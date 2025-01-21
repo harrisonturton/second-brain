@@ -1,8 +1,4 @@
-// user graph (profile)
-// user subgraph (session + history)
-// central graph
-
-package models
+package graph
 
 type Graph struct {
 	AdjacencyList map[string][]string
