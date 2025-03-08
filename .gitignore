@@ -40,3 +40,6 @@ go.work
 # Build output
 /app/dist/
 /server/bin/
+
+# API keys
+server/internal/engine/model/openai/key.txt
