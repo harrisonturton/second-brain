@@ -38,7 +38,7 @@ go.work
 .eslintcache
 
 # Build output
-/app/dist/
+/app_old/dist/
 /server/bin/
 
 # API keys

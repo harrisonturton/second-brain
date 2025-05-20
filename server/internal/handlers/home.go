@@ -7,5 +7,5 @@ import (
 
 // Handler function for the root endpoint
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome to the Go HTTP Server!")
+	_, _ = fmt.Fprintf(w, "Welcome to the Go HTTP Server!")
 }

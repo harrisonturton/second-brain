@@ -1,0 +1,134 @@
+package repository
+
+import (
+	"context"
+	db "github.com/liappi/second-brain/server/internal/db/generated"
+)
+
+type Repository struct {
+	queries *db.Queries // sqlc-generated queries
+}
+
+// NewRepository initializes a new Repository
+func NewRepository(queries *db.Queries) *Repository {
+	return &Repository{queries: queries}
+}
+
+// AppendQueryToSession appends a query to a session
+func (r *Repository) AppendQueryToSession(ctx context.Context, sessionID string, queryID string) error {
+	_, err := r.queries.AppendQueryToSession(ctx, db.AppendQueryToSessionParams{
+		SessionID:   sessionID,
+		ArrayAppend: queryID,
+	})
+	return err
+}
+
+// CreateAbstract creates an abstract
+func (r *Repository) CreateAbstract(
+	ctx context.Context,
+	abstractID string,
+	complexity string,
+	claimIDs []string,
+) error {
+	_, err := r.queries.CreateAbstract(ctx, db.CreateAbstractParams{
+		AbstractID: abstractID,
+		Complexity: complexity,
+		ClaimIds:   claimIDs,
+	})
+	return err
+}
+
+// CreateClaim creates a claim
+func (r *Repository) CreateClaim(ctx context.Context, claimID string, abstractID string, sourceID string) error {
+	_, err := r.queries.CreateClaim(ctx, db.CreateClaimParams{
+		ClaimID:    claimID,
+		AbstractID: abstractID,
+		SourceID:   sourceID,
+	})
+	return err
+}
+
+// CreateConcept creates a concept
+func (r *Repository) CreateConcept(ctx context.Context, conceptID string, name string, abstractIds []string) error {
+	_, err := r.queries.CreateConcept(ctx, db.CreateConceptParams{
+		ConceptID:   conceptID,
+		ConceptName: name,
+		AbstractIds: abstractIds,
+	})
+	return err
+}
+
+// CreateConceptName creates a concept name
+func (r *Repository) CreateConceptName(ctx context.Context, conceptID string, name string) error {
+	_, err := r.queries.CreateConceptName(ctx, db.CreateConceptNameParams{
+		ConceptID:   conceptID,
+		ConceptName: name,
+	})
+	return err
+}
+
+// CreateQuery creates a query
+func (r *Repository) CreateQuery(ctx context.Context, queryID string, conceptIds []string) error {
+	_, err := r.queries.CreateQuery(ctx, db.CreateQueryParams{
+		QueryID:    queryID,
+		ConceptIds: conceptIds,
+	})
+	return err
+}
+
+// CreateSession creates a session
+func (r *Repository) CreateSession(ctx context.Context, sessionID string, queryIDs []string) error {
+	_, err := r.queries.CreateSession(ctx, db.CreateSessionParams{
+		SessionID: sessionID,
+		QueryIds:  queryIDs,
+	})
+	return err
+}
+
+// CreateSource creates a source
+func (r *Repository) CreateSource(ctx context.Context, sourceID string, name string) error {
+	_, err := r.queries.CreateSource(ctx, db.CreateSourceParams{
+		SourceID:   sourceID,
+		SourceName: name,
+	})
+	return err
+}
+
+// GetAbstract retrieves an abstract
+func (r *Repository) GetAbstract(ctx context.Context, abstractID string) (db.Abstract, error) {
+	return r.queries.GetAbstract(ctx, abstractID)
+}
+
+// GetClaim retrieves a claim
+func (r *Repository) GetClaim(ctx context.Context, claimID string) (db.Claim, error) {
+	return r.queries.GetClaim(ctx, claimID)
+}
+
+// GetConcept retrieves a concept
+func (r *Repository) GetConcept(ctx context.Context, conceptID string) (db.Concept, error) {
+	return r.queries.GetConcept(ctx, conceptID)
+}
+
+// GetConceptIdsByName retrieves concept ids by name
+func (r *Repository) GetConceptIdsByName(ctx context.Context, name string) ([]string, error) {
+	return r.queries.GetConceptIdsByName(ctx, name)
+}
+
+// GetSession retrieves a session
+func (r *Repository) GetSession(ctx context.Context, sessionID string) (db.Session, error) {
+	return r.queries.GetSession(ctx, sessionID)
+}
+
+// GetSource retrieves a source
+func (r *Repository) GetSource(ctx context.Context, sourceID string) (db.Source, error) {
+	return r.queries.GetSource(ctx, sourceID)
+}
+
+// UpdateSessionQueries updates a session's queries
+func (r *Repository) UpdateSessionQueries(ctx context.Context, sessionID string, queryIDs []string) error {
+	_, err := r.queries.UpdateSessionQueries(ctx, db.UpdateSessionQueriesParams{
+		SessionID: sessionID,
+		QueryIds:  queryIDs,
+	})
+	return err
+}

@@ -2,9 +2,10 @@ package reference
 
 import (
 	"fmt"
-	"github.com/liappi/second-brain/server/internal/engine/model"
 	"strings"
 	"text/template"
+
+	"github.com/liappi/second-brain/server/internal/engine/model"
 )
 
 var (
@@ -13,10 +14,16 @@ var (
 		"{{.Claim}}"
 )
 
-// Find returns a map of web references backing a given abstract, where a sentence is keyed to a web reference
+// Reference represents a sentence and its corresponding web reference
+type Reference struct {
+	Sentence string
+	Url      string
+}
+
+// Find returns an ordered slice of references backing a given abstract, where each reference contains a sentence and its web reference
 // E.g. "Some sentence about cars." -> "www.cars.com"
-func Find(abstractSentences []string) (map[string]string, error) {
-	sources := make(map[string]string)
+func Find(abstractSentences []string) ([]Reference, error) {
+	var references []Reference
 	for _, sentence := range abstractSentences {
 		t, _ := template.New("sources").Parse(Sources)
 		var promptBuilder strings.Builder
@@ -30,7 +37,10 @@ func Find(abstractSentences []string) (map[string]string, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error finding resources: %v", err)
 		}
-		sources[sentence] = res
+		references = append(references, Reference{
+			Sentence: sentence,
+			Url:      res,
+		})
 	}
-	return sources, nil
+	return references, nil
 }
