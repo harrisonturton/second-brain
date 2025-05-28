@@ -6,7 +6,6 @@ import (
 )
 
 // Actually runs everything, so is slow.
-// TODO(vilia): Add flag for fake mode.
 func TestGenerateEnhancedAbstracts(t *testing.T) {
 	tests := []struct {
 		query string
@@ -16,9 +15,11 @@ func TestGenerateEnhancedAbstracts(t *testing.T) {
 		},
 	}
 
+	eng := NewLlmEngine()
+
 	for _, tt := range tests {
 		t.Run(tt.query, func(t *testing.T) {
-			abstracts, conceptGroups, err := GenerateEnhancedAbstracts(tt.query)
+			abstracts, conceptGroups, err := eng.GenerateEnhancedAbstracts(tt.query)
 			assert.NoError(t, err)
 
 			assert.NotEmptyf(t, abstracts, "No abstracts were generated.")

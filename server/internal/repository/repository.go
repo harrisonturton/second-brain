@@ -9,8 +9,8 @@ type Repository struct {
 	queries *db.Queries // sqlc-generated queries
 }
 
-// NewRepository initializes a new Repository
-func NewRepository(queries *db.Queries) *Repository {
+// New initializes a new Repository
+func New(queries *db.Queries) *Repository {
 	return &Repository{queries: queries}
 }
 
@@ -39,9 +39,10 @@ func (r *Repository) CreateAbstract(
 }
 
 // CreateClaim creates a claim
-func (r *Repository) CreateClaim(ctx context.Context, claimID string, abstractID string, sourceID string) error {
+func (r *Repository) CreateClaim(ctx context.Context, claimID string, claim string, abstractID string, sourceID string) error {
 	_, err := r.queries.CreateClaim(ctx, db.CreateClaimParams{
 		ClaimID:    claimID,
+		Claim:      claim,
 		AbstractID: abstractID,
 		SourceID:   sourceID,
 	})
@@ -119,9 +120,32 @@ func (r *Repository) GetSession(ctx context.Context, sessionID string) (db.Sessi
 	return r.queries.GetSession(ctx, sessionID)
 }
 
+// GetQuery retrieves a query
+func (r *Repository) GetQuery(ctx context.Context, queryID string) (db.Query, error) {
+	return r.queries.GetQuery(ctx, queryID)
+}
+
 // GetSource retrieves a source
 func (r *Repository) GetSource(ctx context.Context, sourceID string) (db.Source, error) {
 	return r.queries.GetSource(ctx, sourceID)
+}
+
+// UpdateConceptAbstracts updates a concept's abstracts
+func (r *Repository) UpdateConceptAbstracts(ctx context.Context, conceptID string, abstractIDs []string) error {
+	_, err := r.queries.UpdateConceptAbstracts(ctx, db.UpdateConceptAbstractsParams{
+		ConceptID:   conceptID,
+		AbstractIds: abstractIDs,
+	})
+	return err
+}
+
+// UpdateConceptRelatedConcepts updates a concept's related concepts
+func (r *Repository) UpdateConceptRelatedConcepts(ctx context.Context, conceptID string, relatedConceptIDs []string) error {
+	_, err := r.queries.UpdateConceptRelatedConcepts(ctx, db.UpdateConceptRelatedConceptsParams{
+		ConceptID:         conceptID,
+		RelatedConceptIds: relatedConceptIDs,
+	})
+	return err
 }
 
 // UpdateSessionQueries updates a session's queries

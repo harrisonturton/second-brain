@@ -16,10 +16,11 @@ const stubResponse: SearchResponse = {
   history: [concept1]
 };
 
+const fakeMode = true
+
 export async function search(
   query: string, 
   sessionId: string | null,
-  fakeMode: boolean = false
 ): Promise<SearchResponse> {
   if (fakeMode) {
     // Simulate network delay

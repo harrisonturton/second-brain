@@ -1,8 +1,7 @@
 package handlers
 
 import (
-	"context"
-	service "github.com/liappi/second-brain/server/internal/service"
+	"github.com/liappi/second-brain/server/internal/service"
 	"net/http"
 )
 
@@ -21,8 +20,10 @@ type SearchResponse struct {
 	} `json:"choices"`
 }
 
-// TODO: Call service and return result as HTTP response
-func SearchHandler(w http.ResponseWriter, r *http.Request) {
-	s := service.Service{}
-	s.Search(ctx, req)
+func SearchHandler(s *service.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// TODO: Call service and return result as HTTP response
+
+		return
+	}
 }

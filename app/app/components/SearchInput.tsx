@@ -14,7 +14,7 @@ export default function SearchInput({ newSession = false }: { newSession?: boole
                 }
                 const sessionId = sessionStorage.getItem("sessionId");
 
-                const result = await search(query, sessionId, true);
+                const result = await search(query, sessionId);
                 console.log('Search result:', result);
                 sessionStorage.setItem('sessionId', result.sessionId);
                 sessionStorage.setItem('searchResult', JSON.stringify(result));

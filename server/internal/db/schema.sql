@@ -16,8 +16,8 @@ CREATE TABLE concepts
 (
     concept_id    TEXT PRIMARY KEY,
     concept_name  TEXT NOT NULL,
-    abstract_ids  TEXT[] NOT NULL,
-    related_concept_ids TEXT[] NOT NULL,
+    abstract_ids  TEXT[],
+    related_concept_ids TEXT[],
     created_at  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

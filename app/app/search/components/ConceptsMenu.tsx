@@ -10,7 +10,7 @@ export default function ConceptsMenu({concept, relatedConcepts}: ConceptGroupsPr
     const handleConceptClick = async (conceptName: string) => {
         try {
             const sessionId = sessionStorage.getItem("sessionId");
-            const result = await search(conceptName, sessionId, true);
+            const result = await search(conceptName, sessionId);
             console.log('Search result:', result);
             sessionStorage.setItem('searchResult', JSON.stringify(result));
             // Dispatch a custom event to notify about the storage change
