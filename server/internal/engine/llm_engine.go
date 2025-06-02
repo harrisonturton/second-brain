@@ -36,6 +36,7 @@ func (l *LlmEngine) GenerateEnhancedAbstracts(query string) ([]EnhancedAbstract,
 	var allInfos []string
 	conceptGroups := make([]concept.ConceptGroup, 0)
 	for name, promptGroup := range promptGroups {
+		fmt.Printf("Getting raw info dump on concept...\n")
 		infos, err := l.getInfos(promptGroup, query)
 		if err != nil {
 			return nil, nil, fmt.Errorf("error getting info: %v", err)
@@ -43,6 +44,7 @@ func (l *LlmEngine) GenerateEnhancedAbstracts(query string) ([]EnhancedAbstract,
 		allInfos = append(allInfos, strings.Join(infos, " "))
 
 		// extract concepts from the raw info for each prompt group e.g. What, Why, Examples, etc.
+		fmt.Printf("Extracting related concepts from info dump...\n")
 		conceptGroup, err := concept.Extract(name, name, strings.Join(infos, " "))
 		if err != nil {
 			return nil, nil, fmt.Errorf("error extracting concepts: %v", err)
@@ -51,12 +53,14 @@ func (l *LlmEngine) GenerateEnhancedAbstracts(query string) ([]EnhancedAbstract,
 	}
 
 	// generate abstracts for all complexity levels using the raw info
+	fmt.Printf("Generating abstracts for all complexity levels from info dump...\n")
 	abstracts, err := abstract.Generate(strings.Join(allInfos, " "))
 	if err != nil {
 		return nil, nil, fmt.Errorf("error generating abstracts: %v", err)
 	}
 
 	// get references for each claim in each abstract
+	fmt.Printf("Getting references for all claims in all abstracts...\n")
 	enhancedAbstracts := make(map[string]EnhancedAbstract)
 	for complexity, a := range abstracts {
 		claims := strings.Split(a, ". ")
@@ -78,11 +82,13 @@ func (l *LlmEngine) GenerateEnhancedAbstracts(query string) ([]EnhancedAbstract,
 	}
 
 	// flatten abstracts into a list ordered by complexity
+	fmt.Printf("Order abstracts by complexity...\n")
 	flattenedEnhancedAbstracts := make([]EnhancedAbstract, len(enhancedAbstracts))
 	for i, level := range abstract.ExpertiseLevels {
 		flattenedEnhancedAbstracts[i] = enhancedAbstracts[level]
 	}
 
+	fmt.Printf("Abstracts: %v\n", enhancedAbstracts)
 	return flattenedEnhancedAbstracts, conceptGroups, nil
 }
 

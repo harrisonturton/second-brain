@@ -1,29 +1,34 @@
 package handlers
 
 import (
-	"github.com/liappi/second-brain/server/internal/service"
+	"context"
+	"encoding/json"
+	"fmt"
 	"net/http"
+
+	"github.com/liappi/second-brain/server/internal/service"
 )
-
-type SearchRequest struct {
-	Messages []Message `json:"messages"`
-}
-
-type Message struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}
-
-type SearchResponse struct {
-	Choices []struct {
-		Message Message `json:"message"`
-	} `json:"choices"`
-}
 
 func SearchHandler(s *service.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO: Call service and return result as HTTP response
+		query := r.URL.Query().Get("query")
+		sessionId := r.URL.Query().Get("sessionId")
+		fmt.Printf("Searching for query term: %s\n", query)
 
-		return
+		result, err := s.Search(context.Background(), service.Request{
+			SessionId: sessionId,
+			Query:     query,
+		})
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to get result: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+
+		if err := json.NewEncoder(w).Encode(result); err != nil {
+			http.Error(w, fmt.Sprintf("failed to encode response: %v", err), http.StatusInternalServerError)
+			return
+		}
 	}
 }

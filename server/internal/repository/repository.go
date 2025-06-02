@@ -60,10 +60,11 @@ func (r *Repository) CreateConcept(ctx context.Context, conceptID string, name s
 }
 
 // CreateConceptName creates a concept name
-func (r *Repository) CreateConceptName(ctx context.Context, conceptID string, name string) error {
+func (r *Repository) CreateConceptName(ctx context.Context, id string, conceptID string, name string) error {
 	_, err := r.queries.CreateConceptName(ctx, db.CreateConceptNameParams{
-		ConceptID:   conceptID,
+		ID:          id,
 		ConceptName: name,
+		ConceptID:   conceptID,
 	})
 	return err
 }

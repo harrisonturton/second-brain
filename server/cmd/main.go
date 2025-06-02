@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	db2 "github.com/liappi/second-brain/server/internal/db"
 	"github.com/liappi/second-brain/server/internal/engine"
 	"github.com/liappi/second-brain/server/internal/service"
 
@@ -15,17 +16,38 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const dbUrl = "postgres://postgres:postgres@localhost:5432/second_brain?sslmode=disable"
+// corsMiddleware adds CORS headers to the response
+func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		// Handle preflight requests
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next(w, r)
+	}
+}
 
 // Main starts the server
 func main() {
 	// Initialize the database connection
-	dbConn, err := sql.Open("postgres", dbUrl)
+	dbConn, err := db2.OpenConn(db2.MainDbName)
 	if err != nil {
 		fmt.Printf("Error connecting to database: %s\n", err)
 		os.Exit(1)
 	}
-	defer dbConn.Close()
+	defer func(dbConn *sql.DB) {
+		err := dbConn.Close()
+		if err != nil {
+			fmt.Printf("Error closing database connection: %s\n", err)
+		}
+	}(dbConn)
 
 	// Test the connection
 	if err := dbConn.Ping(); err != nil {
@@ -39,9 +61,9 @@ func main() {
 	eng := engine.NewLlmEngine()
 	svc := service.New(repo, eng)
 
-	// Register handlers
-	http.HandleFunc("/", handlers.HomeHandler)
-	http.HandleFunc("/search", handlers.SearchHandler(svc))
+	// Register handlers with CORS middleware
+	http.HandleFunc("/", corsMiddleware(handlers.HomeHandler))
+	http.HandleFunc("/search", corsMiddleware(handlers.SearchHandler(svc)))
 
 	// Start the server
 	port := "8081"

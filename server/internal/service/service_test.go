@@ -2,9 +2,9 @@ package service
 
 import (
 	"context"
-	"database/sql"
-	db2 "github.com/liappi/second-brain/server/internal/db"
 	"testing"
+
+	db2 "github.com/liappi/second-brain/server/internal/db"
 
 	"github.com/liappi/second-brain/server/internal/engine"
 
@@ -17,7 +17,7 @@ func TestService_Search(t *testing.T) {
 	tests := map[string][]Request{
 		"car": {
 			{
-				SessionId: "",
+				SessionId: "sessionId",
 				Query:     "car",
 			},
 			{
@@ -28,22 +28,28 @@ func TestService_Search(t *testing.T) {
 	}
 
 	// initialize db
-	err := db2.DestroyDb()
+	err := db2.DestroyDb(db2.TestDbName)
 	if err != nil {
-		t.Fatal()
+		t.Fatal("failed to destroy database")
 	}
-	err = db2.InitDb()
+	err = db2.InitDb(db2.TestDbName)
 	if err != nil {
-		t.Fatal()
+		t.Fatal("failed to initialize database")
 	}
 
-	dbConn, _ := sql.Open("postgres", "postgres://postgres:postgres@localhost:5432/second_brain?sslmode=disable")
+	dbConn, err := db2.OpenConn(db2.TestDbName)
+	if err != nil {
+		t.Fatalf("failed to open database connection")
+	}
 	queries := db.New(dbConn)
 	repo := repository.New(queries)
 	eng := engine.NewFakeEngine()
-	svc := New(repo, eng)
-
 	ctx := context.Background()
+	err = repo.CreateSession(ctx, "sessionId", make([]string, 0)) // set up test session
+	if err != nil {
+		t.Fatal("failed to create session")
+	}
+	svc := New(repo, eng)
 
 	for tc, req := range tests {
 		t.Run(tc, func(t *testing.T) {

@@ -2,6 +2,7 @@ package reference
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 	"text/template"
 
@@ -36,6 +37,12 @@ func Find(abstractSentences []string) ([]Reference, error) {
 		res, err := model.Call(promptBuilder.String(), model.Chat)
 		if err != nil {
 			return nil, fmt.Errorf("error finding resources: %v", err)
+		}
+		fmt.Printf("Reference URL: %s\n", res)
+		_, err = url.Parse(res)
+		if err != nil {
+			fmt.Printf("Skipping URL because invalid: %s\n", res)
+			res = ""
 		}
 		references = append(references, Reference{
 			Sentence: sentence,
