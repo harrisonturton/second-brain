@@ -9,7 +9,7 @@ interface ConceptGroupsProps {
 export default function ConceptsMenu({concept, relatedConcepts}: ConceptGroupsProps) {
     const handleConceptClick = async (conceptName: string) => {
         try {
-            const sessionId = sessionStorage.getItem("sessionId");
+            const sessionId = sessionStorage.getItem("sessionId") || "";
             const result = await search(conceptName, sessionId);
             console.log('Search result:', result);
             sessionStorage.setItem('searchResult', JSON.stringify(result));
@@ -25,12 +25,14 @@ export default function ConceptsMenu({concept, relatedConcepts}: ConceptGroupsPr
             <div>
                 Next concepts
             </div>
-            <ul className="menu bg-base-200 rounded-box w-full mb-4">
-                <li className="p-4 pb-2 text-xs opacity-60 tracking-wide">{concept.name}</li>
-                {relatedConcepts.map((relatedConcept, i) => (
-                    <li key={i} onClick={() => handleConceptClick(relatedConcept.name)}><a>{relatedConcept.name}</a></li>
-                ))}
-            </ul>
+            <div className="h-full overflow-y-auto">
+                <ul className="menu bg-base-200 rounded-box w-full mb-4">
+                    <li className="p-4 pb-2 text-xs opacity-60 tracking-wide">{concept.Name}</li>
+                    {relatedConcepts.map((relatedConcept, i) => (
+                        <li key={i} onClick={() => handleConceptClick(relatedConcept.Name)}><a>{relatedConcept.Name}</a></li>
+                    ))}
+                </ul>
+            </div>
         </div>
     )
 }

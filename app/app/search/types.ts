@@ -1,27 +1,27 @@
 export type Concept = {
-    id?: string;
-    name: string;
-    description: string;
-    abstracts: Abstract[];
+    Id?: string;
+    Name: string;
+    Description: string;
+    Abstracts: Abstract[];
 };
 
 export type Abstract = {
-    claims: Claim[]
-    complexity: string;
+    Claims: Claim[]
+    Complexity: string;
 }
 
 export type Claim = {
-    body: string;
-    source: Source
+    Body: string;
+    Source: Source
 }
 
 export type Source = {
-    title: string;
-    link: string;
-    preview: string;
+    Title: string;
+    Link: string;
+    Preview: string;
 };
 
 export type ConceptGraph = {
-    nodes: Concept[];
-    adjList: Concept[][];
+    Nodes: Concept[];
+    AdjList: Concept[][];
 }

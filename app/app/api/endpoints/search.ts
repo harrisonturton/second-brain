@@ -3,24 +3,24 @@ import {Concept, ConceptGraph} from "@/app/search/types";
 import {concept1, conceptGraph} from "@/app/fakes";
 
 interface SearchResponse {
-  sessionId: string;
-  concept: Concept;
-  conceptGraph: ConceptGraph;
-  history: Concept[];
+  SessionId: string;
+  Concept: Concept;
+  ConceptGraph: ConceptGraph;
+  History: Concept[];
 }
 
 const stubResponse: SearchResponse = {
-  sessionId: "session-id",
-  concept: concept1,
-  conceptGraph: conceptGraph,
-  history: [concept1]
+  SessionId: "session-id",
+  Concept: concept1,
+  ConceptGraph: conceptGraph,
+  History: [concept1]
 };
 
-const fakeMode = true
+const fakeMode = false
 
 export async function search(
   query: string, 
-  sessionId: string | null,
+  sessionId: string,
 ): Promise<SearchResponse> {
   if (fakeMode) {
     // Simulate network delay
@@ -29,17 +29,16 @@ export async function search(
   }
 
   try {
-    const response = await axios.get('/api/search', {
+    console.log("sessionId", sessionId);
+    if (sessionId === undefined || sessionId === null) {
+      sessionId = "";
+    }
+    const response = await axios.get('http://localhost:8081/search', {
       params: {
         query,
         sessionId
       },
-      // Disable caching for testing purposes
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      }
+      withCredentials: true,
     });
     
     return response.data;

@@ -13,11 +13,11 @@ export default function SourcesList({ sources }: SourcesListProps) {
                     {sources.map((s, index) => (
                         <li key={index} className="list-row">
                             <div>
-                                <div>{s.title}</div>
-                                <a className="link link-primary">{s.link}</a>
+                                <div>{s.Title}</div>
+                                <a className="link link-primary">{s.Link}</a>
                             </div>
                             <p className="list-col-wrap text-xs">
-                                {s.preview}
+                                {s.Preview}
                             </p>
                         </li>
                     ))}

@@ -35,10 +35,11 @@ export default function SearchPage() {
             if (storedResult) {
                 try {
                     const result = JSON.parse(storedResult);
+                    console.log('Setting state with result:', result);
                     setState({
-                        activeConcept: result.concept,
-                        conceptGraph: result.conceptGraph,
-                        historyList: result.history,
+                        activeConcept: result.Concept,
+                        conceptGraph: result.ConceptGraph,
+                        historyList: result.History,
                     });
                 } catch (error) {
                     console.error('Failed to parse search result:', error);
@@ -47,7 +48,6 @@ export default function SearchPage() {
         };
 
         window.addEventListener('searchResultUpdated', handleStorageChange);
-        window.addEventListener('activeConceptUpdated', handleStorageChange);
 
         // Check for initial value immediately
         handleStorageChange();
@@ -59,16 +59,17 @@ export default function SearchPage() {
     }, []);
 
     const defaults: Defaults = {
-        complexity: "medium"
+        complexity: "2"
     }
 
-    const abstractMap = Object.fromEntries(
-        state.activeConcept.abstracts.map(abstract => [abstract.complexity, abstract])
-    )
-    const activeConceptIndex = state.conceptGraph.nodes.findIndex(node => node.id === state.activeConcept.id)
-    const relatedConcepts = state.conceptGraph.adjList[activeConceptIndex] || []
-    const activeConceptSources = state.activeConcept?.abstracts.flatMap(abstract => 
-        abstract.claims.map(claim => claim.source)
+    const abstractMap = state.activeConcept?.Abstracts ? Object.fromEntries(
+        state.activeConcept.Abstracts.map(abstract => [abstract.Complexity, abstract])
+    ) : {}
+    
+    const activeConceptIndex = state.conceptGraph?.Nodes.findIndex(node => node.Id === state.activeConcept?.Id) ?? -1
+    const relatedConcepts = state.conceptGraph?.AdjList[activeConceptIndex] || []
+    const activeConceptSources = state.activeConcept?.Abstracts?.flatMap(abstract => 
+        abstract.Claims.map(claim => claim.Source)
     ) || []
 
     return (
@@ -77,17 +78,23 @@ export default function SearchPage() {
             <div className="h-[calc(100vh-4rem)] p-4">
                 <SplitPane
                     historyPanel={<HistoryList history={state.historyList}/>}
-                    abstractPanel={<AbstractCard conceptName={state.activeConcept.name} modalRef={modalRef}
-                                                 defaultComplexity={defaults.complexity}
-                                                 abstractMap={abstractMap}/>}
+                    abstractPanel={<AbstractCard 
+                        conceptName={state.activeConcept?.Name ?? ''} 
+                        modalRef={modalRef as React.RefObject<HTMLDialogElement>}
+                        defaultComplexity={defaults.complexity}
+                        abstractMap={abstractMap}
+                    />}
                     sourcesPanel={<SourcesList sources={activeConceptSources}/>}
-                    relatedConceptsPanel={<ConceptsMenu concept={state.activeConcept} relatedConcepts={relatedConcepts}/>}
+                    relatedConceptsPanel={<ConceptsMenu 
+                        concept={state.activeConcept ?? placeholderConcept} 
+                        relatedConcepts={relatedConcepts}
+                    />}
                 />
             </div>
-            <GraphModal 
-                modalRef={modalRef as React.RefObject<HTMLDialogElement>} 
-                conceptGraph={state.conceptGraph || placeholderConceptGraph}
-            />
+            {<GraphModal
+                modalRef={modalRef as React.RefObject<HTMLDialogElement>}
+                conceptGraph={state.conceptGraph ?? placeholderConceptGraph}
+            />}
         </main>
     )
 }

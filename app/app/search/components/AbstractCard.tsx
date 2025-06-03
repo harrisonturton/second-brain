@@ -24,12 +24,16 @@ export default function AbstractCard({modalRef, conceptName, defaultComplexity, 
         <div className="card bg-base-100 w-full h-full shadow-sm flex flex-col">
             <div className="card-body flex-1 overflow-y-auto">
                 <h2 className="card-title">{conceptName}</h2>
-                {abstract.claims.map((claim, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                        <p className="m-0 flex-1">{claim.body}</p>
-                        <a href={claim.source.link} target="_blank" rel="noopener noreferrer" className="link link-primary shrink-0">[{i}]</a>
-                    </div>
-                ))}
+                {abstract && abstract.Claims ? (
+                    abstract.Claims.map((claim, i) => (
+                        <div key={i} className="flex gap-2 items-start">
+                            <p className="m-0 flex-1">{claim.Body}</p>
+                            <a href={claim.Source.Link} target="_blank" rel="noopener noreferrer" className="link link-primary shrink-0">[{i}]</a>
+                        </div>
+                    ))
+                ) : (
+                    <p className="text-sm opacity-60">No abstract available for this complexity level</p>
+                )}
             </div>
             <div className="flex justify-end gap-2 p-4 shrink-0">
                 <button className="btn btn-square btn-ghost" onClick={() => modalRef.current?.showModal()}>
@@ -40,9 +44,11 @@ export default function AbstractCard({modalRef, conceptName, defaultComplexity, 
                 <details ref={detailsRef} className="dropdown dropdown-top dropdown-end">
                     <summary className="btn m-1">{selectedComplexity}</summary>
                     <ul className="menu dropdown-content bg-base-100 rounded-box z-[50] w-52 p-2 shadow-sm">
-                        <li><a onClick={() => handleComplexitySelect('low')}>low</a></li>
-                        <li><a onClick={() => handleComplexitySelect('medium')}>medium</a></li>
-                        <li><a onClick={() => handleComplexitySelect('high')}>high</a></li>
+                        <li><a onClick={() => handleComplexitySelect('0')}>0</a></li>
+                        <li><a onClick={() => handleComplexitySelect('1')}>1</a></li>
+                        <li><a onClick={() => handleComplexitySelect('2')}>2</a></li>
+                        <li><a onClick={() => handleComplexitySelect('3')}>3</a></li>
+                        <li><a onClick={() => handleComplexitySelect('4')}>4</a></li>
                     </ul>
                 </details>
             </div>

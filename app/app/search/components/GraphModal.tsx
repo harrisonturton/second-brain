@@ -9,20 +9,20 @@ interface GraphModalProps {
 }
 
 export default function GraphModal({modalRef, conceptGraph}: GraphModalProps) {
-    const elements: ElementDefinition[] = conceptGraph.nodes.length === 0 ? [] : [
-        // Add nodes
-        ...conceptGraph.nodes.map(node => ({
-            data: { 
-                id: node.id, 
-                label: node.name 
+    const elements: ElementDefinition[] = conceptGraph.Nodes.length === 0 ? [] : [
+        // nodes
+        ...conceptGraph.Nodes.map(node => ({
+            data: {
+                id: node.Id,
+                label: node.Name
             }
         })),
-        // Add edges from adjList
-        ...conceptGraph.adjList.flatMap((connections, index) => 
+        // edges
+        ...conceptGraph.AdjList.flatMap((connections, index) =>
             connections.map(targetNode => ({
-                data: { 
-                    source: conceptGraph.nodes[index].id,
-                    target: targetNode.id
+                data: {
+                    source: conceptGraph.Nodes[index].Id,
+                    target: targetNode.Id
                 }
             }))
         )
@@ -38,8 +38,8 @@ export default function GraphModal({modalRef, conceptGraph}: GraphModalProps) {
                         style={{ width: "100%", height: "100%" }}
                         layout={{ 
                             name: "grid",
-                            rows: Math.ceil(Math.sqrt(conceptGraph.nodes.length)),
-                            cols: Math.ceil(Math.sqrt(conceptGraph.nodes.length)),
+                            rows: Math.ceil(Math.sqrt(conceptGraph.Nodes.length)),
+                            cols: Math.ceil(Math.sqrt(conceptGraph.Nodes.length)),
                             padding: 50,
                             nodeDimensionsIncludeLabels: true
                         }}

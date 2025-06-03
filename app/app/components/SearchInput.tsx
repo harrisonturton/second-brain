@@ -9,16 +9,17 @@ export default function SearchInput({ newSession = false }: { newSession?: boole
     const handleKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             try {
-                if (newSession) {
-                    sessionStorage.clear();
-                }
-                const sessionId = sessionStorage.getItem("sessionId");
+                const storedSessionId = sessionStorage.getItem("sessionId");
+                const sessionId = newSession ? "" : (storedSessionId || "");
 
                 const result = await search(query, sessionId);
                 console.log('Search result:', result);
-                sessionStorage.setItem('sessionId', result.sessionId);
+                sessionStorage.setItem('sessionId', result.SessionId);
                 sessionStorage.setItem('searchResult', JSON.stringify(result));
-
+                
+                // Dispatch event to notify other components
+                window.dispatchEvent(new Event('searchResultUpdated'));
+                
                 router.push('/search');
             } catch (error) {
                 console.error('Search failed:', error);

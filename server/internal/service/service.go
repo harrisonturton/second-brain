@@ -277,30 +277,55 @@ func (s *Service) getUniqueConcepts(ctx context.Context, concepts []Concept) ([]
 }
 
 func (s *Service) buildConceptGraph(ctx context.Context, concepts []Concept) (ConceptGraph, error) {
-	adjList := make([][]Concept, len(concepts))
-	for i, c := range concepts {
-		if adjList[i] == nil {
-			adjList[i] = make([]Concept, 0)
+	nodes := make([]Concept, 0)
+	nodeIndexes := make(map[string]int) // id -> node index
+	adjList := make([][]Concept, 0)
+
+	// add all concepts to nodes and record their indices
+	for _, c := range concepts {
+		dbConcept, err := s.repo.GetConcept(ctx, c.Id)
+		if err != nil {
+			return ConceptGraph{}, fmt.Errorf("failed to get concept: %v", err)
 		}
+		nodes = append(nodes, c)
+		nodeIndexes[c.Id] = len(nodes) - 1
+		adjList = append(adjList, make([]Concept, 0))
+
+		// add related concepts to nodes if they're not already there
+		for _, rid := range dbConcept.RelatedConceptIds {
+			if _, exists := nodeIndexes[rid]; !exists {
+				rc, err := s.repo.GetConcept(ctx, rid)
+				if err != nil {
+					return ConceptGraph{}, fmt.Errorf("failed to get related concept: %v", err)
+				}
+				relC := Concept{
+					Id:          rc.ConceptID,
+					Name:        rc.ConceptName,
+					Description: rc.ConceptName,
+					Abstracts:   nil,
+				}
+				nodes = append(nodes, relC)
+				nodeIndexes[rid] = len(nodes) - 1
+				adjList = append(adjList, make([]Concept, 0))
+			}
+		}
+	}
+
+	// build adjacency list using the recorded indices
+	for i, c := range nodes {
 		dbConcept, err := s.repo.GetConcept(ctx, c.Id)
 		if err != nil {
 			return ConceptGraph{}, fmt.Errorf("failed to get concept: %v", err)
 		}
 		for _, rid := range dbConcept.RelatedConceptIds {
-			rc, err := s.repo.GetConcept(ctx, rid)
-			if err != nil {
-				return ConceptGraph{}, fmt.Errorf("failed to get related concept: %v", err)
+			if relIdx, exists := nodeIndexes[rid]; exists {
+				adjList[i] = append(adjList[i], nodes[relIdx])
 			}
-			adjList[i] = append(adjList[i], Concept{
-				Id:          rc.ConceptID,
-				Name:        rc.ConceptName,
-				Description: rc.ConceptName,
-				Abstracts:   nil, // don't need to populate this since it's only used for the graph visualisation
-			})
 		}
 	}
+
 	return ConceptGraph{
-		Nodes:   concepts,
+		Nodes:   nodes,
 		AdjList: adjList,
 	}, nil
 }
