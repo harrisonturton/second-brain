@@ -1,31 +1,45 @@
 "use client"
 
-import { useRouter } from 'next/navigation'
-import SearchInput from "@/app/components/SearchInput";
+import {useRouter} from 'next/navigation'
 
-export default function NavBar({ showSearch = true }: { showSearch?: boolean }) {
+interface NavBarProps {
+    showSideBar?: () => void;
+    showSideBarToggle?: boolean;
+}
+
+export default function NavBar({showSideBar: showSideBar}: NavBarProps) {
     const router = useRouter()
+    const showSideBarToggle = !showSideBar
 
     return (
         <div className="navbar bg-base-100 shadow-sm">
             <div className="flex-1">
+                {showSideBarToggle && (
+                    <button
+                        className="btn btn-ghost btn-circle"
+                        onClick={showSideBar}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
+                             stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round"
+                                  d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+                        </svg>
+                    </button>
+                )}
                 <a
                     className="btn btn-ghost text-xl"
-                    onClick={() => router.push('/')}
+                    // onClick={() => router.push('/')}
                 >
-                    second brain
+                    SecondBrain
                 </a>
             </div>
             <div className="flex gap-2">
-                {showSearch && (
-                    <SearchInput/>
-                )}
                 <div className="dropdown dropdown-end">
                     <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
                         <div className="w-10 rounded-full">
                             <img
                                 alt="Tailwind CSS Navbar component"
-                                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+                                src="https://lh3.googleusercontent.com/a/AGNmyxajX2KbMi2PoTx6QwiyG3QkXHTWbjV_xgCQqCqv=s96-c"/>
                         </div>
                     </div>
                     <ul

@@ -6,8 +6,9 @@ export default function SearchInput({ newSession = false }: { newSession?: boole
     const [query, setQuery] = useState('');
     const router = useRouter();
 
-    const handleKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleKeyPress = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === 'Enter') {
+            e.preventDefault(); // Prevent default newline behavior
             try {
                 const storedSessionId = sessionStorage.getItem("sessionId");
                 const sessionId = newSession ? "" : (storedSessionId || "");
@@ -28,10 +29,9 @@ export default function SearchInput({ newSession = false }: { newSession?: boole
     };
 
     return (
-        <input
-            type="text"
-            placeholder="Search"
-            className="input input-bordered w-full max-w-md"
+        <textarea
+            placeholder="Ask anything"
+            className="textarea textarea-bordered w-full max-w-md min-h-[100px]"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}

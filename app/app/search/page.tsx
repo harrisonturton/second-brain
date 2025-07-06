@@ -22,6 +22,9 @@ interface State {
 }
 
 export default function SearchPage() {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
     const modalRef = useRef<HTMLDialogElement>(null);
     const [state, setState] = useState<State>({
         activeConcept: placeholderConcept,
@@ -74,7 +77,11 @@ export default function SearchPage() {
 
     return (
         <main className="h-screen w-screen">
-            <NavBar/>
+            <NavBar
+                // onSidebarToggle={toggleSidebar}
+                // showSidebar={!isSidebarOpen}
+                showSideBarToggle={true}
+            />
             <div className="h-[calc(100vh-4rem)] p-4">
                 <SplitPane
                     historyPanel={<HistoryList history={state.historyList}/>}
