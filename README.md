@@ -14,3 +14,5 @@ To regenerate schema:
 cd server/internal/db
 sqlc generate
 ```
+
+Ask me for the OpenAI API key.
