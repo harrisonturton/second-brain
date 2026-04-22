@@ -38,22 +38,34 @@ import {
 } from "@/components/ui/dropdown-menu"
 import * as React from "react";
 import { AppSearchMenu } from "./app-search-menu";
-
-const chats = [
-    {
-        title: "Chat 1",
-        url: "#",
-    },
-    {
-        title: "Chat 2",
-        url: "#",
-    },
-]
+import {Concept} from "@/app/search/types";
 
 export function AppSidebar() {
     const username = "Vilia";
     const useremail = "vilia.li@gmail.com"
     const {toggleSidebar} = useSidebar();
+    const [historyList, setHistoryList] = React.useState<Concept[]>([]);
+    const [sessionId, setSessionId] = React.useState<string>("");
+
+    React.useEffect(() => {
+        const refresh = () => {
+            setSessionId(sessionStorage.getItem("sessionId") || "");
+            const stored = sessionStorage.getItem("historyList");
+            if (stored) {
+                try {
+                    setHistoryList(JSON.parse(stored));
+                } catch (error) {
+                    console.error('Failed to parse historyList:', error);
+                    setHistoryList([]);
+                }
+            } else {
+                setHistoryList([]);
+            }
+        };
+        refresh();
+        window.addEventListener('sessionHistoryUpdated', refresh);
+        return () => window.removeEventListener('sessionHistoryUpdated', refresh);
+    }, []);
 
     return (
         <>
@@ -90,7 +102,7 @@ export function AppSidebar() {
                                 <SidebarMenuButton asChild>
                                     <a href="/">
                                         <SquarePen/>
-                                        <span>New chat</span>
+                                        <span>New session</span>
                                     </a>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
@@ -102,25 +114,30 @@ export function AppSidebar() {
                                     }
                                 }}>
                                     <Search/>
-                                    <span>Search chats</span>
+                                    <span>Search sessions</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
                 <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-                    <SidebarGroupLabel>Chats</SidebarGroupLabel>
+                    <SidebarGroupLabel>Current session</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {chats.map((item) => (
-                                <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild>
-                                        <a href={item.url}>
-                                            <span>{item.title}</span>
-                                        </a>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
+                            {historyList.map((concept, i) => {
+                                const href = sessionId
+                                    ? `/chat/${sessionId}/${encodeURIComponent(concept.Name)}`
+                                    : `/chat/new/${encodeURIComponent(concept.Name)}`;
+                                return (
+                                    <SidebarMenuItem key={`${concept.Id ?? concept.Name}-${i}`}>
+                                        <SidebarMenuButton asChild>
+                                            <a href={href}>
+                                                <span>{concept.Name}</span>
+                                            </a>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                );
+                            })}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>

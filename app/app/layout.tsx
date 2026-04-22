@@ -11,10 +11,15 @@ export default async function Layout({ children }: { children: React.ReactNode }
 
     return (
         <html>
+        <head>
+            <title>Second Brain</title>
+            {/* Prevents mobile browsers from zooming out to fit the desktop layout */}
+            <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        </head>
         <body>
-        <SidebarProvider defaultOpen={defaultOpen} className="h-full flex flex-row">
+        <SidebarProvider defaultOpen={defaultOpen} className="h-screen flex flex-row">
             <AppSidebar/>
-            <main className="w-full h-full min-h-screen flex-1">
+            <main className="h-screen flex-1">
                 {children}
             </main>
         </SidebarProvider>

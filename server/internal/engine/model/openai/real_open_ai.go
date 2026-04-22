@@ -52,11 +52,19 @@ func (o RealOpenAI) callImpl(r Request) (string, error) {
 		return "", fmt.Errorf("error reading response body: %v", err)
 	}
 
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("openai returned %d: %s", resp.StatusCode, string(respBody))
+	}
+
 	// Parse the response
 	var raw rawResponse
 	err = json.Unmarshal(respBody, &raw)
 	if err != nil {
-		return "", fmt.Errorf("error unmarshalling response: %v", err)
+		return "", fmt.Errorf("error unmarshalling response: %v (body: %s)", err, string(respBody))
+	}
+
+	if len(raw.Choices) == 0 {
+		return "", fmt.Errorf("openai returned no choices (body: %s)", string(respBody))
 	}
 
 	// Return the first choice
