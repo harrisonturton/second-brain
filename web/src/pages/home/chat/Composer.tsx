@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type KeyboardEvent } from 'react'
 import styled from 'styled-components'
-import { ArrowUpIcon } from '../icons/ArrowUpIcon'
+import { ArrowUpIcon } from '@/base/icons/ArrowUpIcon'
 
 const Bar = styled.div`
   display: flex;

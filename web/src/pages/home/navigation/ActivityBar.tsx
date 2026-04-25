@@ -1,11 +1,11 @@
-import { observer } from 'mobx-react-lite'
 import styled from 'styled-components'
-import { BookOpenIcon } from '../icons/BookOpenIcon'
-import { ChatBubblesIcon } from '../icons/ChatBubblesIcon'
-import { CogIcon } from '../icons/CogIcon'
-import { MoonIcon } from '../icons/MoonIcon'
-import { SunIcon } from '../icons/SunIcon'
-import { useRootStore, type WorkspaceSection } from '../stores/RootStore'
+import { BookOpenIcon } from '@/base/icons/BookOpenIcon'
+import { ChatBubblesIcon } from '@/base/icons/ChatBubblesIcon'
+import { CogIcon } from '@/base/icons/CogIcon'
+import { MoonIcon } from '@/base/icons/MoonIcon'
+import { SunIcon } from '@/base/icons/SunIcon'
+import type { WorkspaceSection } from './NavigationStore'
+import type { ThemeMode } from '@/base/theme/themes'
 
 const Strip = styled.nav<{ $topInset: number }>`
   position: fixed;
@@ -80,18 +80,35 @@ const sectionIcons: { id: WorkspaceSection; label: string; Icon: typeof ChatBubb
   { id: 'library', label: 'Library', Icon: BookOpenIcon },
 ]
 
-export const ActivityBar = observer(function ActivityBar() {
-  const store = useRootStore()
-  const activeSection = store.activeSection
-  const isDark = store.themeMode === 'dark'
+export type ActivityBarProps = {
+  activeSection: WorkspaceSection
+  themeMode: ThemeMode
+  topInset: number
+  avatarInitials: string
+  avatarTitle: string
+  onSelectSection: (section: WorkspaceSection) => void
+  onToggleTheme: () => void
+}
+
+export function ActivityBar(props: ActivityBarProps) {
+  const {
+    activeSection,
+    themeMode,
+    topInset,
+    avatarInitials,
+    avatarTitle,
+    onSelectSection,
+    onToggleTheme,
+  } = props
+  const isDark = themeMode === 'dark'
 
   return (
-    <Strip $topInset={store.topInset}>
+    <Strip $topInset={topInset}>
       {sectionIcons.map(({ id, label, Icon }) => (
         <IconButton
           key={id}
           $active={activeSection === id}
-          onClick={() => store.selectSection(id)}
+          onClick={() => onSelectSection(id)}
           aria-label={label}
           title={label}
         >
@@ -101,7 +118,7 @@ export const ActivityBar = observer(function ActivityBar() {
       <Spacer />
       <IconButton
         $active={false}
-        onClick={() => store.toggleTheme()}
+        onClick={onToggleTheme}
         aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
         title={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
         type="button"
@@ -116,9 +133,9 @@ export const ActivityBar = observer(function ActivityBar() {
       >
         <CogIcon />
       </IconButton>
-      <Avatar aria-label="Profile" title="Profile" type="button">
-        HT
+      <Avatar aria-label={avatarTitle} title={avatarTitle} type="button">
+        {avatarInitials}
       </Avatar>
     </Strip>
   )
-})
+}

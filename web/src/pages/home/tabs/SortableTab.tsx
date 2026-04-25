@@ -2,8 +2,8 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { type CSSProperties, type MouseEvent } from 'react'
 import styled from 'styled-components'
-import { XIcon } from '../icons/XIcon'
-import { type Tab as TabModel } from '../stores/RootStore'
+import { XIcon } from '@/base/icons/XIcon'
+import { type Tab as TabModel } from './TabsStore'
 
 const Tab = styled.div<{ $active: boolean }>`
   position: relative;

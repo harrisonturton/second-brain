@@ -2,39 +2,147 @@
 
 Conventions for the `web/` Vite + React + Electron renderer. Read this before adding code here.
 
+## Workflow
+
+- **Commit changes as you go.** When you finish a coherent unit of work (a feature, a refactor pass, a bug fix), stage the relevant files and create a focused commit before moving on. Don't accumulate a session's worth of unrelated changes into one giant commit.
+- Match the existing commit-message style: lowercase, imperative, no trailing period, single line for routine work.
+
 ## Stack
 
 - Vite + React 19 + TypeScript (strict).
 - **MobX 6** with **legacy decorators** (`@observable`, `@action`, `@computed`) and `makeObservable(this)` in the constructor. The TS config has `experimentalDecorators` / `useDefineForClassFields: false` so this is the supported flavour — do not switch to `makeAutoObservable` or stage-3 decorators.
-- **mobx-react-lite**. Wrap components with `observer(function ComponentName() { ... })` — the named function form, not anonymous, so the component shows up properly in React DevTools.
+- **mobx-react-lite**. Subscriptions happen at the install layer through inline `<Observer>` blocks (see Architecture). Avoid wrapping leaf views with `observer` — they should stay stateless.
 - **styled-components** with **transient props** (`$active`, `$collapsed`, …). Always prefix variant props with `$` so they don't leak to the DOM.
-- **@dnd-kit** for the tab drag-and-drop. The hooks (`useSortable`, `useSensors`) are part of its public API — keep them at the use site, don't try to mirror that state into MobX.
+- **@dnd-kit** for the tab drag-and-drop. The hooks (`useSortable`, `useSensors`) are part of its public API — keep them at the use site.
 
-## State management
+## Architecture: views, stores, presenters, services, install
 
-- All shared and cross-component state lives in `src/stores/RootStore.ts`. Components reach it through `useRootStore()`.
-- **Don't prop-drill store-derived values.** If a component is already an `observer` calling `useRootStore()`, read what it needs directly. Only pass props for genuinely component-local data (e.g. dnd-kit's per-row `tab` / `active`).
-- **Derived values are `@computed` getters on the store**, not helper functions called from the component (e.g. `store.topInset`, not `getTopInset(isDesktop, isMaximized)`).
-- `useState` / `useEffect` are reserved for **purely local UI state** that no other component needs to read. The current legitimate uses are:
-  - `TableOfContents` — `IntersectionObserver` lifetime tied to the component.
-  - `Composer` — uncontrolled-ish text input value.
-  - `TabBar` / `SortableTab` — dnd-kit hooks (`useSensors`, `useSortable`).
+The app uses a strict separation between **rendering**, **state**, **behaviour**, and **data fetching** so each layer can be unit-tested independently. Wiring happens in **install** files (pages and `App.tsx`).
 
-  If two components would both want to read the same piece of state, it goes in the store.
+### The four roles
+
+| Role | Lives in | Responsibility | Allowed to import |
+|---|---|---|---|
+| **View** (stateless component) | `*.tsx` next to its presenter, or `base/components/` if generic | Render UI. Props in, JSX out. No `useRootStore`, no `observer`, no service calls. | styled-components, icons, types from sibling store |
+| **Store** | `*Store.ts` next to its presenter | Hold observable state. **Data only** — no services, no orchestration, no React. Just `@observable` fields and one-line `@action` setters. | mobx, types from services (for typed fields) |
+| **Presenter** | `*Presenter.ts` next to its store | Behaviour + business logic. Takes its store(s) and any services in the constructor. Exposes derived getters and action methods. No React. | mobx (`action`), the store, service interfaces |
+| **Service** | `services/<feature>/` | Backend data fetching. **Interface** + **fake impl** today (real impls land later). All services accept an `HttpService` so the fake can simulate latency to exercise loading states. | http types only |
+
+### The install layer
+
+A "stateful component" is just a function that **instantiates the stores + presenters + services it needs and wires them to stateless views**. These are the install files:
+
+- **`App.tsx`** — installs the global theme + window providers around `<HomePage />`.
+- **`main.tsx`** — composition root. Instantiates `FakeHttpService` + every `Fake*Service` and provides them through `<ServicesProvider>`. Instantiates `RootStore` and provides it through `<RootStoreProvider>`. Swap fakes for real impls here.
+- **`pages/<page>/<Page>Page.tsx`** — the page install. Pulls the global stores from `useRootStore()` and the services from `useServices()`, instantiates page-local stores + presenters with `useMemo`, kicks off initial loads in a `useEffect`, and renders stateless views inside inline `<Observer>` blocks that subscribe to the presenter values they read.
+
+Each `<Observer>` block is its own MobX subscription, so re-renders stay scoped to the data each block actually reads. Granular re-renders without per-component install files. **Do not** use the HOC `observer(Component)` for views — keep views stateless and use `<Observer>{() => <View ... />}</Observer>` at the install layer.
+
+### Stores hold state, not behaviour
+
+- A store has only observables + setters. If you find yourself adding a method that calls a service or composes multiple setters, that logic belongs in a presenter.
+- Do not put services on stores. Services flow through the presenter constructor.
+- `RootStore` is a tiny container of **truly global** stores (`themeStore`, `windowStore`). It does NOT hold page-local stores (e.g. `NavigationStore`, `TabsStore`) — those live inside their page and are owned by the page install.
+- If a store has no presenter (`ThemeStore`, `WindowStore`), it can still expose a one-line action method like `toggle()`. The bar for "needs a presenter" is real orchestration logic, not symmetry.
+
+### Presenters are testable behaviour
+
+- Constructor takes `(store, ...services)`. Tests hand it a fake store and a fake service.
+- Methods that mutate multiple store fields are wrapped with `action(...)` from MobX so the change is one transaction.
+- Async loaders set a loading flag, fetch, set the data, and unset the flag in `finally`. The view reads both off the presenter.
+- A presenter that contains essentially zero logic (just passthrough getters and one-line wrappers) is a smell — drop the presenter and let the install file call the store/service directly.
+
+### Services have interfaces and fakes
+
+- Each service is `interface FooService` + `class FakeFooService implements FooService`. The interface goes next to the fake.
+- All `Fake*Service` constructors accept the `HttpService` interface and call `http.request(...)` once per method. The fake then returns its own dummy data; the response from the fake HTTP service is discarded. Today: `FakeHttpService` only sleeps for `delayMs` — change `delayMs` in `main.tsx` to test slower / faster loads.
+- When a real backend lands, write a `RealFooService implements FooService` next to the fake and swap it in `main.tsx`. No other code changes.
+- Services are provided through `<ServicesProvider>` (separate from `<RootStoreProvider>` because services are not stores).
+
+### How a feature is laid out
+
+```
+src/pages/<page>/<feature>/
+  <Feature>Store.ts        observable state, setters
+  <Feature>Presenter.ts    constructor(store, ...services); load/select/etc.
+  <View>.tsx               stateless component(s) for this feature
+```
+
+Components without a presenter (purely visual / form-only) can live in `src/base/components/`. Anything tied to a feature lives with that feature.
+
+## File layout
+
+```
+web/
+  electron/                          Electron main + preload (compiled to dist-desktop/)
+    main.ts
+    preload.ts
+  src/
+    App.tsx                          install: global providers
+    main.tsx                         composition root: services + RootStore
+    electronApi.ts                   window.electronAPI typing & accessor
+    base/                            cross-cutting / non-feature code
+      icons/                         SVG-as-React-component icons
+      theme/
+        ThemeStore.ts                @observable mode, toggle, theme computed
+        themes.ts                    Theme type + lightTheme / darkTheme tokens
+        styled.d.ts                  styled-components DefaultTheme augmentation
+        platformLayout.ts            pixel constants (title bar height, top inset)
+      window/
+        WindowStore.ts               isDesktop / isFullScreen / topInset; subscribes to electronAPI
+    pages/
+      home/
+        HomePage.tsx                 page install: instantiates page-local stores+presenters, wires <Observer>s
+        navigation/                  activity bar + sidebar feature
+          NavigationStore.ts
+          NavigationPresenter.ts
+          ActivityBar.tsx            stateless
+          Sidebar.tsx                stateless (loading-aware)
+        tabs/                        tab strip feature
+          TabsStore.ts
+          TabsPresenter.ts
+          TabBar.tsx                 stateless
+          SortableTab.tsx            stateless (dnd-kit hooks at the use site)
+        chat/                        chat surface (frame + composer + TOC + content)
+          ChatFrame.tsx              stateless layout; takes tabBar slot
+          Composer.tsx               local form state only
+          TableOfContents.tsx        local IntersectionObserver state only
+          ExampleContent.tsx        static
+        profile/
+          ProfileStore.ts
+          ProfilePresenter.ts
+    services/                        backend boundary
+      ServicesContext.ts             Services type + Provider + useServices
+      http/
+        HttpService.ts               interface
+        FakeHttpService.ts           sleep delayMs and resolve
+      session/
+        SessionService.ts            interface + types
+        FakeSessionService.ts        hardcoded dummy data + http.request for delay
+      profile/
+        ProfileService.ts
+        FakeProfileService.ts
+      library/
+        LibraryService.ts
+        FakeLibraryService.ts
+    stores/
+      RootStore.ts                   global stores (themeStore, windowStore) + useRootStore
+  vite.config.ts                     `@/*` alias → ./src/*; base="./" in app-desktop mode
+  tsconfig.app.json                  paths: { "@/*": ["./src/*"] }
+  tsconfig.electron.json             main-process compile (outDir: dist-desktop)
+  eslint.config.js                   ignores dist + dist-desktop; node globals for electron/
+```
+
+### Path alias convention
+
+`@/` maps to `src/`. Use it for any cross-folder import. Same-folder imports stay relative (`./SiblingFile`). Don't write `../../../../...` chains — switch to `@/`.
 
 ## Styling
 
 - One styled-component per visual element, named after its role (`Strip`, `Container`, `IconButton`), declared **above** the React component that uses it.
 - Variants flow through transient props: `` styled.button<{ $active: boolean }>` ... ` ``.
-- Layout/theme tokens live in `src/theme/` (e.g. `platformLayout.ts`, `themes.ts`). Don't sprinkle pixel constants or hex colours across components — read them from the theme.
-
-## Theming
-
-- The full color palette lives in `src/theme/themes.ts` as `lightTheme` / `darkTheme`, both shaped by the `Theme` type. `src/theme/styled.d.ts` augments styled-components' `DefaultTheme` so `${({ theme }) => theme.x}` gets full type-checking.
-- The active mode lives on the store as `themeMode: 'light' | 'dark'`, with a `theme` `@computed` that resolves it to the token object and a `toggleTheme()` action.
-- `App.tsx` is the only place that reads `store.theme` and feeds it to `<ThemeProvider>`. A `createGlobalStyle` block there owns the body bg + text color so the page background is also reactive.
-- **Don't read `themeMode` to branch on light/dark inside other components.** Read tokens off `theme` instead. The one exception is choosing the right *icon* (sun vs moon) for the toggle — that's a content decision, not a styling one.
-- New colour needs go in `themes.ts` as a token that exists in both modes, not as an ad-hoc hex inside a styled-component.
+- Tokens come from the theme (`${({ theme }) => theme.panelBg}`), not from inline hex values. Layout constants (pixel sizes) live in `src/base/theme/platformLayout.ts`.
+- Don't read `themeMode` to branch on light/dark inside views. Read tokens off `theme`. The one exception is choosing the right *icon* (sun vs moon) for the toggle — that's a content decision, not a styling one.
 
 ## Desktop / Electron integration
 
@@ -42,29 +150,9 @@ Conventions for the `web/` Vite + React + Electron renderer. Read this before ad
 - `src/electronApi.ts` is the single source of truth for the `window.electronAPI` shape exposed by `electron/preload.ts` through `contextBridge`. **Keep these in sync** — if you change one, change the other.
 - The preload is compiled as ESM (matching the rest of the package). Electron only loads ESM preload scripts when `webPreferences.sandbox: false`, so that flag is set in `main.ts`. Don't re-enable the sandbox without also moving the preload to CommonJS — otherwise `window.electronAPI` silently fails to expose and `isDesktop` becomes `false`. Renderer isolation still holds via `contextIsolation: true` + `nodeIntegration: false`.
 - The renderer detects desktop mode by **the presence of `window.electronAPI`**, not by Vite mode. The `app-desktop` Vite mode only flips the asset base path (`./` for `file://` loading).
-- `RootStore` owns `isDesktop`, `isDesktopFullScreen`, and the `topInset` computed. The store subscribes to `onWindowStateChange` from preload directly in its constructor — there's no separate `init()` method to remember to call, and **no React effect**.
+- `WindowStore` owns `isDesktop`, `isDesktopFullScreen`, and the `topInset` computed. It subscribes to `onWindowStateChange` from preload directly in its constructor — no React effect needed.
 - The window-state contract is intentionally narrow: only **fullscreen** is tracked, because that's the one transition that hides the macOS traffic lights and lets the panels claim the full vertical space. Don't track maximize/zoom — on macOS those keep traffic lights visible, so the topInset and title-bar logic is the same as for the normal state.
 - The Electron main process emits state on `enter-full-screen` and `leave-full-screen`, plus a 120 ms re-emit per event to catch the end of macOS fullscreen animations (querying `isFullScreen()` mid-animation can be stale). **Do not add polling fallbacks**; if a transition is genuinely missed, find the right main-process event instead.
-
-## File layout
-
-```
-web/
-  electron/                  Electron main + preload (compiled to dist-desktop/)
-    main.ts
-    preload.ts
-  src/
-    components/              styled-components + observer components
-    icons/                   SVG-as-React-component icons
-    stores/RootStore.ts      MobX store + RootStoreProvider/useRootStore
-    theme/                   layout/design tokens
-    electronApi.ts           window.electronAPI typing & accessor
-    App.tsx
-    main.tsx
-  vite.config.ts             base="./" only in app-desktop mode
-  tsconfig.electron.json     main-process compile (outDir: dist-desktop)
-  eslint.config.js           ignores dist + dist-desktop; node globals for electron/
-```
 
 ## Build modes
 

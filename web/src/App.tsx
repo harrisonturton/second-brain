@@ -1,10 +1,8 @@
 import { observer } from 'mobx-react-lite'
 import styled, { ThemeProvider, createGlobalStyle } from 'styled-components'
-import { ActivityBar } from './components/ActivityBar'
-import { ChatFrame } from './components/ChatFrame'
-import { NavigationPanel } from './components/NavigationPanel'
-import { useRootStore } from './stores/RootStore'
-import { PLATFORM_LAYOUT } from './theme/platformLayout'
+import { HomePage } from '@/pages/home/HomePage'
+import { useRootStore } from '@/stores/RootStore'
+import { PLATFORM_LAYOUT } from '@/base/theme/platformLayout'
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -35,14 +33,14 @@ const DesktopTitleBar = styled.header<{ $visible: boolean }>`
 `
 
 const App = observer(function App() {
-  const store = useRootStore()
+  const { themeStore, windowStore } = useRootStore()
   return (
-    <ThemeProvider theme={store.theme}>
+    <ThemeProvider theme={themeStore.theme}>
       <GlobalStyle />
-      <ActivityBar />
-      <NavigationPanel />
-      <ChatFrame />
-      <DesktopTitleBar $visible={store.isDesktop && !store.isDesktopFullScreen}>
+      <HomePage />
+      <DesktopTitleBar
+        $visible={windowStore.isDesktop && !windowStore.isDesktopFullScreen}
+      >
         Knowledge Engine
       </DesktopTitleBar>
     </ThemeProvider>

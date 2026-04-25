@@ -10,10 +10,9 @@ import {
   SortableContext,
   horizontalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { observer } from 'mobx-react-lite'
 import styled from 'styled-components'
-import { useRootStore } from '../stores/RootStore'
 import { SortableTab } from './SortableTab'
+import type { Tab } from './TabsStore'
 
 const Bar = styled.div`
   display: flex;
@@ -23,8 +22,21 @@ const Bar = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.panelBorder};
 `
 
-export const TabBar = observer(function TabBar() {
-  const store = useRootStore()
+export type TabBarProps = {
+  tabs: Tab[]
+  activeTabId: string | null
+  onSelectTab: (id: string) => void
+  onCloseTab: (id: string) => void
+  onMoveTab: (draggedId: string, targetId: string) => void
+}
+
+export function TabBar({
+  tabs,
+  activeTabId,
+  onSelectTab,
+  onCloseTab,
+  onMoveTab,
+}: TabBarProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
   )
@@ -32,7 +44,7 @@ export const TabBar = observer(function TabBar() {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
     if (!over || active.id === over.id) return
-    store.moveTab(active.id as string, over.id as string)
+    onMoveTab(active.id as string, over.id as string)
   }
 
   return (
@@ -42,19 +54,19 @@ export const TabBar = observer(function TabBar() {
       onDragEnd={handleDragEnd}
     >
       <SortableContext
-        items={store.tabs.map((t) => t.id)}
+        items={tabs.map((t) => t.id)}
         strategy={horizontalListSortingStrategy}
       >
         <Bar>
-          {store.tabs.map((tab) => (
+          {tabs.map((tab) => (
             <SortableTab
               key={tab.id}
               tab={tab}
-              active={tab.id === store.activeTabId}
-              onActivate={() => store.setActiveTab(tab.id)}
+              active={tab.id === activeTabId}
+              onActivate={() => onSelectTab(tab.id)}
               onClose={(e) => {
                 e.stopPropagation()
-                store.closeTab(tab.id)
+                onCloseTab(tab.id)
               }}
             />
           ))}
@@ -62,4 +74,4 @@ export const TabBar = observer(function TabBar() {
       </SortableContext>
     </DndContext>
   )
-})
+}

@@ -1,15 +1,13 @@
-import { observer } from 'mobx-react-lite'
+import type { ReactNode } from 'react'
 import styled from 'styled-components'
-import { useRootStore } from '../stores/RootStore'
 import { Composer } from './Composer'
 import { ExampleContent } from './ExampleContent'
-import { TabBar } from './TabBar'
 import { TableOfContents, type TocEntry } from './TableOfContents'
 
-const Frame = styled.div<{ $navigationPanelCollapsed: boolean; $topInset: number }>`
+const Frame = styled.div<{ $sidebarCollapsed: boolean; $topInset: number }>`
   position: fixed;
   top: ${({ $topInset }) => `${$topInset}px`};
-  left: ${({ $navigationPanelCollapsed }) => ($navigationPanelCollapsed ? '44px' : '268px')};
+  left: ${({ $sidebarCollapsed }) => ($sidebarCollapsed ? '44px' : '268px')};
   right: 4px;
   bottom: 4px;
   display: flex;
@@ -65,14 +63,17 @@ const tocEntries: TocEntry[] = [
   { id: 'discussion', label: 'Discussion' },
 ]
 
-export const ChatFrame = observer(function ChatFrame() {
-  const store = useRootStore()
+export type ChatFrameProps = {
+  sidebarCollapsed: boolean
+  topInset: number
+  /** Stateful tab strip; injected as a slot so ChatFrame stays stateless. */
+  tabBar: ReactNode
+}
+
+export function ChatFrame({ sidebarCollapsed, topInset, tabBar }: ChatFrameProps) {
   return (
-    <Frame
-      $navigationPanelCollapsed={store.navigationPanelCollapsed}
-      $topInset={store.topInset}
-    >
-      <TabBar />
+    <Frame $sidebarCollapsed={sidebarCollapsed} $topInset={topInset}>
+      {tabBar}
       <Body>
         <TableOfContents entries={tocEntries} />
         <Main>
@@ -88,4 +89,4 @@ export const ChatFrame = observer(function ChatFrame() {
       </Body>
     </Frame>
   )
-})
+}

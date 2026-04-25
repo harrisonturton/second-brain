@@ -1,8 +1,7 @@
-import { observer } from 'mobx-react-lite'
-import styled from 'styled-components'
-import { ChevronLeftIcon } from '../icons/ChevronLeftIcon'
-import { MoreVerticalIcon } from '../icons/MoreVerticalIcon'
-import { useRootStore, type WorkspaceSection } from '../stores/RootStore'
+import styled, { keyframes } from 'styled-components'
+import { ChevronLeftIcon } from '@/base/icons/ChevronLeftIcon'
+import { MoreVerticalIcon } from '@/base/icons/MoreVerticalIcon'
+import type { SidebarItem } from './NavigationStore'
 
 const PANEL_WIDTH = 220
 
@@ -145,59 +144,60 @@ const MoreButton = styled.button`
   }
 `
 
-const sessionItems = [
-  'Inbox',
-  'Today',
-  'Upcoming',
-  'Projects',
-  'Notes',
-  'Archive',
-]
+const shimmer = keyframes`
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+`
 
-const libraryItems = [
-  'Articles',
-  'Notes',
-  'Saved sources',
-  'Highlights',
-  'Collections',
-]
+const SkeletonRow = styled.div`
+  height: 18px;
+  margin: 4px 6px;
+  border-radius: 4px;
+  background: ${({ theme }) => theme.subtleHoverBg};
+  animation: ${shimmer} 1.2s ease-in-out infinite;
+`
 
-const sectionLabels: Record<WorkspaceSection, string> = {
-  sessions: 'Sessions',
-  library: 'Library',
+export type SidebarProps = {
+  title: string
+  items: SidebarItem[]
+  loading: boolean
+  collapsed: boolean
+  topInset: number
+  onToggleSidebar: () => void
 }
 
-const itemsBySection: Record<WorkspaceSection, string[]> = {
-  sessions: sessionItems,
-  library: libraryItems,
-}
-
-export const NavigationPanel = observer(function NavigationPanel() {
-  const store = useRootStore()
-  const section = store.activeSection
+export function Sidebar(props: SidebarProps) {
+  const { title, items, loading, collapsed, topInset, onToggleSidebar } = props
 
   return (
-    <Container
-      $collapsed={store.navigationPanelCollapsed}
-      $topInset={store.topInset}
-    >
-      <PanelTitle type="button">{sectionLabels[section]}</PanelTitle>
+    <Container $collapsed={collapsed} $topInset={topInset}>
+      <PanelTitle type="button">{title}</PanelTitle>
       <ToggleButton
-        onClick={() => store.toggleNavigationPanel()}
-        aria-label="Collapse navigation panel"
+        onClick={onToggleSidebar}
+        aria-label="Collapse sidebar"
       >
         <ChevronLeftIcon />
       </ToggleButton>
       <Items>
-        {itemsBySection[section].map((label) => (
-          <Item key={label}>
-            <Label>{label}</Label>
-            <MoreButton aria-label={`More options for ${label}`}>
-              <MoreVerticalIcon />
-            </MoreButton>
-          </Item>
-        ))}
+        {loading && items.length === 0 ? (
+          <>
+            <SkeletonRow />
+            <SkeletonRow />
+            <SkeletonRow />
+            <SkeletonRow />
+          </>
+        ) : (
+          items.map((item) => (
+            <Item key={item.id}>
+              <Label>{item.label}</Label>
+              <MoreButton aria-label={`More options for ${item.label}`}>
+                <MoreVerticalIcon />
+              </MoreButton>
+            </Item>
+          ))
+        )}
       </Items>
     </Container>
   )
-})
+}
