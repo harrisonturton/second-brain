@@ -15,15 +15,18 @@ const Tab = styled.div<{ $active: boolean }>`
   border-radius: 4px;
   font-size: 13px;
   line-height: 1;
-  color: ${({ theme }) => theme.textPrimary};
-  background: transparent;
+  color: ${({ $active, theme }) =>
+    $active ? theme.activeFg : theme.textPrimary};
+  background: ${({ $active, theme }) =>
+    $active ? theme.activeBg : 'transparent'};
   cursor: pointer;
   white-space: nowrap;
   user-select: none;
-  transition: background 120ms ease;
+  transition: background 120ms ease, color 120ms ease;
 
   &:hover {
-    background: ${({ theme }) => theme.subtleHoverBg};
+    background: ${({ $active, theme }) =>
+      $active ? theme.activeBg : theme.subtleHoverBg};
   }
 
   &:not(:first-child)::before {

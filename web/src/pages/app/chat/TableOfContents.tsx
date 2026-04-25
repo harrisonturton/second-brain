@@ -55,7 +55,7 @@ const TocLink = styled.a<{ $active: boolean; $level: 1 | 2 }>`
   font-size: ${({ $level }) => ($level === 2 ? '12px' : '13px')};
   font-weight: ${({ $active }) => ($active ? 500 : 400)};
   color: ${({ $active, theme }) =>
-    $active ? theme.textPrimary : theme.tocBarActive};
+    $active ? theme.textPrimary : theme.textSecondary};
   text-decoration: none;
   line-height: 1.4;
   transition: color 120ms ease;
@@ -66,7 +66,7 @@ const TocLink = styled.a<{ $active: boolean; $level: 1 | 2 }>`
 
   &:hover ${Bar} {
     background: ${({ $active, theme }) =>
-      $active ? theme.textPrimary : theme.tocBarActive};
+      $active ? theme.textPrimary : theme.textSecondary};
   }
 `
 

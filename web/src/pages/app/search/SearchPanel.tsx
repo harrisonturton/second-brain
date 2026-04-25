@@ -67,7 +67,7 @@ const InputWrap = styled.div<{ $focused: boolean }>`
   background: ${({ theme }) => theme.panelBg};
   border: 1px solid
     ${({ $focused, theme }) =>
-      $focused ? theme.textTertiary : theme.panelBorder};
+      $focused ? theme.accentBg : theme.panelBorder};
   border-radius: 8px;
   box-shadow: ${({ $focused, theme }) =>
     $focused ? theme.panelShadow : 'none'};

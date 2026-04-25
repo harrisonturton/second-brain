@@ -90,14 +90,16 @@ const Item = styled.div<{ $selected: boolean }>`
   width: 100%;
   padding: 1px 0;
   font-size: 13px;
-  color: ${({ theme }) => theme.textPrimary};
+  color: ${({ $selected, theme }) =>
+    $selected ? theme.activeFg : theme.textPrimary};
   border-radius: 4px;
   background-clip: content-box;
   background-color: ${({ $selected, theme }) =>
-    $selected ? theme.subtleHoverBg : 'transparent'};
+    $selected ? theme.activeBg : 'transparent'};
 
   &:hover {
-    background-color: ${({ theme }) => theme.subtleHoverBg};
+    background-color: ${({ $selected, theme }) =>
+      $selected ? theme.activeBg : theme.subtleHoverBg};
   }
 `
 

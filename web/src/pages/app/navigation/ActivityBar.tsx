@@ -40,7 +40,7 @@ const IconButton = styled.button<{ $active: boolean }>`
   border: none;
   border-radius: 5px;
   color: ${({ $active, theme }) =>
-    $active ? theme.textPrimary : theme.textSecondary};
+    $active ? theme.activeFg : theme.textSecondary};
   cursor: pointer;
   transition: background 120ms ease, color 120ms ease;
 

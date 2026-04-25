@@ -16,20 +16,22 @@ const Pill = styled.button<{ $active: boolean }>`
   height: 22px;
   padding: 0 8px;
   background: ${({ $active, theme }) =>
-    $active ? theme.subtleHoverBg : 'transparent'};
+    $active ? theme.activeBg : 'transparent'};
   border: none;
   border-radius: 4px;
   font: inherit;
   font-size: 13px;
   line-height: 1.5;
-  color: ${({ theme }) => theme.textPrimary};
+  color: ${({ $active, theme }) =>
+    $active ? theme.activeFg : theme.textPrimary};
   cursor: pointer;
   white-space: nowrap;
   opacity: ${({ $active }) => ($active ? 1 : 0.65)};
-  transition: background 120ms ease, opacity 120ms ease;
+  transition: background 120ms ease, opacity 120ms ease, color 120ms ease;
 
   &:hover {
-    background: ${({ theme }) => theme.subtleHoverBg};
+    background: ${({ $active, theme }) =>
+      $active ? theme.activeBg : theme.subtleHoverBg};
     opacity: 1;
   }
 `

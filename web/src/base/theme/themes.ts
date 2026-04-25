@@ -15,6 +15,7 @@ export type Theme = {
 
   hoverBg: string
   activeBg: string
+  activeFg: string
   subtleHoverBg: string
   divider: string
 
@@ -24,7 +25,6 @@ export type Theme = {
   accentFg: string
 
   tocBar: string
-  tocBarActive: string
 }
 
 const SANS_FONT_STACK =
@@ -48,17 +48,17 @@ export const lightTheme: Theme = {
   textMuted: '#6b6b6b',
 
   hoverBg: 'rgba(0, 0, 0, 0.06)',
-  activeBg: 'rgba(0, 0, 0, 0.07)',
+  activeBg: 'rgba(94, 92, 230, 0.14)',
+  activeFg: '#3d3bb3',
   subtleHoverBg: '#f3f3f3',
   divider: 'rgba(0, 0, 0, 0.08)',
 
-  accentBg: '#1f1f1f',
-  accentBgHover: '#2f2f2f',
+  accentBg: '#5e5ce6',
+  accentBgHover: '#4f4dd0',
   accentBgDisabled: '#dcdcdc',
   accentFg: '#ffffff',
 
   tocBar: '#d8d8d8',
-  tocBarActive: '#888888',
 }
 
 export const darkTheme: Theme = {
@@ -78,6 +78,7 @@ export const darkTheme: Theme = {
 
   hoverBg: 'rgba(255, 255, 255, 0.06)',
   activeBg: 'rgba(255, 255, 255, 0.09)',
+  activeFg: '#e8e8e8',
   subtleHoverBg: '#242424',
   divider: 'rgba(255, 255, 255, 0.1)',
 
@@ -87,7 +88,6 @@ export const darkTheme: Theme = {
   accentFg: '#181818',
 
   tocBar: '#383838',
-  tocBarActive: '#888888',
 }
 
 export const sepiaTheme: Theme = {
@@ -107,6 +107,7 @@ export const sepiaTheme: Theme = {
 
   hoverBg: 'rgba(60, 40, 10, 0.05)',
   activeBg: 'rgba(60, 40, 10, 0.07)',
+  activeFg: '#322a1f',
   subtleHoverBg: '#f2eee5',
   divider: 'rgba(60, 40, 10, 0.08)',
 
@@ -116,7 +117,6 @@ export const sepiaTheme: Theme = {
   accentFg: '#fbf9f4',
 
   tocBar: '#dcd4be',
-  tocBarActive: '#8c8270',
 }
 
 export const themesByMode = {
