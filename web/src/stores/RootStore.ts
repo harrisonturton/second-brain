@@ -6,9 +6,12 @@ export interface Tab {
   label: string
 }
 
+export type SidebarView = 'sessions' | 'library'
+
 export class RootStore {
   @observable query = ''
   @observable sidebarCollapsed = false
+  @observable activeSidebarView: SidebarView = 'sessions'
   @observable tabs: Tab[] = [
     { id: 't1', label: 'The shape of meaning' },
     { id: 't2', label: 'Embeddings primer' },
@@ -25,6 +28,11 @@ export class RootStore {
 
   @action toggleSidebar() {
     this.sidebarCollapsed = !this.sidebarCollapsed
+  }
+
+  @action selectSidebarView(view: SidebarView) {
+    this.activeSidebarView = view
+    this.sidebarCollapsed = false
   }
 
   @action setActiveTab(id: string) {

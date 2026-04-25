@@ -1,18 +1,26 @@
 import { observer } from 'mobx-react-lite'
 import styled from 'styled-components'
+import { BookOpenIcon } from '../icons/BookOpenIcon'
+import { ChatBubblesIcon } from '../icons/ChatBubblesIcon'
 import { ChevronLeftIcon } from '../icons/ChevronLeftIcon'
 import { MoreVerticalIcon } from '../icons/MoreVerticalIcon'
-import { useRootStore } from '../stores/RootStore'
+import {
+  useRootStore,
+  type SidebarView,
+} from '../stores/RootStore'
 
-const EXPANDED_WIDTH = 240
-const COLLAPSED_WIDTH = 32
+const ICON_STRIP_WIDTH = 40
+const CONTENT_WIDTH = 220
+const EXPANDED_WIDTH = ICON_STRIP_WIDTH + CONTENT_WIDTH
 
 const Container = styled.aside<{ $collapsed: boolean }>`
   position: fixed;
   top: 4px;
   left: 4px;
   bottom: 4px;
-  width: ${({ $collapsed }) => ($collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH)}px;
+  width: ${({ $collapsed }) =>
+    $collapsed ? ICON_STRIP_WIDTH : EXPANDED_WIDTH}px;
+  display: flex;
   background: #fff;
   border: 1px solid #e8e8e8;
   border-radius: 7px;
@@ -22,7 +30,51 @@ const Container = styled.aside<{ $collapsed: boolean }>`
   transition: width 260ms cubic-bezier(0.32, 0.72, 0, 1);
 `
 
-const SessionsTitle = styled.button<{ $collapsed: boolean }>`
+const IconStrip = styled.div`
+  flex-shrink: 0;
+  width: ${ICON_STRIP_WIDTH}px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 0;
+  gap: 4px;
+`
+
+const IconButton = styled.button<{ $active: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: ${({ $active }) => ($active ? '#f1f1f1' : 'transparent')};
+  border: none;
+  border-radius: 5px;
+  color: ${({ $active }) => ($active ? '#2a2a2a' : '#888')};
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+
+  &:hover {
+    background: #f3f3f3;
+    color: #2a2a2a;
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+`
+
+const ContentPanel = styled.div<{ $collapsed: boolean }>`
+  position: relative;
+  flex-shrink: 0;
+  width: ${CONTENT_WIDTH}px;
+  opacity: ${({ $collapsed }) => ($collapsed ? 0 : 1)};
+  pointer-events: ${({ $collapsed }) => ($collapsed ? 'none' : 'auto')};
+  transition: opacity 200ms ease;
+`
+
+const PanelTitle = styled.button`
   position: absolute;
   top: 5px;
   left: 5px;
@@ -42,16 +94,13 @@ const SessionsTitle = styled.button<{ $collapsed: boolean }>`
   white-space: nowrap;
   overflow: hidden;
   cursor: pointer;
-  opacity: ${({ $collapsed }) => ($collapsed ? 0 : 1)};
-  pointer-events: ${({ $collapsed }) => ($collapsed ? 'none' : 'auto')};
-  transition: opacity 200ms ease;
 
   &:hover {
     background: #f3f3f3;
   }
 `
 
-const ToggleButton = styled.button<{ $collapsed: boolean }>`
+const ToggleButton = styled.button`
   position: absolute;
   top: 5px;
   right: 5px;
@@ -66,10 +115,7 @@ const ToggleButton = styled.button<{ $collapsed: boolean }>`
   border-radius: 3px;
   color: #6b6b6b;
   cursor: pointer;
-  transform: ${({ $collapsed }) => ($collapsed ? 'rotate(180deg)' : 'rotate(0deg)')};
-  transition:
-    transform 260ms cubic-bezier(0.32, 0.72, 0, 1),
-    background 120ms ease;
+  transition: background 120ms ease;
 
   &:hover {
     background: rgba(0, 0, 0, 0.06);
@@ -81,12 +127,8 @@ const ToggleButton = styled.button<{ $collapsed: boolean }>`
   }
 `
 
-const Items = styled.div<{ $collapsed: boolean }>`
-  width: ${EXPANDED_WIDTH}px;
+const Items = styled.div`
   padding: 32px 5px 5px;
-  opacity: ${({ $collapsed }) => ($collapsed ? 0 : 1)};
-  pointer-events: ${({ $collapsed }) => ($collapsed ? 'none' : 'auto')};
-  transition: opacity 200ms ease;
 `
 
 const Item = styled.div`
@@ -149,34 +191,73 @@ const MoreButton = styled.button`
   }
 `
 
-const items = ['Inbox', 'Today', 'Upcoming', 'Projects', 'Notes', 'Archive']
+const sessionItems = [
+  'Inbox',
+  'Today',
+  'Upcoming',
+  'Projects',
+  'Notes',
+  'Archive',
+]
+
+const libraryItems = [
+  'Articles',
+  'Notes',
+  'Saved sources',
+  'Highlights',
+  'Collections',
+]
+
+const viewLabels: Record<SidebarView, string> = {
+  sessions: 'Sessions',
+  library: 'Library',
+}
 
 export const Sidebar = observer(function Sidebar() {
   const store = useRootStore()
   const collapsed = store.sidebarCollapsed
+  const view = store.activeSidebarView
+  const items = view === 'sessions' ? sessionItems : libraryItems
 
   return (
     <Container $collapsed={collapsed}>
-      <SessionsTitle $collapsed={collapsed} type="button">
-        Sessions
-      </SessionsTitle>
-      <ToggleButton
-        $collapsed={collapsed}
-        onClick={() => store.toggleSidebar()}
-        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-      >
-        <ChevronLeftIcon />
-      </ToggleButton>
-      <Items $collapsed={collapsed}>
-        {items.map((label) => (
-          <Item key={label}>
-            <Label>{label}</Label>
-            <MoreButton aria-label={`More options for ${label}`}>
-              <MoreVerticalIcon />
-            </MoreButton>
-          </Item>
-        ))}
-      </Items>
+      <IconStrip>
+        <IconButton
+          $active={view === 'sessions'}
+          onClick={() => store.selectSidebarView('sessions')}
+          aria-label="Sessions"
+          title="Sessions"
+        >
+          <ChatBubblesIcon />
+        </IconButton>
+        <IconButton
+          $active={view === 'library'}
+          onClick={() => store.selectSidebarView('library')}
+          aria-label="Library"
+          title="Library"
+        >
+          <BookOpenIcon />
+        </IconButton>
+      </IconStrip>
+      <ContentPanel $collapsed={collapsed}>
+        <PanelTitle type="button">{viewLabels[view]}</PanelTitle>
+        <ToggleButton
+          onClick={() => store.toggleSidebar()}
+          aria-label="Collapse sidebar"
+        >
+          <ChevronLeftIcon />
+        </ToggleButton>
+        <Items>
+          {items.map((label) => (
+            <Item key={label}>
+              <Label>{label}</Label>
+              <MoreButton aria-label={`More options for ${label}`}>
+                <MoreVerticalIcon />
+              </MoreButton>
+            </Item>
+          ))}
+        </Items>
+      </ContentPanel>
     </Container>
   )
 })

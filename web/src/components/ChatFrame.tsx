@@ -9,7 +9,7 @@ import { TableOfContents, type TocEntry } from './TableOfContents'
 const Frame = styled.div<{ $sidebarCollapsed: boolean }>`
   position: fixed;
   top: 4px;
-  left: ${({ $sidebarCollapsed }) => ($sidebarCollapsed ? '40px' : '248px')};
+  left: ${({ $sidebarCollapsed }) => ($sidebarCollapsed ? '48px' : '268px')};
   right: 4px;
   bottom: 4px;
   display: flex;
@@ -46,7 +46,7 @@ const Messages = styled.div`
 const Column = styled.div`
   width: 100%;
   max-width: 720px;
-  padding: 32px 24px 120px;
+  padding: 32px 24px 180px;
 `
 
 const ComposerSlot = styled.div`
