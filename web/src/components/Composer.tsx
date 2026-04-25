@@ -9,24 +9,6 @@ const Bar = styled.div`
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff 40%);
 `
 
-const Box = styled.form`
-  width: 100%;
-  max-width: 720px;
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  padding: 10px 10px 10px 14px;
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: border-color 120ms ease;
-
-  &:focus-within {
-    border-color: #bdbdbd;
-  }
-`
-
 const Field = styled.textarea`
   flex: 1;
   border: none;
@@ -38,11 +20,30 @@ const Field = styled.textarea`
   background: transparent;
   color: #2a2a2a;
   padding: 6px 0;
-  max-height: 200px;
+  min-height: 22px;
+  max-height: 240px;
   overflow-y: auto;
 
   &::placeholder {
     color: #b3b3b3;
+  }
+`
+
+const Box = styled.form`
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px 10px 10px 14px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: border-color 120ms ease;
+
+  &:focus-within {
+    border-color: #bdbdbd;
   }
 `
 

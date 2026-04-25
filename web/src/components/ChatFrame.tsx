@@ -2,6 +2,7 @@ import { observer } from 'mobx-react-lite'
 import styled from 'styled-components'
 import { useRootStore } from '../stores/RootStore'
 import { Composer } from './Composer'
+import { TableOfContents, type TocEntry } from './TableOfContents'
 
 const Frame = styled.div<{ $sidebarCollapsed: boolean }>`
   position: fixed;
@@ -10,7 +11,6 @@ const Frame = styled.div<{ $sidebarCollapsed: boolean }>`
   right: 4px;
   bottom: 4px;
   display: flex;
-  flex-direction: column;
   background: #fff;
   border: 1px solid #e8e8e8;
   border-radius: 7px;
@@ -18,6 +18,13 @@ const Frame = styled.div<{ $sidebarCollapsed: boolean }>`
   overflow: hidden;
   will-change: left;
   transition: left 260ms cubic-bezier(0.32, 0.72, 0, 1);
+`
+
+const Main = styled.div`
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 `
 
 const Messages = styled.div`
@@ -33,14 +40,24 @@ const Column = styled.div`
   padding: 32px 24px 24px;
 `
 
+const tocEntries: TocEntry[] = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'concepts', label: 'Concepts', level: 2 },
+  { id: 'sources', label: 'Sources', level: 2 },
+  { id: 'discussion', label: 'Discussion' },
+]
+
 export const ChatFrame = observer(function ChatFrame() {
   const { sidebarCollapsed } = useRootStore()
   return (
     <Frame $sidebarCollapsed={sidebarCollapsed}>
-      <Messages>
-        <Column />
-      </Messages>
-      <Composer />
+      <TableOfContents entries={tocEntries} />
+      <Main>
+        <Messages>
+          <Column />
+        </Messages>
+        <Composer />
+      </Main>
     </Frame>
   )
 })
