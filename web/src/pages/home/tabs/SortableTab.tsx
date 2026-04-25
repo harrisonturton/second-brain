@@ -85,19 +85,19 @@ const CloseButton = styled.button`
   }
 `
 
-interface SortableTabViewProps {
+interface SortableTabProps {
   tab: TabModel
   active: boolean
   onActivate: () => void
   onClose: (e: MouseEvent) => void
 }
 
-export function SortableTabView({
+export function SortableTab({
   tab,
   active,
   onActivate,
   onClose,
-}: SortableTabViewProps) {
+}: SortableTabProps) {
   const {
     attributes,
     listeners,

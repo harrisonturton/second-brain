@@ -23,7 +23,7 @@ The app uses a strict separation between **rendering**, **state**, **behaviour**
 
 | Role | Lives in | Responsibility | Allowed to import |
 |---|---|---|---|
-| **View** (stateless component) | `*View.tsx` next to its presenter, or `base/components/` if generic | Render UI. Props in, JSX out. No `useRootStore`, no `observer`, no service calls. **Always named with the `View` suffix** (e.g. `ActivityBarView`, `SidebarView`). | styled-components, icons, types from sibling store |
+| **Component** (stateless) | `*.tsx` next to its store/presenter | Render UI. Props in, JSX out. No `useRootStore`, no `observer`, no service calls. Plain name (`ActivityBar`, `Sidebar`, `ChatFrame`). The stateful, store-bound version is created inline in the page install and conventionally named `*View` locally — that's the only place the `View` suffix appears. | styled-components, icons, types from sibling store |
 | **Store** | `*Store.ts` next to its presenter | Hold observable state — **everything the views read**. No services, no orchestration, no React. Just `@observable` fields and one-line `@action` setters. The shape of the store is the shape of what the view consumes; the presenter is responsible for keeping the right values in those fields. | mobx, types from services (for typed fields) |
 | **Presenter** | `*Presenter.ts` next to its store | Behaviour + business logic. Takes its store(s) and any services in the constructor. Exposes **only action methods** — no state getters, no derived `@computed`. Views never read from a presenter. The presenter writes results into the store, and the view reads the store. No React. | mobx (`action`), the store, service interfaces |
 | **Service** | `services/<feature>/` | Backend data fetching. **Interface** + **fake impl** today (real impls land later). All services accept an `HttpService` so the fake can simulate latency to exercise loading states. | http types only |
@@ -48,8 +48,9 @@ export default makePage((_, { rootStore, services }) => {
   void navPresenter.loadSidebarItems()
 
   // State comes from the store; actions come from the presenter.
-  const Sidebar = observer(() => (
-    <SidebarView
+  // The local `*View` name is the stateful, store-bound version of `Sidebar`.
+  const SidebarView = observer(() => (
+    <Sidebar
       collapsed={navStore.sidebarCollapsed}
       items={navStore.sidebarItems}
       loading={navStore.sidebarLoading}
@@ -57,7 +58,7 @@ export default makePage((_, { rootStore, services }) => {
     />
   ))
 
-  return () => <HomePageView Sidebar={Sidebar} />
+  return () => <HomePage Sidebar={SidebarView} />
 })
 ```
 
@@ -120,22 +121,22 @@ web/
     pages/
       home/
         index.tsx                    page install (makePage); default-exported so callers `import HomePage from '@/pages/home'`
-        HomePageView.tsx             stateless layout that takes ActivityBar / Sidebar / ChatFrame as props
+        HomePage.tsx                 stateless layout that takes ActivityBar / Sidebar / ChatFrame as props
         navigation/                  activity bar + sidebar feature
           NavigationStore.ts
           NavigationPresenter.ts
-          ActivityBarView.tsx        stateless
-          SidebarView.tsx            stateless (loading-aware)
+          ActivityBar.tsx            stateless
+          Sidebar.tsx                stateless (loading-aware)
         tabs/                        tab strip feature
           TabsStore.ts
           TabsPresenter.ts
-          TabBarView.tsx             stateless
-          SortableTabView.tsx        stateless (dnd-kit hooks at the use site)
+          TabBar.tsx                 stateless
+          SortableTab.tsx            stateless (dnd-kit hooks at the use site)
         chat/                        chat surface (frame + composer + TOC + content)
-          ChatFrameView.tsx          stateless layout; takes tabBar slot
-          ComposerView.tsx           local form state only
-          TableOfContentsView.tsx    local IntersectionObserver state only
-          ExampleContentView.tsx     static
+          ChatFrame.tsx              stateless layout; takes tabBar slot
+          Composer.tsx               local form state only
+          TableOfContents.tsx        local IntersectionObserver state only
+          ExampleContent.tsx         static
         profile/
           ProfileStore.ts
           ProfilePresenter.ts

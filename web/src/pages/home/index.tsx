@@ -1,17 +1,17 @@
 import { observer } from 'mobx-react-lite'
 import { makePage } from '@/base/page/Page'
-import { HomePageView } from './HomePageView'
-import { ChatFrameView } from './chat/ChatFrameView'
-import { ActivityBarView } from './navigation/ActivityBarView'
+import { HomePage } from './HomePage'
+import { ChatFrame } from './chat/ChatFrame'
+import { ActivityBar } from './navigation/ActivityBar'
 import { NavigationPresenter } from './navigation/NavigationPresenter'
 import {
   NavigationStore,
   type WorkspaceSection,
 } from './navigation/NavigationStore'
-import { SidebarView } from './navigation/SidebarView'
+import { Sidebar } from './navigation/Sidebar'
 import { ProfilePresenter } from './profile/ProfilePresenter'
 import { ProfileStore } from './profile/ProfileStore'
-import { TabBarView } from './tabs/TabBarView'
+import { TabBar } from './tabs/TabBar'
 import { TabsPresenter } from './tabs/TabsPresenter'
 import { TabsStore } from './tabs/TabsStore'
 
@@ -21,13 +21,15 @@ const sectionTitles: Record<WorkspaceSection, string> = {
 }
 
 /**
- * HomePage — page install. Setup runs once on mount: it builds the
- * page-local stores + presenters, kicks off initial loads, and binds
- * each `*View` to its store/presenter via `observer(...)`.
+ * HomePage install. Setup runs once on mount: it builds the page-local
+ * stores + presenters, kicks off initial loads, and binds each
+ * stateless component to its store/presenter via inline
+ * `observer(() => <Component ... />)` wrappers.
  *
- * Bindings read **state from stores** and **actions from presenters**.
- * Presenters intentionally don't expose state getters — they write into
- * the store, and views read the store directly.
+ * Local convention: the inline wrapped versions get the `View` suffix
+ * (`SidebarView` is "the Sidebar bound to a view of the data") since
+ * they're temporary, page-scoped values; the canonical exported
+ * components keep the plain name (`Sidebar`).
  */
 export default makePage((_props, { rootStore, services }) => {
   const { themeStore, windowStore } = rootStore
@@ -51,8 +53,8 @@ export default makePage((_props, { rootStore, services }) => {
   void tabsPresenter.load()
   void profilePresenter.load()
 
-  const ActivityBar = observer(() => (
-    <ActivityBarView
+  const ActivityBarView = observer(() => (
+    <ActivityBar
       activeSection={navigationStore.activeSection}
       themeMode={themeStore.mode}
       topInset={windowStore.topInset}
@@ -63,8 +65,8 @@ export default makePage((_props, { rootStore, services }) => {
     />
   ))
 
-  const Sidebar = observer(() => (
-    <SidebarView
+  const SidebarView = observer(() => (
+    <Sidebar
       title={sectionTitles[navigationStore.activeSection]}
       items={navigationStore.sidebarItems}
       loading={navigationStore.sidebarLoading}
@@ -74,8 +76,8 @@ export default makePage((_props, { rootStore, services }) => {
     />
   ))
 
-  const TabBar = observer(() => (
-    <TabBarView
+  const TabBarView = observer(() => (
+    <TabBar
       tabs={tabsStore.tabs}
       activeTabId={tabsStore.activeTabId}
       onSelectTab={tabsPresenter.selectTab}
@@ -84,19 +86,19 @@ export default makePage((_props, { rootStore, services }) => {
     />
   ))
 
-  const ChatFrame = observer(() => (
-    <ChatFrameView
+  const ChatFrameView = observer(() => (
+    <ChatFrame
       sidebarCollapsed={navigationStore.sidebarCollapsed}
       topInset={windowStore.topInset}
-      tabBar={<TabBar />}
+      tabBar={<TabBarView />}
     />
   ))
 
   return () => (
-    <HomePageView
-      ActivityBar={ActivityBar}
-      Sidebar={Sidebar}
-      ChatFrame={ChatFrame}
+    <HomePage
+      ActivityBar={ActivityBarView}
+      Sidebar={SidebarView}
+      ChatFrame={ChatFrameView}
     />
   )
 })

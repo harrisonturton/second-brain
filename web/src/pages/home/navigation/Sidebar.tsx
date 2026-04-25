@@ -158,7 +158,7 @@ const SkeletonRow = styled.div`
   animation: ${shimmer} 1.2s ease-in-out infinite;
 `
 
-export type SidebarViewProps = {
+export type SidebarProps = {
   title: string
   items: SidebarItem[]
   loading: boolean
@@ -167,7 +167,7 @@ export type SidebarViewProps = {
   onToggleSidebar: () => void
 }
 
-export function SidebarView(props: SidebarViewProps) {
+export function Sidebar(props: SidebarProps) {
   const { title, items, loading, collapsed, topInset, onToggleSidebar } = props
 
   return (

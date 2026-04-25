@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import styled from 'styled-components'
-import { ComposerView } from './ComposerView'
-import { ExampleContentView } from './ExampleContentView'
-import { TableOfContentsView, type TocEntry } from './TableOfContentsView'
+import { Composer } from './Composer'
+import { ExampleContent } from './ExampleContent'
+import { TableOfContents, type TocEntry } from './TableOfContents'
 
 const Frame = styled.div<{ $sidebarCollapsed: boolean; $topInset: number }>`
   position: fixed;
@@ -63,31 +63,31 @@ const tocEntries: TocEntry[] = [
   { id: 'discussion', label: 'Discussion' },
 ]
 
-export type ChatFrameViewProps = {
+export type ChatFrameProps = {
   sidebarCollapsed: boolean
   topInset: number
-  /** Stateful tab strip; injected as a slot so the view stays stateless. */
+  /** Stateful tab strip; injected as a slot so the layout stays stateless. */
   tabBar: ReactNode
 }
 
-export function ChatFrameView({
+export function ChatFrame({
   sidebarCollapsed,
   topInset,
   tabBar,
-}: ChatFrameViewProps) {
+}: ChatFrameProps) {
   return (
     <Frame $sidebarCollapsed={sidebarCollapsed} $topInset={topInset}>
       {tabBar}
       <Body>
-        <TableOfContentsView entries={tocEntries} />
+        <TableOfContents entries={tocEntries} />
         <Main>
           <Messages>
             <Column>
-              <ExampleContentView />
+              <ExampleContent />
             </Column>
           </Messages>
           <ComposerSlot>
-            <ComposerView />
+            <Composer />
           </ComposerSlot>
         </Main>
       </Body>

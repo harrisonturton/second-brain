@@ -80,7 +80,7 @@ const sectionIcons: { id: WorkspaceSection; label: string; Icon: typeof ChatBubb
   { id: 'library', label: 'Library', Icon: BookOpenIcon },
 ]
 
-export type ActivityBarViewProps = {
+export type ActivityBarProps = {
   activeSection: WorkspaceSection
   themeMode: ThemeMode
   topInset: number
@@ -90,7 +90,7 @@ export type ActivityBarViewProps = {
   onToggleTheme: () => void
 }
 
-export function ActivityBarView(props: ActivityBarViewProps) {
+export function ActivityBar(props: ActivityBarProps) {
   const {
     activeSection,
     themeMode,
