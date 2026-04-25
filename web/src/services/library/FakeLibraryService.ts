@@ -6,7 +6,6 @@ import type {
 } from './LibraryService'
 
 const CATEGORIES: LibraryCategory[] = [
-  { id: 'search', label: 'Search' },
   { id: 'browse', label: 'Browse' },
 ]
 

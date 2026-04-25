@@ -20,6 +20,9 @@ import {
   type WorkspaceSection,
 } from './navigation/NavigationStore'
 import { Sidebar } from './navigation/Sidebar'
+import { SearchPanel } from './search/SearchPanel'
+import { SearchPresenter } from './search/SearchPresenter'
+import { SearchStore } from './search/SearchStore'
 import { DeveloperSettings } from './settings/DeveloperSettings'
 import { SettingsPanel } from './settings/SettingsPanel'
 import { SettingsPresenter } from './settings/SettingsPresenter'
@@ -30,6 +33,7 @@ import { TabsPresenter } from './tabs/TabsPresenter'
 import { TabsStore } from './tabs/TabsStore'
 
 const sectionTitles: Record<WorkspaceSection, string> = {
+  search: 'Search',
   sessions: 'Sessions',
   library: 'Library',
   minions: 'Minions',
@@ -61,12 +65,14 @@ export default makePage<{
     const tabsStore = new TabsStore()
     const settingsStore = new SettingsStore()
     const libraryStore = new LibraryStore()
+    const searchStore = new SearchStore()
 
     const navigationPresenter = new NavigationPresenter(
       navigationStore,
       services.sessionService,
       services.libraryService,
       services.minionsService,
+      services.searchService,
     )
     const tabsPresenter = new TabsPresenter(tabsStore, services.sessionService)
     const settingsPresenter = new SettingsPresenter(
@@ -77,12 +83,23 @@ export default makePage<{
       libraryStore,
       services.libraryService,
     )
+    const searchPresenter = new SearchPresenter(
+      searchStore,
+      services.searchService,
+    )
 
     settingsPresenter.applyToServices()
 
     void navigationPresenter.loadSidebarItems()
     void tabsPresenter.load()
     void libraryPresenter.loadDocuments()
+    void searchPresenter.loadHistory()
+
+    /** Activity-bar Search button: always opens an empty new search. */
+    const handleOpenNewSearch = () => {
+      searchPresenter.reset()
+      navigationPresenter.openNewSearch()
+    }
 
     const ActivityBarView = observer(() => (
       <ActivityBar
@@ -94,6 +111,7 @@ export default makePage<{
         onSelectSection={navigationPresenter.selectSection}
         onToggleTheme={() => themeStore.toggle()}
         onProfileClick={() => navigationPresenter.openSettingsItem('user')}
+        onOpenNewSearch={handleOpenNewSearch}
       />
     ))
 
@@ -182,9 +200,25 @@ export default makePage<{
       />
     ))
 
+    const SearchPanelView = observer(() => (
+      <SearchPanel
+        query={searchStore.query}
+        results={searchStore.results}
+        searching={searchStore.searching}
+        sidebarCollapsed={navigationStore.sidebarCollapsed}
+        topInset={windowStore.topInset}
+        onQueryChange={searchPresenter.setQuery}
+        onSubmit={searchPresenter.runSearch}
+        breadcrumbBar={<BreadcrumbBarView />}
+      />
+    ))
+
     const MainView = observer(() => {
       if (navigationStore.activeSection === 'settings') {
         return <SettingsPanelView />
+      }
+      if (navigationStore.activeSection === 'search') {
+        return <SearchPanelView />
       }
       if (
         navigationStore.activeSection === 'library' &&

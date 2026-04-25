@@ -1,6 +1,7 @@
 import { action } from 'mobx'
 import type { LibraryService } from '@/services/library/LibraryService'
 import type { MinionsService } from '@/services/minions/MinionsService'
+import type { SearchService } from '@/services/search/SearchService'
 import type { SessionService } from '@/services/session/SessionService'
 import type {
   NavigationStore,
@@ -31,6 +32,7 @@ export class NavigationPresenter {
     private sessionService: SessionService,
     private libraryService: LibraryService,
     private minionsService: MinionsService,
+    private searchService: SearchService,
   ) {}
 
   selectSection = action((section: WorkspaceSection): void => {
@@ -55,6 +57,20 @@ export class NavigationPresenter {
     this.store.setSelectedSidebarItemId(id)
   }
 
+  /** Open a fresh, empty search. Always switches to the search
+   *  section, expands the sidebar, and clears any previously selected
+   *  history item — clicking the activity bar Search entry should
+   *  feel like "new search" every time. */
+  openNewSearch = action((): void => {
+    const sectionChanged = this.store.activeSection !== 'search'
+    this.store.setActiveSection('search')
+    this.store.setSidebarCollapsed(false)
+    this.store.setSelectedSidebarItemId(null)
+    if (sectionChanged) {
+      void this.loadSidebarItems()
+    }
+  })
+
   /** Jump to a specific item inside the settings section (used e.g.
    *  by the avatar button to open user settings directly). Bypasses
    *  the toggle-collapse behaviour of `selectSection`. */
@@ -77,7 +93,14 @@ export class NavigationPresenter {
       const items = await this.fetchItemsFor(section)
       if (token !== this.loadId) return
       this.store.setSidebarItems(items)
-      if (!this.store.selectedSidebarItemId && items[0]) {
+      // Search treats "no selection" as a fresh empty search, so we
+      // never auto-select an item there. Other sections default the
+      // selection to the first item.
+      if (
+        section !== 'search' &&
+        !this.store.selectedSidebarItemId &&
+        items[0]
+      ) {
         this.store.setSelectedSidebarItemId(items[0].id)
       }
     } finally {
@@ -91,6 +114,10 @@ export class NavigationPresenter {
     section: WorkspaceSection,
   ): Promise<SidebarItem[]> {
     switch (section) {
+      case 'search': {
+        const history = await this.searchService.listHistory()
+        return history.map((h) => ({ id: h.id, label: h.query }))
+      }
       case 'sessions':
         return this.sessionService.listCategories()
       case 'library':

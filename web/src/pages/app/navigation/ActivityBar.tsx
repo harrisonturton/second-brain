@@ -3,6 +3,7 @@ import { BookOpenIcon } from '@/base/icons/BookOpenIcon'
 import { ChatBubblesIcon } from '@/base/icons/ChatBubblesIcon'
 import { CogIcon } from '@/base/icons/CogIcon'
 import { MoonIcon } from '@/base/icons/MoonIcon'
+import { SearchIcon } from '@/base/icons/SearchIcon'
 import { SparklesIcon } from '@/base/icons/SparklesIcon'
 import { SunIcon } from '@/base/icons/SunIcon'
 import type { WorkspaceSection } from './NavigationStore'
@@ -91,6 +92,9 @@ export type ActivityBarProps = {
   onSelectSection: (section: WorkspaceSection) => void
   onToggleTheme: () => void
   onProfileClick: () => void
+  /** Always opens a fresh empty search — independent of selectSection's
+   *  toggle-collapse behaviour. */
+  onOpenNewSearch: () => void
 }
 
 export function ActivityBar(props: ActivityBarProps) {
@@ -103,11 +107,21 @@ export function ActivityBar(props: ActivityBarProps) {
     onSelectSection,
     onToggleTheme,
     onProfileClick,
+    onOpenNewSearch,
   } = props
   const isDark = themeMode === 'dark'
 
   return (
     <Strip $topInset={topInset}>
+      <IconButton
+        $active={activeSection === 'search'}
+        onClick={onOpenNewSearch}
+        aria-label="New search"
+        title="New search"
+        type="button"
+      >
+        <SearchIcon />
+      </IconButton>
       {sectionIcons.map(({ id, label, Icon }) => (
         <IconButton
           key={id}

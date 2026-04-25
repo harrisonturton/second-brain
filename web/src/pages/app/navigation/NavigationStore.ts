@@ -1,6 +1,11 @@
 import { action, makeObservable, observable } from 'mobx'
 
-export type WorkspaceSection = 'sessions' | 'library' | 'minions' | 'settings'
+export type WorkspaceSection =
+  | 'search'
+  | 'sessions'
+  | 'library'
+  | 'minions'
+  | 'settings'
 
 export type SidebarItem = {
   id: string
