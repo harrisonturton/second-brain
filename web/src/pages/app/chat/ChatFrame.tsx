@@ -66,8 +66,6 @@ const tocEntries: TocEntry[] = [
 export type ChatFrameProps = {
   sidebarCollapsed: boolean
   topInset: number
-  /** Stateful tab strip; injected as a slot so the layout stays stateless. */
-  tabBar: ReactNode
   /** Stateful breadcrumb strip rendered at the bottom of the panel. */
   breadcrumbBar: ReactNode
 }
@@ -75,12 +73,10 @@ export type ChatFrameProps = {
 export function ChatFrame({
   sidebarCollapsed,
   topInset,
-  tabBar,
   breadcrumbBar,
 }: ChatFrameProps) {
   return (
     <Frame $sidebarCollapsed={sidebarCollapsed} $topInset={topInset}>
-      {tabBar}
       <Body>
         <TableOfContents entries={tocEntries} />
         <Main>

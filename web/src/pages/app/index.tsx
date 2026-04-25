@@ -129,15 +129,19 @@ export default makePage<{
       />
     ))
 
-    const TabBarView = observer(() => (
-      <TabBar
-        tabs={tabsStore.tabs}
-        activeTabId={tabsStore.activeTabId}
-        onSelectTab={tabsPresenter.selectTab}
-        onCloseTab={tabsPresenter.closeTab}
-        onMoveTab={tabsPresenter.moveTab}
-      />
-    ))
+    const TabBarView = observer(() => {
+      if (!windowStore.isDesktop) return null
+      return (
+        <TabBar
+          tabs={tabsStore.tabs}
+          activeTabId={tabsStore.activeTabId}
+          fullScreen={windowStore.isDesktopFullScreen}
+          onSelectTab={tabsPresenter.selectTab}
+          onCloseTab={tabsPresenter.closeTab}
+          onMoveTab={tabsPresenter.moveTab}
+        />
+      )
+    })
 
     const BreadcrumbBarView = observer(() => {
       const section = navigationStore.activeSection
@@ -166,7 +170,6 @@ export default makePage<{
       <ChatFrame
         sidebarCollapsed={navigationStore.sidebarCollapsed}
         topInset={windowStore.topInset}
-        tabBar={<TabBarView />}
         breadcrumbBar={<BreadcrumbBarView />}
       />
     ))
@@ -245,6 +248,7 @@ export default makePage<{
         ActivityBar={ActivityBarView}
         Sidebar={SidebarView}
         Main={MainView}
+        TabBar={TabBarView}
       />
     )
   },

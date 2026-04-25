@@ -9,35 +9,30 @@ const Tab = styled.div<{ $active: boolean }>`
   position: relative;
   display: flex;
   align-items: center;
-  height: 22px;
-  padding: 0 8px;
+  height: 26px;
+  padding: 0 12px;
+  min-width: 80px;
   max-width: 220px;
-  border-radius: 4px;
-  font-size: 13px;
+  border-radius: 6px;
+  font-size: 12px;
   line-height: 1;
   color: ${({ $active, theme }) =>
-    $active ? theme.activeFg : theme.textPrimary};
+    $active ? theme.textPrimary : theme.textSecondary};
   background: ${({ $active, theme }) =>
-    $active ? theme.activeBg : 'transparent'};
+    $active ? theme.panelBg : 'transparent'};
+  border: 1px solid
+    ${({ $active, theme }) =>
+      $active ? theme.panelBorder : 'transparent'};
   cursor: pointer;
   white-space: nowrap;
   user-select: none;
-  transition: background 120ms ease, color 120ms ease;
+  -webkit-app-region: no-drag;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
 
   &:hover {
     background: ${({ $active, theme }) =>
-      $active ? theme.activeBg : theme.subtleHoverBg};
-  }
-
-  &:not(:first-child)::before {
-    content: '';
-    position: absolute;
-    left: -2px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1px;
-    height: 10px;
-    background: ${({ theme }) => theme.divider};
+      $active ? theme.panelBg : theme.subtleHoverBg};
+    color: ${({ theme }) => theme.textPrimary};
   }
 `
 
@@ -59,8 +54,9 @@ const Label = styled.span<{ $active: boolean }>`
 const CloseButton = styled.button`
   position: absolute;
   top: 50%;
-  right: 3px;
+  right: 4px;
   transform: translateY(-50%);
+  -webkit-app-region: no-drag;
   display: flex;
   align-items: center;
   justify-content: center;

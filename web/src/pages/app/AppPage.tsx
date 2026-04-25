@@ -7,6 +7,9 @@ export type AppPageProps = {
    *  active (the chat surface for sessions/library, the settings
    *  panel for settings). */
   Main: FunctionComponent
+  /** Top-of-window tab bar. Renders only on desktop; on web the install
+   *  passes a no-op component. */
+  TabBar: FunctionComponent
 }
 
 /**
@@ -14,9 +17,10 @@ export type AppPageProps = {
  * in `index.tsx` hands in pre-bound, observer-wrapped subcomponents;
  * this layout just composes them.
  */
-export function AppPage({ ActivityBar, Sidebar, Main }: AppPageProps) {
+export function AppPage({ ActivityBar, Sidebar, Main, TabBar }: AppPageProps) {
   return (
     <>
+      <TabBar />
       <ActivityBar />
       <Sidebar />
       <Main />

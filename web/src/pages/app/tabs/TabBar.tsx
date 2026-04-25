@@ -14,17 +14,29 @@ import styled from 'styled-components'
 import { SortableTab } from './SortableTab'
 import type { Tab } from './TabsStore'
 
-const Bar = styled.div`
+const TRAFFIC_LIGHTS_GUTTER = 80
+
+const Bar = styled.div<{ $fullScreen: boolean }>`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 36px;
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding: 5px;
-  border-bottom: 1px solid ${({ theme }) => theme.panelBorder};
+  gap: 4px;
+  padding: 0 8px 0
+    ${({ $fullScreen }) => ($fullScreen ? '8px' : `${TRAFFIC_LIGHTS_GUTTER}px`)};
+  z-index: 60;
+  -webkit-app-region: drag;
+  user-select: none;
+  transition: padding-left 200ms ease;
 `
 
 export type TabBarProps = {
   tabs: Tab[]
   activeTabId: string | null
+  fullScreen: boolean
   onSelectTab: (id: string) => void
   onCloseTab: (id: string) => void
   onMoveTab: (draggedId: string, targetId: string) => void
@@ -33,6 +45,7 @@ export type TabBarProps = {
 export function TabBar({
   tabs,
   activeTabId,
+  fullScreen,
   onSelectTab,
   onCloseTab,
   onMoveTab,
@@ -57,7 +70,7 @@ export function TabBar({
         items={tabs.map((t) => t.id)}
         strategy={horizontalListSortingStrategy}
       >
-        <Bar>
+        <Bar $fullScreen={fullScreen}>
           {tabs.map((tab) => (
             <SortableTab
               key={tab.id}

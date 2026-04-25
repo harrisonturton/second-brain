@@ -27,18 +27,10 @@ const DesktopTitleBar = styled.header<{ $visible: boolean }>`
   left: 0;
   right: 0;
   height: ${PLATFORM_LAYOUT.appDesktop.titleBarHeight}px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
+  z-index: 40;
   pointer-events: ${({ $visible }) => ($visible ? 'auto' : 'none')};
-  opacity: ${({ $visible }) => ($visible ? 0.82 : 0)};
   -webkit-app-region: drag;
   user-select: none;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: ${({ theme }) => theme.textSecondary};
 `
 
 /**
@@ -64,12 +56,13 @@ export default makePage((_props, { services }) => {
   )
   sessionPresenter.restore()
 
+  // Empty drag strip — gives the macOS window a draggable area on
+  // pages without their own tab bar (e.g. login). The app page's tab
+  // bar overlays this with a higher z-index and provides drag itself.
   const TitleBarView = observer(() => (
     <DesktopTitleBar
       $visible={windowStore.isDesktop && !windowStore.isDesktopFullScreen}
-    >
-      Knowledge Engine
-    </DesktopTitleBar>
+    />
   ))
 
   const RoutedSubpage = observer(() => {
