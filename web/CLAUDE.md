@@ -142,6 +142,11 @@ web/
         profile/
           ProfileStore.ts
           ProfilePresenter.ts
+        settings/                    settings subpage (rendered when activeSection === 'settings')
+          SettingsStore.ts           developer-mode flag + fake network delay
+          SettingsPresenter.ts       writes settings into runtime services (e.g. FakeHttpService.delayMs)
+          SettingsPanel.tsx          stateless settings panel (sidebar-item-driven content)
+          DeveloperSettings.tsx      stateless developer-settings form
     services/                        backend boundary
       ServicesContext.ts             Services type + Provider + useServices
       http/

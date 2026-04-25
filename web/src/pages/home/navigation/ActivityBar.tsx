@@ -126,7 +126,8 @@ export function ActivityBar(props: ActivityBarProps) {
         {isDark ? <SunIcon /> : <MoonIcon />}
       </IconButton>
       <IconButton
-        $active={false}
+        $active={activeSection === 'settings'}
+        onClick={() => onSelectSection('settings')}
         aria-label="Settings"
         title="Settings"
         type="button"

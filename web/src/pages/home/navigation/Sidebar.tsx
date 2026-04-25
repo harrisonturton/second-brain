@@ -84,20 +84,22 @@ const Items = styled.div`
   padding: 32px 5px 5px;
 `
 
-const Item = styled.div`
+const Item = styled.div<{ $selected: boolean }>`
   display: flex;
   align-items: center;
   width: 100%;
   font-size: 13px;
   color: ${({ theme }) => theme.textPrimary};
   border-radius: 4px;
+  background: ${({ $selected, theme }) =>
+    $selected ? theme.subtleHoverBg : 'transparent'};
 
   &:hover {
     background: ${({ theme }) => theme.subtleHoverBg};
   }
 `
 
-const Label = styled.button`
+const Label = styled.button<{ $selected: boolean }>`
   flex: 1;
   padding: 4px 6px;
   background: transparent;
@@ -107,7 +109,7 @@ const Label = styled.button`
   font: inherit;
   color: inherit;
   line-height: 1.3;
-  opacity: 0.65;
+  opacity: ${({ $selected }) => ($selected ? 1 : 0.65)};
   transition: opacity 120ms ease;
 
   ${Item}:hover & {
@@ -161,14 +163,25 @@ const SkeletonRow = styled.div`
 export type SidebarProps = {
   title: string
   items: SidebarItem[]
+  selectedItemId: string | null
   loading: boolean
   collapsed: boolean
   topInset: number
+  onSelectItem: (id: string) => void
   onToggleSidebar: () => void
 }
 
 export function Sidebar(props: SidebarProps) {
-  const { title, items, loading, collapsed, topInset, onToggleSidebar } = props
+  const {
+    title,
+    items,
+    selectedItemId,
+    loading,
+    collapsed,
+    topInset,
+    onSelectItem,
+    onToggleSidebar,
+  } = props
 
   return (
     <Container $collapsed={collapsed} $topInset={topInset}>
@@ -188,14 +201,22 @@ export function Sidebar(props: SidebarProps) {
             <SkeletonRow />
           </>
         ) : (
-          items.map((item) => (
-            <Item key={item.id}>
-              <Label>{item.label}</Label>
-              <MoreButton aria-label={`More options for ${item.label}`}>
-                <MoreVerticalIcon />
-              </MoreButton>
-            </Item>
-          ))
+          items.map((item) => {
+            const selected = item.id === selectedItemId
+            return (
+              <Item key={item.id} $selected={selected}>
+                <Label
+                  $selected={selected}
+                  onClick={() => onSelectItem(item.id)}
+                >
+                  {item.label}
+                </Label>
+                <MoreButton aria-label={`More options for ${item.label}`}>
+                  <MoreVerticalIcon />
+                </MoreButton>
+              </Item>
+            )
+          })
         )}
       </Items>
     </Container>

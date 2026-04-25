@@ -13,6 +13,10 @@ import {
 import { Sidebar } from './navigation/Sidebar'
 import { ProfilePresenter } from './profile/ProfilePresenter'
 import { ProfileStore } from './profile/ProfileStore'
+import { DeveloperSettings } from './settings/DeveloperSettings'
+import { SettingsPanel } from './settings/SettingsPanel'
+import { SettingsPresenter } from './settings/SettingsPresenter'
+import { SettingsStore } from './settings/SettingsStore'
 import { TabBar } from './tabs/TabBar'
 import { TabsPresenter } from './tabs/TabsPresenter'
 import { TabsStore } from './tabs/TabsStore'
@@ -20,6 +24,7 @@ import { TabsStore } from './tabs/TabsStore'
 const sectionTitles: Record<WorkspaceSection, string> = {
   sessions: 'Sessions',
   library: 'Library',
+  settings: 'Settings',
 }
 
 /**
@@ -36,6 +41,7 @@ export default makePage<{ themeStore: ThemeStore; windowStore: WindowStore }>(
     const navigationStore = new NavigationStore()
     const tabsStore = new TabsStore()
     const profileStore = new ProfileStore()
+    const settingsStore = new SettingsStore()
 
     const navigationPresenter = new NavigationPresenter(
       navigationStore,
@@ -47,6 +53,14 @@ export default makePage<{ themeStore: ThemeStore; windowStore: WindowStore }>(
       profileStore,
       services.profileService,
     )
+    const settingsPresenter = new SettingsPresenter(
+      settingsStore,
+      services.httpService,
+    )
+
+    // If developer mode is on at load (from persisted settings, when we
+    // wire that up), make sure the runtime services match.
+    settingsPresenter.applyToServices()
 
     void navigationPresenter.loadSidebarItems()
     void tabsPresenter.load()
@@ -68,9 +82,11 @@ export default makePage<{ themeStore: ThemeStore; windowStore: WindowStore }>(
       <Sidebar
         title={sectionTitles[navigationStore.activeSection]}
         items={navigationStore.sidebarItems}
+        selectedItemId={navigationStore.selectedSidebarItemId}
         loading={navigationStore.sidebarLoading}
         collapsed={navigationStore.sidebarCollapsed}
         topInset={windowStore.topInset}
+        onSelectItem={navigationPresenter.selectSidebarItem}
         onToggleSidebar={navigationPresenter.toggleSidebar}
       />
     ))
@@ -93,11 +109,37 @@ export default makePage<{ themeStore: ThemeStore; windowStore: WindowStore }>(
       />
     ))
 
+    const DeveloperSettingsView = observer(() => (
+      <DeveloperSettings
+        developerMode={settingsStore.developerMode}
+        fakeNetworkDelayMs={settingsStore.fakeNetworkDelayMs}
+        onDeveloperModeChange={settingsPresenter.setDeveloperMode}
+        onFakeNetworkDelayChange={settingsPresenter.setFakeNetworkDelayMs}
+      />
+    ))
+
+    const SettingsPanelView = observer(() => (
+      <SettingsPanel
+        selectedItemId={navigationStore.selectedSidebarItemId}
+        sidebarCollapsed={navigationStore.sidebarCollapsed}
+        topInset={windowStore.topInset}
+        developerSettings={<DeveloperSettingsView />}
+      />
+    ))
+
+    const MainView = observer(() =>
+      navigationStore.activeSection === 'settings' ? (
+        <SettingsPanelView />
+      ) : (
+        <ChatFrameView />
+      ),
+    )
+
     return () => (
       <HomePage
         ActivityBar={ActivityBarView}
         Sidebar={SidebarView}
-        ChatFrame={ChatFrameView}
+        Main={MainView}
       />
     )
   },
