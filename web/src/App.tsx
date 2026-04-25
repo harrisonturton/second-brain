@@ -1,30 +1,24 @@
 import { observer } from 'mobx-react-lite'
 import styled from 'styled-components'
+import { Sidebar } from './components/Sidebar'
 import { useRootStore } from './stores/RootStore'
 
-const Page = styled.main`
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
+const Main = styled.main`
+  margin-left: 264px;
   padding: 24px;
-`
-
-const Title = styled.h1`
-  margin: 0;
-  font-size: 32px;
-  font-weight: 500;
+  min-height: 100svh;
 `
 
 const App = observer(function App() {
   useRootStore()
 
   return (
-    <Page>
-      <Title>second brain</Title>
-    </Page>
+    <>
+      <Sidebar />
+      <Main>
+        <h1>second brain</h1>
+      </Main>
+    </>
   )
 })
 
