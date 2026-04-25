@@ -23,9 +23,6 @@ export type Theme = {
 
   tocBar: string
   tocBarActive: string
-
-  /** Highlight colour for the ripple shader behind the login screen. */
-  loginShaderAccent: string
 }
 
 export const lightTheme: Theme = {
@@ -53,8 +50,6 @@ export const lightTheme: Theme = {
 
   tocBar: '#d8d8d8',
   tocBarActive: '#888888',
-
-  loginShaderAccent: '#5b80c2',
 }
 
 export const darkTheme: Theme = {
@@ -82,8 +77,6 @@ export const darkTheme: Theme = {
 
   tocBar: '#383838',
   tocBarActive: '#888888',
-
-  loginShaderAccent: '#7eb6ff',
 }
 
 export const themesByMode = {

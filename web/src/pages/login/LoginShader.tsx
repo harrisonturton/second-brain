@@ -10,108 +10,28 @@ const Canvas = styled.canvas`
   pointer-events: none;
 `
 
-// Fullscreen quad — two triangles in NDC.
-const QUAD = new Float32Array([
-  -1, -1,
-  1, -1,
-  -1, 1,
-  -1, 1,
-  1, -1,
-  1, 1,
-])
+// Visual tuning. Cell size + gap define the grid; the rest control how
+// strongly the cursor lights cells and how ripple wavefronts spread.
+const CELL_SIZE = 14
+const GAP = 1
+const CURSOR_RADIUS = 56
+const RIPPLE_SPEED = 320 // CSS px / second
+const RIPPLE_PERIOD_MS = 110 // emit a new ripple every N ms
+const RIPPLE_LIFETIME_S = 1.4
+const RIPPLE_WIDTH = 28
+const DECAY_PER_60HZ = 0.93 // per-frame decay at 60 Hz; framerate-corrected below
 
-const VERTEX_SRC = `
-attribute vec2 a_position;
-void main() {
-  gl_Position = vec4(a_position, 0.0, 1.0);
-}
-`
-
-// Ripple field. A few ambient wave sources drift slowly; one strong
-// source follows the cursor. Distance attenuation keeps energy bounded.
-// The result modulates a tint between the page bg and the accent.
-const FRAGMENT_SRC = `
-precision highp float;
-
-uniform vec2 u_resolution;
-uniform vec2 u_mouse;
-uniform float u_time;
-uniform vec3 u_baseColor;
-uniform vec3 u_accentColor;
-
-float wave(vec2 p, vec2 source, float freq, float phase) {
-  float d = distance(p, source);
-  return sin(d * freq - phase) * exp(-d * 1.1);
-}
-
-void main() {
-  vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-  float aspect = u_resolution.x / u_resolution.y;
-  vec2 p = uv;
-  p.x *= aspect;
-
-  vec2 m = u_mouse / u_resolution.xy;
-  m.y = 1.0 - m.y;
-  m.x *= aspect;
-
-  float t = u_time;
-
-  float r0 = wave(p, m, 28.0, t * 2.4);
-
-  vec2 a1 = vec2(0.30 * aspect + sin(t * 0.13) * 0.10, 0.50 + cos(t * 0.17) * 0.18);
-  vec2 a2 = vec2(0.72 * aspect + cos(t * 0.11) * 0.10, 0.40 + sin(t * 0.19) * 0.18);
-  vec2 a3 = vec2(0.50 * aspect + sin(t * 0.07) * 0.22, 0.72 + cos(t * 0.23) * 0.12);
-
-  float r1 = wave(p, a1, 22.0, t * 1.8);
-  float r2 = wave(p, a2, 24.0, t * 2.0);
-  float r3 = wave(p, a3, 18.0, t * 1.5);
-
-  float field = r0 * 0.55 + (r1 + r2 + r3) * 0.22;
-
-  // Map roughly [-1, 1] → [0, 1], then squash to a calm range.
-  float intensity = smoothstep(-0.4, 1.0, field) * 0.22;
-
-  vec3 col = mix(u_baseColor, u_accentColor, intensity);
-  gl_FragColor = vec4(col, 1.0);
-}
-`
-
-function compile(
-  gl: WebGLRenderingContext,
-  source: string,
-  type: GLenum,
-): WebGLShader | null {
-  const shader = gl.createShader(type)
-  if (!shader) return null
-  gl.shaderSource(shader, source)
-  gl.compileShader(shader)
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    console.error('LoginShader compile failed:', gl.getShaderInfoLog(shader))
-    gl.deleteShader(shader)
-    return null
-  }
-  return shader
-}
-
-function hexToRgb(hex: string): [number, number, number] {
-  const s = hex.replace('#', '')
-  const v = s.length === 3
-    ? s.split('').map((c) => c + c).join('')
-    : s
-  return [
-    parseInt(v.slice(0, 2), 16) / 255,
-    parseInt(v.slice(2, 4), 16) / 255,
-    parseInt(v.slice(4, 6), 16) / 255,
-  ]
-}
+type Ripple = { x: number; y: number; t: number }
 
 /**
- * LoginShader — fullscreen WebGL ripple field rendered behind the
- * login form. Ambient wave sources drift slowly; a stronger source
- * follows (lerped) the mouse cursor for a "thinking / brainwave"
- * vibe. Pointer-events disabled so it doesn't block the form.
+ * LoginShader — a canvas-2D grid of cells behind the login form.
+ * Cells start at the page background; the cursor lights nearby cells
+ * (path) and emits expanding ripple wavefronts that flip cells they
+ * cross. Each cell decays back to the background over ~1 s.
  *
- * Falls back to nothing visible if the browser refuses WebGL.
+ * Uses the canvas at device-pixel resolution but does math in CSS
+ * pixels for cursor maths sanity. Pointer-events disabled so the
+ * canvas never intercepts the form.
  */
 export function LoginShader() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -120,102 +40,143 @@ export function LoginShader() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const gl = canvas.getContext('webgl', {
-      antialias: false,
-      premultipliedAlpha: false,
-    })
-    if (!gl) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
 
-    const vs = compile(gl, VERTEX_SRC, gl.VERTEX_SHADER)
-    const fs = compile(gl, FRAGMENT_SRC, gl.FRAGMENT_SHADER)
-    if (!vs || !fs) return
-    const program = gl.createProgram()
-    if (!program) return
-    gl.attachShader(program, vs)
-    gl.attachShader(program, fs)
-    gl.linkProgram(program)
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      console.error('LoginShader link failed:', gl.getProgramInfoLog(program))
-      gl.deleteShader(vs)
-      gl.deleteShader(fs)
-      gl.deleteProgram(program)
-      return
-    }
-    gl.useProgram(program)
-
-    const buffer = gl.createBuffer()
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
-    gl.bufferData(gl.ARRAY_BUFFER, QUAD, gl.STATIC_DRAW)
-    const positionLoc = gl.getAttribLocation(program, 'a_position')
-    gl.enableVertexAttribArray(positionLoc)
-    gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, 0, 0)
-
-    const uResolution = gl.getUniformLocation(program, 'u_resolution')
-    const uMouse = gl.getUniformLocation(program, 'u_mouse')
-    const uTime = gl.getUniformLocation(program, 'u_time')
-    const uBase = gl.getUniformLocation(program, 'u_baseColor')
-    const uAccent = gl.getUniformLocation(program, 'u_accentColor')
-
-    let dpr = Math.min(window.devicePixelRatio || 1, 2)
     let cssWidth = 0
     let cssHeight = 0
-    let target = { x: 0, y: 0 }
-    let smoothed = { x: 0, y: 0 }
+    let cols = 0
+    let rows = 0
+    let intensities = new Float32Array(0)
+    const target = { x: -1e6, y: -1e6 }
+    const ripples: Ripple[] = []
+    let lastEmitMs = 0
 
     const onMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect()
-      target = { x: e.clientX - rect.left, y: e.clientY - rect.top }
+      target.x = e.clientX - rect.left
+      target.y = e.clientY - rect.top
     }
     window.addEventListener('mousemove', onMove)
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect()
-      dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
       cssWidth = rect.width
       cssHeight = rect.height
       canvas.width = Math.max(1, Math.floor(cssWidth * dpr))
       canvas.height = Math.max(1, Math.floor(cssHeight * dpr))
-      gl.viewport(0, 0, canvas.width, canvas.height)
-      // Centre the cursor on first frame so the ripple isn't pinned at (0, 0).
-      if (target.x === 0 && target.y === 0) {
-        target = { x: cssWidth / 2, y: cssHeight / 2 }
-        smoothed = { ...target }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+
+      cols = Math.ceil(cssWidth / CELL_SIZE)
+      rows = Math.ceil(cssHeight / CELL_SIZE)
+      intensities = new Float32Array(cols * rows)
+
+      // Centre the cursor on first frame so the ripples have somewhere
+      // to come from before the user moves the mouse.
+      if (target.x === -1e6) {
+        target.x = cssWidth / 2
+        target.y = cssHeight / 2
       }
     }
     resize()
     window.addEventListener('resize', resize)
 
-    const baseRgb = hexToRgb(theme.pageBg)
-    const accentRgb = hexToRgb(theme.loginShaderAccent)
+    const start = performance.now()
+    let lastFrameMs = start
 
     let raf = 0
-    const start = performance.now()
     const draw = () => {
-      const t = (performance.now() - start) / 1000
-      // Ease the cursor follower towards its target for a softer trail.
-      smoothed.x += (target.x - smoothed.x) * 0.08
-      smoothed.y += (target.y - smoothed.y) * 0.08
+      const nowMs = performance.now()
+      const t = (nowMs - start) / 1000
+      const dt = Math.max(0.001, (nowMs - lastFrameMs) / 1000)
+      lastFrameMs = nowMs
 
-      gl.uniform2f(uResolution, canvas.width, canvas.height)
-      gl.uniform2f(uMouse, smoothed.x * dpr, smoothed.y * dpr)
-      gl.uniform1f(uTime, t)
-      gl.uniform3f(uBase, baseRgb[0], baseRgb[1], baseRgb[2])
-      gl.uniform3f(uAccent, accentRgb[0], accentRgb[1], accentRgb[2])
-      gl.drawArrays(gl.TRIANGLES, 0, 6)
+      // Emit a ripple at the cursor's current position on a fixed
+      // cadence; the cursor's movement is reflected naturally by the
+      // changing emit positions.
+      if (nowMs - lastEmitMs > RIPPLE_PERIOD_MS) {
+        ripples.push({ x: target.x, y: target.y, t })
+        lastEmitMs = nowMs
+      }
+      while (ripples.length && t - ripples[0].t > RIPPLE_LIFETIME_S) {
+        ripples.shift()
+      }
+
+      // Frame-rate-corrected decay so the visual is the same on 144 Hz
+      // and 60 Hz displays.
+      const decay = Math.pow(DECAY_PER_60HZ, dt * 60)
+
+      // Update per-cell intensities.
+      for (let r = 0; r < rows; r++) {
+        const cy = r * CELL_SIZE + CELL_SIZE / 2
+        for (let c = 0; c < cols; c++) {
+          const idx = r * cols + c
+          const cx = c * CELL_SIZE + CELL_SIZE / 2
+
+          let intensity = intensities[idx] * decay
+
+          // Path: cells inside the cursor radius get lit proportional
+          // to their proximity.
+          const pdx = cx - target.x
+          const pdy = cy - target.y
+          const pd = Math.sqrt(pdx * pdx + pdy * pdy)
+          if (pd < CURSOR_RADIUS) {
+            const v = 1 - pd / CURSOR_RADIUS
+            if (v > intensity) intensity = v
+          }
+
+          // Ripples: each ripple is a thin ring expanding outward from
+          // its emit position. Cells close to the ring get lit with a
+          // strength that fades over the ripple's lifetime.
+          for (let i = 0; i < ripples.length; i++) {
+            const rp = ripples[i]
+            const dx = cx - rp.x
+            const dy = cy - rp.y
+            const d = Math.sqrt(dx * dx + dy * dy)
+            const age = t - rp.t
+            const expected = age * RIPPLE_SPEED
+            const offset = Math.abs(d - expected)
+            if (offset < RIPPLE_WIDTH) {
+              const ring = 1 - offset / RIPPLE_WIDTH
+              const ageFalloff = 1 - age / RIPPLE_LIFETIME_S
+              const v = ring * ageFalloff * 0.85
+              if (v > intensity) intensity = v
+            }
+          }
+
+          intensities[idx] = intensity
+        }
+      }
+
+      // Render. Background fill, then a single colour pass for lit
+      // cells (alpha = intensity gives the smooth transitions).
+      ctx.fillStyle = theme.pageBg
+      ctx.fillRect(0, 0, cssWidth, cssHeight)
+      ctx.fillStyle = theme.textPrimary
+      const inner = CELL_SIZE - GAP
+      for (let r = 0; r < rows; r++) {
+        const py = r * CELL_SIZE + GAP / 2
+        for (let c = 0; c < cols; c++) {
+          const intensity = intensities[r * cols + c]
+          if (intensity > 0.02) {
+            ctx.globalAlpha = intensity
+            ctx.fillRect(c * CELL_SIZE + GAP / 2, py, inner, inner)
+          }
+        }
+      }
+      ctx.globalAlpha = 1
+
       raf = requestAnimationFrame(draw)
     }
     raf = requestAnimationFrame(draw)
 
     return () => {
       cancelAnimationFrame(raf)
-      window.removeEventListener('resize', resize)
       window.removeEventListener('mousemove', onMove)
-      gl.deleteBuffer(buffer)
-      gl.deleteProgram(program)
-      gl.deleteShader(vs)
-      gl.deleteShader(fs)
+      window.removeEventListener('resize', resize)
     }
-  }, [theme.pageBg, theme.loginShaderAccent])
+  }, [theme.pageBg, theme.textPrimary])
 
   return <Canvas ref={canvasRef} aria-hidden="true" />
 }
