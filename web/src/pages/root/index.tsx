@@ -13,7 +13,11 @@ const GlobalStyle = createGlobalStyle`
   body {
     background: ${({ theme }) => theme.pageBg};
     color: ${({ theme }) => theme.textPrimary};
+    font-family: ${({ theme }) => theme.fontFamily};
     transition: background-color 200ms ease, color 200ms ease;
+  }
+  button, input, textarea, select {
+    font-family: ${({ theme }) => theme.fontFamily};
   }
 `
 

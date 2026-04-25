@@ -1,4 +1,6 @@
 export type Theme = {
+  fontFamily: string
+
   pageBg: string
   panelBg: string
   panelBgFade: string
@@ -25,7 +27,14 @@ export type Theme = {
   tocBarActive: string
 }
 
+const SANS_FONT_STACK =
+  "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+const SERIF_FONT_STACK =
+  "'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif"
+
 export const lightTheme: Theme = {
+  fontFamily: SANS_FONT_STACK,
+
   pageBg: '#f6f6f6',
   panelBg: '#ffffff',
   panelBgFade: 'rgba(255, 255, 255, 0)',
@@ -53,6 +62,8 @@ export const lightTheme: Theme = {
 }
 
 export const darkTheme: Theme = {
+  fontFamily: SANS_FONT_STACK,
+
   pageBg: '#0e0e0e',
   panelBg: '#181818',
   panelBgFade: 'rgba(24, 24, 24, 0)',
@@ -80,6 +91,8 @@ export const darkTheme: Theme = {
 }
 
 export const sepiaTheme: Theme = {
+  fontFamily: SERIF_FONT_STACK,
+
   pageBg: '#f1ece1',
   panelBg: '#faf6ec',
   panelBgFade: 'rgba(250, 246, 236, 0)',
