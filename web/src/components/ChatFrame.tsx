@@ -9,7 +9,7 @@ import { TableOfContents, type TocEntry } from './TableOfContents'
 const Frame = styled.div<{ $sidebarCollapsed: boolean }>`
   position: fixed;
   top: 4px;
-  left: ${({ $sidebarCollapsed }) => ($sidebarCollapsed ? '48px' : '268px')};
+  left: ${({ $sidebarCollapsed }) => ($sidebarCollapsed ? '80px' : '268px')};
   right: 4px;
   bottom: 4px;
   display: flex;

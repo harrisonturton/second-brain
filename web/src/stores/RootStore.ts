@@ -31,6 +31,10 @@ export class RootStore {
   }
 
   @action selectSidebarView(view: SidebarView) {
+    if (this.activeSidebarView === view && !this.sidebarCollapsed) {
+      this.sidebarCollapsed = true
+      return
+    }
     this.activeSidebarView = view
     this.sidebarCollapsed = false
   }
