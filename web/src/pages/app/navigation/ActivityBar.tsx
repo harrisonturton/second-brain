@@ -3,6 +3,7 @@ import { BookOpenIcon } from '@/base/icons/BookOpenIcon'
 import { ChatBubblesIcon } from '@/base/icons/ChatBubblesIcon'
 import { CogIcon } from '@/base/icons/CogIcon'
 import { MoonIcon } from '@/base/icons/MoonIcon'
+import { SparklesIcon } from '@/base/icons/SparklesIcon'
 import { SunIcon } from '@/base/icons/SunIcon'
 import type { WorkspaceSection } from './NavigationStore'
 import type { ThemeMode } from '@/base/theme/themes'
@@ -78,6 +79,7 @@ const Avatar = styled.button`
 const sectionIcons: { id: WorkspaceSection; label: string; Icon: typeof ChatBubblesIcon }[] = [
   { id: 'sessions', label: 'Sessions', Icon: ChatBubblesIcon },
   { id: 'library', label: 'Library', Icon: BookOpenIcon },
+  { id: 'minions', label: 'Minions', Icon: SparklesIcon },
 ]
 
 export type ActivityBarProps = {

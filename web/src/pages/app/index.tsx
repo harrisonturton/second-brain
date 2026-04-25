@@ -6,6 +6,9 @@ import type { ThemeStore } from '@/base/theme/ThemeStore'
 import type { WindowStore } from '@/base/window/WindowStore'
 import { AppPage } from './AppPage'
 import { ChatFrame } from './chat/ChatFrame'
+import { BrowsePanel } from './library/BrowsePanel'
+import { LibraryPresenter } from './library/LibraryPresenter'
+import { LibraryStore } from './library/LibraryStore'
 import { ActivityBar } from './navigation/ActivityBar'
 import { NavigationPresenter } from './navigation/NavigationPresenter'
 import {
@@ -25,6 +28,7 @@ import { TabsStore } from './tabs/TabsStore'
 const sectionTitles: Record<WorkspaceSection, string> = {
   sessions: 'Sessions',
   library: 'Library',
+  minions: 'Minions',
   settings: 'Settings',
 }
 
@@ -52,22 +56,29 @@ export default makePage<{
     const navigationStore = new NavigationStore()
     const tabsStore = new TabsStore()
     const settingsStore = new SettingsStore()
+    const libraryStore = new LibraryStore()
 
     const navigationPresenter = new NavigationPresenter(
       navigationStore,
       services.sessionService,
       services.libraryService,
+      services.minionsService,
     )
     const tabsPresenter = new TabsPresenter(tabsStore, services.sessionService)
     const settingsPresenter = new SettingsPresenter(
       settingsStore,
       services.httpService,
     )
+    const libraryPresenter = new LibraryPresenter(
+      libraryStore,
+      services.libraryService,
+    )
 
     settingsPresenter.applyToServices()
 
     void navigationPresenter.loadSidebarItems()
     void tabsPresenter.load()
+    void libraryPresenter.loadDocuments()
 
     const ActivityBarView = observer(() => (
       <ActivityBar
@@ -132,13 +143,27 @@ export default makePage<{
       />
     ))
 
-    const MainView = observer(() =>
-      navigationStore.activeSection === 'settings' ? (
-        <SettingsPanelView />
-      ) : (
-        <ChatFrameView />
-      ),
-    )
+    const BrowsePanelView = observer(() => (
+      <BrowsePanel
+        documents={libraryStore.documents}
+        loading={libraryStore.documentsLoading}
+        sidebarCollapsed={navigationStore.sidebarCollapsed}
+        topInset={windowStore.topInset}
+      />
+    ))
+
+    const MainView = observer(() => {
+      if (navigationStore.activeSection === 'settings') {
+        return <SettingsPanelView />
+      }
+      if (
+        navigationStore.activeSection === 'library' &&
+        navigationStore.selectedSidebarItemId === 'browse'
+      ) {
+        return <BrowsePanelView />
+      }
+      return <ChatFrameView />
+    })
 
     return () => (
       <AppPage

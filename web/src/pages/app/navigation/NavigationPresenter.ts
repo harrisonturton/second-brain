@@ -1,5 +1,6 @@
 import { action } from 'mobx'
 import type { LibraryService } from '@/services/library/LibraryService'
+import type { MinionsService } from '@/services/minions/MinionsService'
 import type { SessionService } from '@/services/session/SessionService'
 import type {
   NavigationStore,
@@ -29,6 +30,7 @@ export class NavigationPresenter {
     private store: NavigationStore,
     private sessionService: SessionService,
     private libraryService: LibraryService,
+    private minionsService: MinionsService,
   ) {}
 
   selectSection = action((section: WorkspaceSection): void => {
@@ -93,6 +95,8 @@ export class NavigationPresenter {
         return this.sessionService.listCategories()
       case 'library':
         return this.libraryService.listCategories()
+      case 'minions':
+        return this.minionsService.listMinions()
       case 'settings':
         return SETTINGS_SIDEBAR_ITEMS
     }

@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react'
 import type { HttpService } from './http/HttpService'
 import type { LibraryService } from './library/LibraryService'
+import type { MinionsService } from './minions/MinionsService'
 import type { ProfileService } from './profile/ProfileService'
 import type { SessionService } from './session/SessionService'
 
@@ -15,6 +16,7 @@ export type Services = {
   sessionService: SessionService
   profileService: ProfileService
   libraryService: LibraryService
+  minionsService: MinionsService
 }
 
 const ServicesContext = createContext<Services | null>(null)
