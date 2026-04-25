@@ -6,18 +6,18 @@ import { ExampleContent } from './ExampleContent'
 import { TabBar } from './TabBar'
 import { TableOfContents, type TocEntry } from './TableOfContents'
 
-const Frame = styled.div<{ $sidebarCollapsed: boolean; $topInset: number }>`
+const Frame = styled.div<{ $navigationPanelCollapsed: boolean; $topInset: number }>`
   position: fixed;
   top: ${({ $topInset }) => `${$topInset}px`};
-  left: ${({ $sidebarCollapsed }) => ($sidebarCollapsed ? '44px' : '268px')};
+  left: ${({ $navigationPanelCollapsed }) => ($navigationPanelCollapsed ? '44px' : '268px')};
   right: 4px;
   bottom: 4px;
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border: 1px solid #e8e8e8;
+  background: ${({ theme }) => theme.panelBg};
+  border: 1px solid ${({ theme }) => theme.panelBorder};
   border-radius: 7px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  box-shadow: ${({ theme }) => theme.panelShadow};
   overflow: hidden;
   will-change: left;
   transition:
@@ -48,7 +48,7 @@ const Messages = styled.div`
 const Column = styled.div`
   width: 100%;
   max-width: 720px;
-  padding: 32px 24px 180px;
+  padding: 48px 24px 180px;
 `
 
 const ComposerSlot = styled.div`
@@ -69,7 +69,7 @@ export const ChatFrame = observer(function ChatFrame() {
   const store = useRootStore()
   return (
     <Frame
-      $sidebarCollapsed={store.sidebarCollapsed}
+      $navigationPanelCollapsed={store.navigationPanelCollapsed}
       $topInset={store.topInset}
     >
       <TabBar />

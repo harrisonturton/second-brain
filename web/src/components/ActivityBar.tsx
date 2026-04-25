@@ -3,7 +3,9 @@ import styled from 'styled-components'
 import { BookOpenIcon } from '../icons/BookOpenIcon'
 import { ChatBubblesIcon } from '../icons/ChatBubblesIcon'
 import { CogIcon } from '../icons/CogIcon'
-import { useRootStore, type SidebarView } from '../stores/RootStore'
+import { MoonIcon } from '../icons/MoonIcon'
+import { SunIcon } from '../icons/SunIcon'
+import { useRootStore, type WorkspaceSection } from '../stores/RootStore'
 
 const Strip = styled.nav<{ $topInset: number }>`
   position: fixed;
@@ -30,17 +32,18 @@ const IconButton = styled.button<{ $active: boolean }>`
   width: 28px;
   height: 28px;
   padding: 0;
-  background: ${({ $active }) =>
-    $active ? 'rgba(0, 0, 0, 0.07)' : 'transparent'};
+  background: ${({ $active, theme }) =>
+    $active ? theme.activeBg : 'transparent'};
   border: none;
   border-radius: 5px;
-  color: ${({ $active }) => ($active ? '#2a2a2a' : '#7a7a7a')};
+  color: ${({ $active, theme }) =>
+    $active ? theme.textPrimary : theme.textSecondary};
   cursor: pointer;
   transition: background 120ms ease, color 120ms ease;
 
   &:hover {
-    background: rgba(0, 0, 0, 0.06);
-    color: #2a2a2a;
+    background: ${({ theme }) => theme.hoverBg};
+    color: ${({ theme }) => theme.textPrimary};
   }
 
   svg {
@@ -72,22 +75,23 @@ const Avatar = styled.button`
   }
 `
 
-const viewIcons: { id: SidebarView; label: string; Icon: typeof ChatBubblesIcon }[] = [
+const sectionIcons: { id: WorkspaceSection; label: string; Icon: typeof ChatBubblesIcon }[] = [
   { id: 'sessions', label: 'Sessions', Icon: ChatBubblesIcon },
   { id: 'library', label: 'Library', Icon: BookOpenIcon },
 ]
 
-export const IconStrip = observer(function IconStrip() {
+export const ActivityBar = observer(function ActivityBar() {
   const store = useRootStore()
-  const activeView = store.activeSidebarView
+  const activeSection = store.activeSection
+  const isDark = store.themeMode === 'dark'
 
   return (
     <Strip $topInset={store.topInset}>
-      {viewIcons.map(({ id, label, Icon }) => (
+      {sectionIcons.map(({ id, label, Icon }) => (
         <IconButton
           key={id}
-          $active={activeView === id}
-          onClick={() => store.selectSidebarView(id)}
+          $active={activeSection === id}
+          onClick={() => store.selectSection(id)}
           aria-label={label}
           title={label}
         >
@@ -95,6 +99,15 @@ export const IconStrip = observer(function IconStrip() {
         </IconButton>
       ))}
       <Spacer />
+      <IconButton
+        $active={false}
+        onClick={() => store.toggleTheme()}
+        aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+        title={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+        type="button"
+      >
+        {isDark ? <SunIcon /> : <MoonIcon />}
+      </IconButton>
       <IconButton
         $active={false}
         aria-label="Settings"

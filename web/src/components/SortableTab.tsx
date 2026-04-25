@@ -15,7 +15,7 @@ const Tab = styled.div<{ $active: boolean }>`
   border-radius: 4px;
   font-size: 13px;
   line-height: 1;
-  color: #2a2a2a;
+  color: ${({ theme }) => theme.textPrimary};
   background: transparent;
   cursor: pointer;
   white-space: nowrap;
@@ -23,7 +23,7 @@ const Tab = styled.div<{ $active: boolean }>`
   transition: background 120ms ease;
 
   &:hover {
-    background: #f3f3f3;
+    background: ${({ theme }) => theme.subtleHoverBg};
   }
 
   &:not(:first-child)::before {
@@ -34,7 +34,7 @@ const Tab = styled.div<{ $active: boolean }>`
     transform: translateY(-50%);
     width: 1px;
     height: 10px;
-    background: rgba(0, 0, 0, 0.08);
+    background: ${({ theme }) => theme.divider};
   }
 `
 
@@ -63,10 +63,10 @@ const CloseButton = styled.button`
   width: 16px;
   height: 16px;
   padding: 0;
-  background: #f3f3f3;
+  background: ${({ theme }) => theme.subtleHoverBg};
   border: none;
   border-radius: 3px;
-  color: #4a4a4a;
+  color: ${({ theme }) => theme.textBody};
   cursor: pointer;
   opacity: 0;
   transition: background 120ms ease, opacity 120ms ease;
@@ -76,7 +76,7 @@ const CloseButton = styled.button`
   }
 
   &:hover {
-    background: #e5e5e5;
+    background: ${({ theme }) => theme.panelBorder};
   }
 
   svg {

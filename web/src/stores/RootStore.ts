@@ -2,18 +2,19 @@ import { createContext, useContext } from 'react'
 import { action, computed, makeObservable, observable } from 'mobx'
 import { getElectronApi } from '../electronApi'
 import { PLATFORM_LAYOUT } from '../theme/platformLayout'
+import { themesByMode, type Theme, type ThemeMode } from '../theme/themes'
 
 export interface Tab {
   id: string
   label: string
 }
 
-export type SidebarView = 'sessions' | 'library'
+export type WorkspaceSection = 'sessions' | 'library'
 
 export class RootStore {
   @observable query = ''
-  @observable sidebarCollapsed = false
-  @observable activeSidebarView: SidebarView = 'sessions'
+  @observable navigationPanelCollapsed = false
+  @observable activeSection: WorkspaceSection = 'sessions'
   @observable tabs: Tab[] = [
     { id: 't1', label: 'The shape of meaning' },
     { id: 't2', label: 'Embeddings primer' },
@@ -21,6 +22,7 @@ export class RootStore {
   @observable activeTabId: string = 't1'
   @observable isDesktop = false
   @observable isDesktopFullScreen = false
+  @observable themeMode: ThemeMode = 'light'
 
   constructor() {
     makeObservable(this)
@@ -48,21 +50,29 @@ export class RootStore {
     this.isDesktopFullScreen = value
   }
 
+  @computed get theme(): Theme {
+    return themesByMode[this.themeMode]
+  }
+
+  @action toggleTheme() {
+    this.themeMode = this.themeMode === 'light' ? 'dark' : 'light'
+  }
+
   @action setQuery(value: string) {
     this.query = value
   }
 
-  @action toggleSidebar() {
-    this.sidebarCollapsed = !this.sidebarCollapsed
+  @action toggleNavigationPanel() {
+    this.navigationPanelCollapsed = !this.navigationPanelCollapsed
   }
 
-  @action selectSidebarView(view: SidebarView) {
-    if (this.activeSidebarView === view && !this.sidebarCollapsed) {
-      this.sidebarCollapsed = true
+  @action selectSection(section: WorkspaceSection) {
+    if (this.activeSection === section && !this.navigationPanelCollapsed) {
+      this.navigationPanelCollapsed = true
       return
     }
-    this.activeSidebarView = view
-    this.sidebarCollapsed = false
+    this.activeSection = section
+    this.navigationPanelCollapsed = false
   }
 
   @action setActiveTab(id: string) {

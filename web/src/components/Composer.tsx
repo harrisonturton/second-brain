@@ -6,7 +6,8 @@ const Bar = styled.div`
   display: flex;
   justify-content: center;
   padding: 8px 24px 14px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff 40%);
+  background: ${({ theme }) =>
+    `linear-gradient(to bottom, ${theme.panelBgFade}, ${theme.panelBg} 40%)`};
 `
 
 const Field = styled.textarea`
@@ -18,14 +19,14 @@ const Field = styled.textarea`
   font-size: 14px;
   line-height: 1.5;
   background: transparent;
-  color: #2a2a2a;
+  color: ${({ theme }) => theme.textPrimary};
   padding: 4px 0;
   min-height: 22px;
   max-height: 240px;
   overflow-y: auto;
 
   &::placeholder {
-    color: #b3b3b3;
+    color: ${({ theme }) => theme.textTertiary};
   }
 `
 
@@ -36,14 +37,14 @@ const Box = styled.form`
   align-items: flex-end;
   gap: 8px;
   padding: 8px 8px 8px 12px;
-  background: #fff;
-  border: 1px solid #e0e0e0;
+  background: ${({ theme }) => theme.panelBg};
+  border: 1px solid ${({ theme }) => theme.panelBorder};
   border-radius: 8px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: ${({ theme }) => theme.panelShadow};
   transition: border-color 120ms ease;
 
   &:focus-within {
-    border-color: #bdbdbd;
+    border-color: ${({ theme }) => theme.textTertiary};
   }
 `
 
@@ -54,19 +55,19 @@ const SendButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #1f1f1f;
-  color: #fff;
+  background: ${({ theme }) => theme.accentBg};
+  color: ${({ theme }) => theme.accentFg};
   border: none;
   border-radius: 10px;
   cursor: pointer;
   transition: background 120ms ease, opacity 120ms ease;
 
   &:hover:not(:disabled) {
-    background: #2f2f2f;
+    background: ${({ theme }) => theme.accentBgHover};
   }
 
   &:disabled {
-    background: #dcdcdc;
+    background: ${({ theme }) => theme.accentBgDisabled};
     cursor: not-allowed;
   }
 

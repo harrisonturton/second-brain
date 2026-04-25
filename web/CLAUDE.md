@@ -26,7 +26,15 @@ Conventions for the `web/` Vite + React + Electron renderer. Read this before ad
 
 - One styled-component per visual element, named after its role (`Strip`, `Container`, `IconButton`), declared **above** the React component that uses it.
 - Variants flow through transient props: `` styled.button<{ $active: boolean }>` ... ` ``.
-- Layout/theme tokens live in `src/theme/` (e.g. `platformLayout.ts`). Don't sprinkle pixel constants across components.
+- Layout/theme tokens live in `src/theme/` (e.g. `platformLayout.ts`, `themes.ts`). Don't sprinkle pixel constants or hex colours across components — read them from the theme.
+
+## Theming
+
+- The full color palette lives in `src/theme/themes.ts` as `lightTheme` / `darkTheme`, both shaped by the `Theme` type. `src/theme/styled.d.ts` augments styled-components' `DefaultTheme` so `${({ theme }) => theme.x}` gets full type-checking.
+- The active mode lives on the store as `themeMode: 'light' | 'dark'`, with a `theme` `@computed` that resolves it to the token object and a `toggleTheme()` action.
+- `App.tsx` is the only place that reads `store.theme` and feeds it to `<ThemeProvider>`. A `createGlobalStyle` block there owns the body bg + text color so the page background is also reactive.
+- **Don't read `themeMode` to branch on light/dark inside other components.** Read tokens off `theme` instead. The one exception is choosing the right *icon* (sun vs moon) for the toggle — that's a content decision, not a styling one.
+- New colour needs go in `themes.ts` as a token that exists in both modes, not as an ad-hoc hex inside a styled-component.
 
 ## Desktop / Electron integration
 

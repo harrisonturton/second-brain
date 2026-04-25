@@ -14,7 +14,7 @@ interface Props {
 const Aside = styled.aside`
   flex-shrink: 0;
   width: 180px;
-  padding: 32px 12px 24px 20px;
+  padding: 48px 0 24px 40px;
   overflow-y: auto;
   scrollbar-width: none;
 
@@ -34,11 +34,12 @@ const List = styled.ul`
 
 const Item = styled.li``
 
-const Bar = styled.span<{ $level: 1 | 2 }>`
+const Bar = styled.span<{ $level: 1 | 2; $active: boolean }>`
   flex-shrink: 0;
   width: ${({ $level }) => ($level === 2 ? '26px' : '14px')};
   height: 1px;
-  background: #d8d8d8;
+  background: ${({ $active, theme }) =>
+    $active ? theme.textPrimary : theme.tocBar};
   transition: background 120ms ease;
 `
 
@@ -53,17 +54,19 @@ const TocLink = styled.a<{ $active: boolean; $level: 1 | 2 }>`
   padding: 3px 0;
   font-size: ${({ $level }) => ($level === 2 ? '12px' : '13px')};
   font-weight: ${({ $active }) => ($active ? 500 : 400)};
-  color: ${({ $active }) => ($active ? '#2a2a2a' : '#888')};
+  color: ${({ $active, theme }) =>
+    $active ? theme.textPrimary : theme.tocBarActive};
   text-decoration: none;
   line-height: 1.4;
   transition: color 120ms ease;
 
   &:hover {
-    color: #2a2a2a;
+    color: ${({ theme }) => theme.textPrimary};
   }
 
   &:hover ${Bar} {
-    background: #888;
+    background: ${({ $active, theme }) =>
+      $active ? theme.textPrimary : theme.tocBarActive};
   }
 `
 
@@ -106,7 +109,7 @@ export function TableOfContents({ entries }: Props) {
                   ?.scrollIntoView({ behavior: 'smooth' })
               }}
             >
-              <Bar $level={level} />
+              <Bar $level={level} $active={activeId === id} />
               <LinkLabel>{label}</LinkLabel>
             </TocLink>
           </Item>

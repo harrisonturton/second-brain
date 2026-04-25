@@ -1,10 +1,18 @@
 import { observer } from 'mobx-react-lite'
-import styled from 'styled-components'
+import styled, { ThemeProvider, createGlobalStyle } from 'styled-components'
+import { ActivityBar } from './components/ActivityBar'
 import { ChatFrame } from './components/ChatFrame'
-import { IconStrip } from './components/IconStrip'
-import { Sidebar } from './components/Sidebar'
+import { NavigationPanel } from './components/NavigationPanel'
 import { useRootStore } from './stores/RootStore'
 import { PLATFORM_LAYOUT } from './theme/platformLayout'
+
+const GlobalStyle = createGlobalStyle`
+  body {
+    background: ${({ theme }) => theme.pageBg};
+    color: ${({ theme }) => theme.textPrimary};
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+`
 
 const DesktopTitleBar = styled.header<{ $visible: boolean }>`
   position: fixed;
@@ -23,20 +31,21 @@ const DesktopTitleBar = styled.header<{ $visible: boolean }>`
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.01em;
-  color: #4b5563;
+  color: ${({ theme }) => theme.textSecondary};
 `
 
 const App = observer(function App() {
   const store = useRootStore()
   return (
-    <>
-      <IconStrip />
-      <Sidebar />
+    <ThemeProvider theme={store.theme}>
+      <GlobalStyle />
+      <ActivityBar />
+      <NavigationPanel />
       <ChatFrame />
       <DesktopTitleBar $visible={store.isDesktop && !store.isDesktopFullScreen}>
         Knowledge Engine
       </DesktopTitleBar>
-    </>
+    </ThemeProvider>
   )
 })
 

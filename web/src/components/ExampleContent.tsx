@@ -12,7 +12,7 @@ const SectionHeading = styled.h2`
   margin: 0 0 12px;
   font-size: 18px;
   font-weight: 500;
-  color: #2a2a2a;
+  color: ${({ theme }) => theme.textPrimary};
   letter-spacing: -0.01em;
 `
 
@@ -20,7 +20,7 @@ const Paragraph = styled.p`
   margin: 0 0 12px;
   font-size: 14px;
   line-height: 1.65;
-  color: #4a4a4a;
+  color: ${({ theme }) => theme.textBody};
 
   &:last-child {
     margin-bottom: 0;

@@ -2,7 +2,7 @@ import { observer } from 'mobx-react-lite'
 import styled from 'styled-components'
 import { ChevronLeftIcon } from '../icons/ChevronLeftIcon'
 import { MoreVerticalIcon } from '../icons/MoreVerticalIcon'
-import { useRootStore, type SidebarView } from '../stores/RootStore'
+import { useRootStore, type WorkspaceSection } from '../stores/RootStore'
 
 const PANEL_WIDTH = 220
 
@@ -12,10 +12,10 @@ const Container = styled.aside<{ $collapsed: boolean; $topInset: number }>`
   left: 44px;
   bottom: 4px;
   width: ${PANEL_WIDTH}px;
-  background: #fff;
-  border: 1px solid #e8e8e8;
+  background: ${({ theme }) => theme.panelBg};
+  border: 1px solid ${({ theme }) => theme.panelBorder};
   border-radius: 7px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  box-shadow: ${({ theme }) => theme.panelShadow};
   overflow: hidden;
   opacity: ${({ $collapsed }) => ($collapsed ? 0 : 1)};
   transform: ${({ $collapsed }) =>
@@ -42,7 +42,7 @@ const PanelTitle = styled.button`
   font: inherit;
   font-size: 13px;
   line-height: 1;
-  color: #2a2a2a;
+  color: ${({ theme }) => theme.textPrimary};
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
@@ -50,7 +50,7 @@ const PanelTitle = styled.button`
   transition: background 120ms ease;
 
   &:hover {
-    background: #f3f3f3;
+    background: ${({ theme }) => theme.subtleHoverBg};
   }
 `
 
@@ -67,12 +67,12 @@ const ToggleButton = styled.button`
   background: transparent;
   border: none;
   border-radius: 3px;
-  color: #6b6b6b;
+  color: ${({ theme }) => theme.textMuted};
   cursor: pointer;
   transition: background 120ms ease;
 
   &:hover {
-    background: rgba(0, 0, 0, 0.06);
+    background: ${({ theme }) => theme.hoverBg};
   }
 
   svg {
@@ -90,11 +90,11 @@ const Item = styled.div`
   align-items: center;
   width: 100%;
   font-size: 13px;
-  color: #2a2a2a;
+  color: ${({ theme }) => theme.textPrimary};
   border-radius: 4px;
 
   &:hover {
-    background: #f3f3f3;
+    background: ${({ theme }) => theme.subtleHoverBg};
   }
 `
 
@@ -127,7 +127,7 @@ const MoreButton = styled.button`
   background: transparent;
   border: none;
   border-radius: 3px;
-  color: #6b6b6b;
+  color: ${({ theme }) => theme.textMuted};
   cursor: pointer;
   opacity: 0;
 
@@ -136,7 +136,7 @@ const MoreButton = styled.button`
   }
 
   &:hover {
-    background: rgba(0, 0, 0, 0.06);
+    background: ${({ theme }) => theme.hoverBg};
   }
 
   svg {
@@ -162,31 +162,34 @@ const libraryItems = [
   'Collections',
 ]
 
-const viewLabels: Record<SidebarView, string> = {
+const sectionLabels: Record<WorkspaceSection, string> = {
   sessions: 'Sessions',
   library: 'Library',
 }
 
-const itemsByView: Record<SidebarView, string[]> = {
+const itemsBySection: Record<WorkspaceSection, string[]> = {
   sessions: sessionItems,
   library: libraryItems,
 }
 
-export const Sidebar = observer(function Sidebar() {
+export const NavigationPanel = observer(function NavigationPanel() {
   const store = useRootStore()
-  const view = store.activeSidebarView
+  const section = store.activeSection
 
   return (
-    <Container $collapsed={store.sidebarCollapsed} $topInset={store.topInset}>
-      <PanelTitle type="button">{viewLabels[view]}</PanelTitle>
+    <Container
+      $collapsed={store.navigationPanelCollapsed}
+      $topInset={store.topInset}
+    >
+      <PanelTitle type="button">{sectionLabels[section]}</PanelTitle>
       <ToggleButton
-        onClick={() => store.toggleSidebar()}
-        aria-label="Collapse sidebar"
+        onClick={() => store.toggleNavigationPanel()}
+        aria-label="Collapse navigation panel"
       >
         <ChevronLeftIcon />
       </ToggleButton>
       <Items>
-        {itemsByView[view].map((label) => (
+        {itemsBySection[section].map((label) => (
           <Item key={label}>
             <Label>{label}</Label>
             <MoreButton aria-label={`More options for ${label}`}>

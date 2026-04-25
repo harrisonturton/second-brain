@@ -20,7 +20,7 @@ const Bar = styled.div`
   align-items: center;
   gap: 2px;
   padding: 5px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid ${({ theme }) => theme.panelBorder};
 `
 
 export const TabBar = observer(function TabBar() {
