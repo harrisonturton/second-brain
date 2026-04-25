@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { useRootStore } from '../stores/RootStore'
 import { Composer } from './Composer'
 import { ExampleContent } from './ExampleContent'
+import { TabBar } from './TabBar'
 import { TableOfContents, type TocEntry } from './TableOfContents'
 
 const Frame = styled.div<{ $sidebarCollapsed: boolean }>`
@@ -12,6 +13,7 @@ const Frame = styled.div<{ $sidebarCollapsed: boolean }>`
   right: 4px;
   bottom: 4px;
   display: flex;
+  flex-direction: column;
   background: #fff;
   border: 1px solid #e8e8e8;
   border-radius: 7px;
@@ -21,15 +23,21 @@ const Frame = styled.div<{ $sidebarCollapsed: boolean }>`
   transition: left 260ms cubic-bezier(0.32, 0.72, 0, 1);
 `
 
+const Body = styled.div`
+  flex: 1;
+  min-height: 0;
+  display: flex;
+`
+
 const Main = styled.div`
+  position: relative;
   flex: 1;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
 `
 
 const Messages = styled.div`
-  flex: 1;
+  position: absolute;
+  inset: 0;
   overflow-y: auto;
   display: flex;
   justify-content: center;
@@ -38,7 +46,14 @@ const Messages = styled.div`
 const Column = styled.div`
   width: 100%;
   max-width: 720px;
-  padding: 32px 24px 24px;
+  padding: 32px 24px 120px;
+`
+
+const ComposerSlot = styled.div`
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
 `
 
 const tocEntries: TocEntry[] = [
@@ -52,15 +67,20 @@ export const ChatFrame = observer(function ChatFrame() {
   const { sidebarCollapsed } = useRootStore()
   return (
     <Frame $sidebarCollapsed={sidebarCollapsed}>
-      <TableOfContents entries={tocEntries} />
-      <Main>
-        <Messages>
-          <Column>
-            <ExampleContent />
-          </Column>
-        </Messages>
-        <Composer />
-      </Main>
+      <TabBar />
+      <Body>
+        <TableOfContents entries={tocEntries} />
+        <Main>
+          <Messages>
+            <Column>
+              <ExampleContent />
+            </Column>
+          </Messages>
+          <ComposerSlot>
+            <Composer />
+          </ComposerSlot>
+        </Main>
+      </Body>
     </Frame>
   )
 })
