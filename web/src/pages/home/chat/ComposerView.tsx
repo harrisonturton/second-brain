@@ -77,7 +77,7 @@ const SendButton = styled.button`
   }
 `
 
-export function Composer() {
+export function ComposerView() {
   const [value, setValue] = useState('')
 
   const submit = () => {

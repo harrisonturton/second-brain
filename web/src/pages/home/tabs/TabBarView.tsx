@@ -11,7 +11,7 @@ import {
   horizontalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import styled from 'styled-components'
-import { SortableTab } from './SortableTab'
+import { SortableTabView } from './SortableTabView'
 import type { Tab } from './TabsStore'
 
 const Bar = styled.div`
@@ -22,7 +22,7 @@ const Bar = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.panelBorder};
 `
 
-export type TabBarProps = {
+export type TabBarViewProps = {
   tabs: Tab[]
   activeTabId: string | null
   onSelectTab: (id: string) => void
@@ -30,13 +30,13 @@ export type TabBarProps = {
   onMoveTab: (draggedId: string, targetId: string) => void
 }
 
-export function TabBar({
+export function TabBarView({
   tabs,
   activeTabId,
   onSelectTab,
   onCloseTab,
   onMoveTab,
-}: TabBarProps) {
+}: TabBarViewProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
   )
@@ -59,7 +59,7 @@ export function TabBar({
       >
         <Bar>
           {tabs.map((tab) => (
-            <SortableTab
+            <SortableTabView
               key={tab.id}
               tab={tab}
               active={tab.id === activeTabId}

@@ -27,7 +27,7 @@ const Paragraph = styled.p`
   }
 `
 
-export function ExampleContent() {
+export function ExampleContentView() {
   return (
     <>
       <Section id="overview">

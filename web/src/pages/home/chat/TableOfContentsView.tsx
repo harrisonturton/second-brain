@@ -70,7 +70,7 @@ const TocLink = styled.a<{ $active: boolean; $level: 1 | 2 }>`
   }
 `
 
-export function TableOfContents({ entries }: Props) {
+export function TableOfContentsView({ entries }: Props) {
   const [activeId, setActiveId] = useState<string>(entries[0]?.id ?? '')
 
   useEffect(() => {

@@ -23,7 +23,7 @@ The app uses a strict separation between **rendering**, **state**, **behaviour**
 
 | Role | Lives in | Responsibility | Allowed to import |
 |---|---|---|---|
-| **View** (stateless component) | `*.tsx` next to its presenter, or `base/components/` if generic | Render UI. Props in, JSX out. No `useRootStore`, no `observer`, no service calls. | styled-components, icons, types from sibling store |
+| **View** (stateless component) | `*View.tsx` next to its presenter, or `base/components/` if generic | Render UI. Props in, JSX out. No `useRootStore`, no `observer`, no service calls. **Always named with the `View` suffix** (e.g. `ActivityBarView`, `SidebarView`). | styled-components, icons, types from sibling store |
 | **Store** | `*Store.ts` next to its presenter | Hold observable state. **Data only** — no services, no orchestration, no React. Just `@observable` fields and one-line `@action` setters. | mobx, types from services (for typed fields) |
 | **Presenter** | `*Presenter.ts` next to its store | Behaviour + business logic. Takes its store(s) and any services in the constructor. Exposes derived getters and action methods. No React. | mobx (`action`), the store, service interfaces |
 | **Service** | `services/<feature>/` | Backend data fetching. **Interface** + **fake impl** today (real impls land later). All services accept an `HttpService` so the fake can simulate latency to exercise loading states. | http types only |
@@ -34,9 +34,30 @@ A "stateful component" is just a function that **instantiates the stores + prese
 
 - **`App.tsx`** — installs the global theme + window providers around `<HomePage />`.
 - **`main.tsx`** — composition root. Instantiates `FakeHttpService` + every `Fake*Service` and provides them through `<ServicesProvider>`. Instantiates `RootStore` and provides it through `<RootStoreProvider>`. Swap fakes for real impls here.
-- **`pages/<page>/<Page>Page.tsx`** — the page install. Pulls the global stores from `useRootStore()` and the services from `useServices()`, instantiates page-local stores + presenters with `useMemo`, kicks off initial loads in a `useEffect`, and renders stateless views inside inline `<Observer>` blocks that subscribe to the presenter values they read.
+- **`pages/<page>/<Page>.tsx`** — the page install. Built using the `makePage` factory from `@/base/page/Page`. The setup function passed to `makePage` runs once on mount with `(initialProps, { rootStore, services })`, instantiates page-local stores + presenters, kicks off initial loads, wraps each `*View` in `observer(() => <View ... />)` to bind it to its presenter, and returns a root component (typically rendering a `<PageView>` that takes the bound subcomponents as props).
 
-Each `<Observer>` block is its own MobX subscription, so re-renders stay scoped to the data each block actually reads. Granular re-renders without per-component install files. **Do not** use the HOC `observer(Component)` for views — keep views stateless and use `<Observer>{() => <View ... />}</Observer>` at the install layer.
+The setup function runs once and stores live for the lifetime of the page mount — no `useMemo` / `useEffect` ceremony. Each `observer(() => ...)` wrapper is its own MobX subscription, so re-renders stay scoped to the data each binding reads. **Do not** wrap views themselves with `observer` — keep them stateless and bind them in the setup function.
+
+Example shape:
+
+```tsx
+// HomePage.tsx
+export default makePage((_, { rootStore, services }) => {
+  const navStore = new NavigationStore()
+  const navPresenter = new NavigationPresenter(navStore, services.sessionService, services.libraryService)
+  void navPresenter.loadSessionCategories()
+
+  const Sidebar = observer(() => (
+    <SidebarView
+      collapsed={navPresenter.sidebarCollapsed}
+      items={navPresenter.sidebarItems}
+      onToggleSidebar={navPresenter.toggleSidebar}
+    />
+  ))
+
+  return () => <HomePageView Sidebar={Sidebar} />
+})
+```
 
 ### Stores hold state, not behaviour
 
@@ -83,6 +104,8 @@ web/
     electronApi.ts                   window.electronAPI typing & accessor
     base/                            cross-cutting / non-feature code
       icons/                         SVG-as-React-component icons
+      page/
+        Page.ts                      makePage factory used by every page install
       theme/
         ThemeStore.ts                @observable mode, toggle, theme computed
         themes.ts                    Theme type + lightTheme / darkTheme tokens
@@ -92,22 +115,23 @@ web/
         WindowStore.ts               isDesktop / isFullScreen / topInset; subscribes to electronAPI
     pages/
       home/
-        HomePage.tsx                 page install: instantiates page-local stores+presenters, wires <Observer>s
+        HomePage.tsx                 page install (makePage); instantiates stores + presenters and binds views
+        HomePageView.tsx             stateless layout that takes ActivityBar / Sidebar / ChatFrame as props
         navigation/                  activity bar + sidebar feature
           NavigationStore.ts
           NavigationPresenter.ts
-          ActivityBar.tsx            stateless
-          Sidebar.tsx                stateless (loading-aware)
+          ActivityBarView.tsx        stateless
+          SidebarView.tsx            stateless (loading-aware)
         tabs/                        tab strip feature
           TabsStore.ts
           TabsPresenter.ts
-          TabBar.tsx                 stateless
-          SortableTab.tsx            stateless (dnd-kit hooks at the use site)
+          TabBarView.tsx             stateless
+          SortableTabView.tsx        stateless (dnd-kit hooks at the use site)
         chat/                        chat surface (frame + composer + TOC + content)
-          ChatFrame.tsx              stateless layout; takes tabBar slot
-          Composer.tsx               local form state only
-          TableOfContents.tsx        local IntersectionObserver state only
-          ExampleContent.tsx        static
+          ChatFrameView.tsx          stateless layout; takes tabBar slot
+          ComposerView.tsx           local form state only
+          TableOfContentsView.tsx    local IntersectionObserver state only
+          ExampleContentView.tsx     static
         profile/
           ProfileStore.ts
           ProfilePresenter.ts
