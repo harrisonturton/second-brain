@@ -4,35 +4,29 @@ import { ChevronLeftIcon } from '../icons/ChevronLeftIcon'
 import { MoreVerticalIcon } from '../icons/MoreVerticalIcon'
 import { useRootStore, type SidebarView } from '../stores/RootStore'
 
-const COLLAPSED_WIDTH = 32
-const EXPANDED_WIDTH = 220
+const PANEL_WIDTH = 220
 
 const Container = styled.aside<{ $collapsed: boolean }>`
   position: fixed;
   top: 4px;
   left: 44px;
   bottom: 4px;
-  width: ${({ $collapsed }) =>
-    $collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}px;
-  background: ${({ $collapsed }) => ($collapsed ? '#f6f6f6' : '#fff')};
+  width: ${PANEL_WIDTH}px;
+  background: #fff;
   border: 1px solid #e8e8e8;
   border-radius: 7px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
   overflow: hidden;
-  opacity: ${({ $collapsed }) => ($collapsed ? 0.6 : 1)};
-  cursor: ${({ $collapsed }) => ($collapsed ? 'pointer' : 'default')};
-  will-change: width;
+  opacity: ${({ $collapsed }) => ($collapsed ? 0 : 1)};
+  transform: ${({ $collapsed }) =>
+    $collapsed ? 'translateX(-12px)' : 'translateX(0)'};
+  pointer-events: ${({ $collapsed }) => ($collapsed ? 'none' : 'auto')};
   transition:
-    width 260ms cubic-bezier(0.32, 0.72, 0, 1),
     opacity 200ms ease,
-    background-color 200ms ease;
-
-  &:hover {
-    background: #fff;
-  }
+    transform 260ms cubic-bezier(0.32, 0.72, 0, 1);
 `
 
-const PanelTitle = styled.button<{ $collapsed: boolean }>`
+const PanelTitle = styled.button`
   position: absolute;
   top: 5px;
   left: 5px;
@@ -52,16 +46,13 @@ const PanelTitle = styled.button<{ $collapsed: boolean }>`
   white-space: nowrap;
   overflow: hidden;
   cursor: pointer;
-  opacity: ${({ $collapsed }) => ($collapsed ? 0 : 1)};
-  pointer-events: ${({ $collapsed }) => ($collapsed ? 'none' : 'auto')};
-  transition: opacity 200ms ease;
 
   &:hover {
     background: #f3f3f3;
   }
 `
 
-const ToggleButton = styled.button<{ $collapsed: boolean }>`
+const ToggleButton = styled.button`
   position: absolute;
   top: 5px;
   right: 5px;
@@ -76,11 +67,7 @@ const ToggleButton = styled.button<{ $collapsed: boolean }>`
   border-radius: 3px;
   color: #6b6b6b;
   cursor: pointer;
-  transform: ${({ $collapsed }) =>
-    $collapsed ? 'rotate(180deg)' : 'rotate(0deg)'};
-  transition:
-    transform 260ms cubic-bezier(0.32, 0.72, 0, 1),
-    background 120ms ease;
+  transition: background 120ms ease;
 
   &:hover {
     background: rgba(0, 0, 0, 0.06);
@@ -92,12 +79,8 @@ const ToggleButton = styled.button<{ $collapsed: boolean }>`
   }
 `
 
-const Items = styled.div<{ $collapsed: boolean }>`
-  width: ${EXPANDED_WIDTH}px;
+const Items = styled.div`
   padding: 32px 5px 5px;
-  opacity: ${({ $collapsed }) => ($collapsed ? 0 : 1)};
-  pointer-events: ${({ $collapsed }) => ($collapsed ? 'none' : 'auto')};
-  transition: opacity 200ms ease;
 `
 
 const Item = styled.div`
@@ -189,24 +172,15 @@ export const Sidebar = observer(function Sidebar() {
   const items = view === 'sessions' ? sessionItems : libraryItems
 
   return (
-    <Container
-      $collapsed={collapsed}
-      onClick={collapsed ? () => store.toggleSidebar() : undefined}
-    >
-      <PanelTitle $collapsed={collapsed} type="button">
-        {viewLabels[view]}
-      </PanelTitle>
+    <Container $collapsed={collapsed}>
+      <PanelTitle type="button">{viewLabels[view]}</PanelTitle>
       <ToggleButton
-        $collapsed={collapsed}
-        onClick={(e) => {
-          e.stopPropagation()
-          store.toggleSidebar()
-        }}
-        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        onClick={() => store.toggleSidebar()}
+        aria-label="Collapse sidebar"
       >
         <ChevronLeftIcon />
       </ToggleButton>
-      <Items $collapsed={collapsed}>
+      <Items>
         {items.map((label) => (
           <Item key={label}>
             <Label>{label}</Label>
