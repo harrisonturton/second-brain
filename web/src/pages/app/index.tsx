@@ -23,6 +23,7 @@ import { Sidebar } from './navigation/Sidebar'
 import { SearchPanel } from './search/SearchPanel'
 import { SearchPresenter } from './search/SearchPresenter'
 import { SearchStore } from './search/SearchStore'
+import { AppearanceSettings } from './settings/AppearanceSettings'
 import { DeveloperSettings } from './settings/DeveloperSettings'
 import { SettingsPanel } from './settings/SettingsPanel'
 import { SettingsPresenter } from './settings/SettingsPresenter'
@@ -179,12 +180,22 @@ export default makePage<{
       />
     ))
 
+    const AppearanceSettingsView = observer(() => (
+      <AppearanceSettings
+        lightAccent={themeStore.lightAccent}
+        lightPageTint={themeStore.lightPageTint}
+        onLightAccentChange={(hex) => themeStore.setLightAccent(hex)}
+        onLightPageTintChange={(hex) => themeStore.setLightPageTint(hex)}
+      />
+    ))
+
     const SettingsPanelView = observer(() => (
       <SettingsPanel
         selectedItemId={navigationStore.selectedSidebarItemId}
         sidebarCollapsed={navigationStore.sidebarCollapsed}
         topInset={windowStore.topInset}
         userSettings={<UserSettings onLogout={sessionPresenter.logout} />}
+        appearanceSettings={<AppearanceSettingsView />}
         developerSettings={<DeveloperSettingsView />}
         breadcrumbBar={<BreadcrumbBarView />}
       />

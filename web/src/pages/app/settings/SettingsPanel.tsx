@@ -48,6 +48,7 @@ export type SettingsPanelProps = {
    *  them to their stores/presenters; only the slot for the selected
    *  sidebar item is rendered. */
   userSettings: ReactNode
+  appearanceSettings: ReactNode
   developerSettings: ReactNode
   breadcrumbBar: ReactNode
 }
@@ -57,6 +58,7 @@ export function SettingsPanel({
   sidebarCollapsed,
   topInset,
   userSettings,
+  appearanceSettings,
   developerSettings,
   breadcrumbBar,
 }: SettingsPanelProps) {
@@ -65,6 +67,7 @@ export function SettingsPanel({
       <Body>
         <Column>
           {selectedItemId === 'user' && userSettings}
+          {selectedItemId === 'appearance' && appearanceSettings}
           {selectedItemId === 'developer' && developerSettings}
           {selectedItemId === null && (
             <Empty>Pick a settings section from the sidebar.</Empty>

@@ -11,6 +11,7 @@ import type {
 
 const SETTINGS_SIDEBAR_ITEMS: SidebarItem[] = [
   { id: 'user', label: 'User' },
+  { id: 'appearance', label: 'Appearance' },
   { id: 'developer', label: 'Developer' },
 ]
 
