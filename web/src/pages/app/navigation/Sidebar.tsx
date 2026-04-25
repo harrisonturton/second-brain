@@ -1,6 +1,6 @@
 import styled, { keyframes } from 'styled-components'
-import { ChevronLeftIcon } from '@/base/icons/ChevronLeftIcon'
 import { MoreVerticalIcon } from '@/base/icons/MoreVerticalIcon'
+import { XIcon } from '@/base/icons/XIcon'
 import type { SidebarItem } from './NavigationStore'
 
 const PANEL_WIDTH = 220
@@ -88,14 +88,16 @@ const Item = styled.div<{ $selected: boolean }>`
   display: flex;
   align-items: center;
   width: 100%;
+  padding: 1px 0;
   font-size: 13px;
   color: ${({ theme }) => theme.textPrimary};
   border-radius: 4px;
-  background: ${({ $selected, theme }) =>
+  background-clip: content-box;
+  background-color: ${({ $selected, theme }) =>
     $selected ? theme.subtleHoverBg : 'transparent'};
 
   &:hover {
-    background: ${({ theme }) => theme.subtleHoverBg};
+    background-color: ${({ theme }) => theme.subtleHoverBg};
   }
 `
 
@@ -188,9 +190,9 @@ export function Sidebar(props: SidebarProps) {
       <PanelTitle type="button">{title}</PanelTitle>
       <ToggleButton
         onClick={onToggleSidebar}
-        aria-label="Collapse sidebar"
+        aria-label="Close sidebar"
       >
-        <ChevronLeftIcon />
+        <XIcon />
       </ToggleButton>
       <Items>
         {loading && items.length === 0 ? (

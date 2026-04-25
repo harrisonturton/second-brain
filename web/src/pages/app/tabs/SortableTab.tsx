@@ -44,6 +44,7 @@ const Label = styled.span<{ $active: boolean }>`
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  line-height: 1.5;
   opacity: ${({ $active }) => ($active ? 1 : 0.65)};
   transition: opacity 120ms ease;
 
