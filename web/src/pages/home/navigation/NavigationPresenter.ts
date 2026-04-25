@@ -53,6 +53,19 @@ export class NavigationPresenter {
     this.store.setSelectedSidebarItemId(id)
   }
 
+  /** Jump to a specific item inside the settings section (used e.g.
+   *  by the avatar button to open user settings directly). Bypasses
+   *  the toggle-collapse behaviour of `selectSection`. */
+  openSettingsItem = action((itemId: string): void => {
+    const sectionChanged = this.store.activeSection !== 'settings'
+    this.store.setActiveSection('settings')
+    this.store.setSelectedSidebarItemId(itemId)
+    this.store.setSidebarCollapsed(false)
+    if (sectionChanged) {
+      void this.loadSidebarItems()
+    }
+  })
+
   loadSidebarItems = async (): Promise<void> => {
     const token = ++this.loadId
     const section = this.store.activeSection

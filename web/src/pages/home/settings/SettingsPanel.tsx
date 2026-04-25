@@ -44,9 +44,10 @@ export type SettingsPanelProps = {
   selectedItemId: string | null
   sidebarCollapsed: boolean
   topInset: number
-  /** Slot for the developer-settings view; the install file binds it
-   *  to the SettingsPresenter. Only rendered when the developer item
-   *  is selected. */
+  /** Slots for the per-item settings views. The install file binds
+   *  them to their stores/presenters; only the slot for the selected
+   *  sidebar item is rendered. */
+  userSettings: ReactNode
   developerSettings: ReactNode
 }
 
@@ -54,14 +55,15 @@ export function SettingsPanel({
   selectedItemId,
   sidebarCollapsed,
   topInset,
+  userSettings,
   developerSettings,
 }: SettingsPanelProps) {
   return (
     <Panel $sidebarCollapsed={sidebarCollapsed} $topInset={topInset}>
       <Body>
         <Column>
+          {selectedItemId === 'user' && userSettings}
           {selectedItemId === 'developer' && developerSettings}
-          {selectedItemId === 'user' && <Empty>User settings coming soon.</Empty>}
           {selectedItemId === null && (
             <Empty>Pick a settings section from the sidebar.</Empty>
           )}

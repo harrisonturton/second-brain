@@ -17,6 +17,7 @@ import { DeveloperSettings } from './settings/DeveloperSettings'
 import { SettingsPanel } from './settings/SettingsPanel'
 import { SettingsPresenter } from './settings/SettingsPresenter'
 import { SettingsStore } from './settings/SettingsStore'
+import { UserSettings } from './settings/UserSettings'
 import { TabBar } from './tabs/TabBar'
 import { TabsPresenter } from './tabs/TabsPresenter'
 import { TabsStore } from './tabs/TabsStore'
@@ -66,6 +67,10 @@ export default makePage<{ themeStore: ThemeStore; windowStore: WindowStore }>(
     void tabsPresenter.load()
     void profilePresenter.load()
 
+    const handleLogout = () => {
+      // TODO: wire when session state lands.
+    }
+
     const ActivityBarView = observer(() => (
       <ActivityBar
         activeSection={navigationStore.activeSection}
@@ -75,6 +80,7 @@ export default makePage<{ themeStore: ThemeStore; windowStore: WindowStore }>(
         avatarTitle={profileStore.profile?.name ?? 'Profile'}
         onSelectSection={navigationPresenter.selectSection}
         onToggleTheme={() => themeStore.toggle()}
+        onProfileClick={() => navigationPresenter.openSettingsItem('user')}
       />
     ))
 
@@ -123,6 +129,7 @@ export default makePage<{ themeStore: ThemeStore; windowStore: WindowStore }>(
         selectedItemId={navigationStore.selectedSidebarItemId}
         sidebarCollapsed={navigationStore.sidebarCollapsed}
         topInset={windowStore.topInset}
+        userSettings={<UserSettings onLogout={handleLogout} />}
         developerSettings={<DeveloperSettingsView />}
       />
     ))

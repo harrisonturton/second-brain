@@ -88,6 +88,7 @@ export type ActivityBarProps = {
   avatarTitle: string
   onSelectSection: (section: WorkspaceSection) => void
   onToggleTheme: () => void
+  onProfileClick: () => void
 }
 
 export function ActivityBar(props: ActivityBarProps) {
@@ -99,6 +100,7 @@ export function ActivityBar(props: ActivityBarProps) {
     avatarTitle,
     onSelectSection,
     onToggleTheme,
+    onProfileClick,
   } = props
   const isDark = themeMode === 'dark'
 
@@ -134,7 +136,12 @@ export function ActivityBar(props: ActivityBarProps) {
       >
         <CogIcon />
       </IconButton>
-      <Avatar aria-label={avatarTitle} title={avatarTitle} type="button">
+      <Avatar
+        aria-label={avatarTitle}
+        title={avatarTitle}
+        type="button"
+        onClick={onProfileClick}
+      >
         {avatarInitials}
       </Avatar>
     </Strip>
