@@ -48,13 +48,13 @@ export const lightTheme: Theme = {
   textMuted: '#6b6b6b',
 
   hoverBg: 'rgba(0, 0, 0, 0.06)',
-  activeBg: 'rgba(94, 92, 230, 0.14)',
-  activeFg: '#3d3bb3',
+  activeBg: 'rgba(93, 124, 71, 0.16)',
+  activeFg: '#3a5328',
   subtleHoverBg: '#f3f3f3',
   divider: 'rgba(0, 0, 0, 0.08)',
 
-  accentBg: '#5e5ce6',
-  accentBgHover: '#4f4dd0',
+  accentBg: '#5d7c47',
+  accentBgHover: '#4d6a3a',
   accentBgDisabled: '#dcdcdc',
   accentFg: '#ffffff',
 
