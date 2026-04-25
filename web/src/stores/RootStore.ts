@@ -3,6 +3,7 @@ import { action, makeObservable, observable } from 'mobx'
 
 export class RootStore {
   @observable query = ''
+  @observable sidebarCollapsed = false
 
   constructor() {
     makeObservable(this)
@@ -10,6 +11,10 @@ export class RootStore {
 
   @action setQuery(value: string) {
     this.query = value
+  }
+
+  @action toggleSidebar() {
+    this.sidebarCollapsed = !this.sidebarCollapsed
   }
 }
 

@@ -1,29 +1,92 @@
+import { observer } from 'mobx-react-lite'
 import styled from 'styled-components'
+import { ChevronLeftIcon } from '../icons/ChevronLeftIcon'
 import { MoreVerticalIcon } from '../icons/MoreVerticalIcon'
+import { useRootStore } from '../stores/RootStore'
 
-const Container = styled.aside`
+const EXPANDED_WIDTH = 240
+const COLLAPSED_WIDTH = 32
+
+const Container = styled.aside<{ $collapsed: boolean }>`
   position: fixed;
-  top: 6px;
-  left: 6px;
-  bottom: 6px;
-  width: 240px;
-  padding: 10px 8px;
+  top: 4px;
+  left: 4px;
+  bottom: 4px;
+  width: ${({ $collapsed }) => ($collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH)}px;
   background: #fff;
   border: 1px solid #e8e8e8;
   border-radius: 7px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0, 0, 0, 0.03);
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  will-change: width;
+  transition: width 260ms cubic-bezier(0.32, 0.72, 0, 1);
 `
 
-const SectionLabel = styled.div`
-  padding: 4px 6px 2px;
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0;
+const SessionsTitle = styled.button<{ $collapsed: boolean }>`
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 31px;
+  display: flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 6px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1;
   color: #2a2a2a;
-  opacity: 0.45;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+  opacity: ${({ $collapsed }) => ($collapsed ? 0 : 1)};
+  pointer-events: ${({ $collapsed }) => ($collapsed ? 'none' : 'auto')};
+  transition: opacity 200ms ease;
+
+  &:hover {
+    background: #f3f3f3;
+  }
+`
+
+const ToggleButton = styled.button<{ $collapsed: boolean }>`
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  color: #6b6b6b;
+  cursor: pointer;
+  transform: ${({ $collapsed }) => ($collapsed ? 'rotate(180deg)' : 'rotate(0deg)')};
+  transition:
+    transform 260ms cubic-bezier(0.32, 0.72, 0, 1),
+    background 120ms ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+`
+
+const Items = styled.div<{ $collapsed: boolean }>`
+  width: ${EXPANDED_WIDTH}px;
+  padding: 32px 5px 5px;
+  opacity: ${({ $collapsed }) => ($collapsed ? 0 : 1)};
+  pointer-events: ${({ $collapsed }) => ($collapsed ? 'none' : 'auto')};
+  transition: opacity 200ms ease;
 `
 
 const Item = styled.div`
@@ -49,6 +112,12 @@ const Label = styled.button`
   font: inherit;
   color: inherit;
   line-height: 1.3;
+  opacity: 0.65;
+  transition: opacity 120ms ease;
+
+  ${Item}:hover & {
+    opacity: 1;
+  }
 `
 
 const MoreButton = styled.button`
@@ -82,18 +151,32 @@ const MoreButton = styled.button`
 
 const items = ['Inbox', 'Today', 'Upcoming', 'Projects', 'Notes', 'Archive']
 
-export function Sidebar() {
+export const Sidebar = observer(function Sidebar() {
+  const store = useRootStore()
+  const collapsed = store.sidebarCollapsed
+
   return (
-    <Container>
-      <SectionLabel>Sessions</SectionLabel>
-      {items.map((label) => (
-        <Item key={label}>
-          <Label>{label}</Label>
-          <MoreButton aria-label={`More options for ${label}`}>
-            <MoreVerticalIcon />
-          </MoreButton>
-        </Item>
-      ))}
+    <Container $collapsed={collapsed}>
+      <SessionsTitle $collapsed={collapsed} type="button">
+        Sessions
+      </SessionsTitle>
+      <ToggleButton
+        $collapsed={collapsed}
+        onClick={() => store.toggleSidebar()}
+        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+      >
+        <ChevronLeftIcon />
+      </ToggleButton>
+      <Items $collapsed={collapsed}>
+        {items.map((label) => (
+          <Item key={label}>
+            <Label>{label}</Label>
+            <MoreButton aria-label={`More options for ${label}`}>
+              <MoreVerticalIcon />
+            </MoreButton>
+          </Item>
+        ))}
+      </Items>
     </Container>
   )
-}
+})
