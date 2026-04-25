@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "es2023",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "outDir": "dist-desktop",
+    "rootDir": "electron",
+    "sourceMap": true
+  },
+  "include": ["electron/**/*.ts"]
+}

@@ -6,9 +6,9 @@ import { ExampleContent } from './ExampleContent'
 import { TabBar } from './TabBar'
 import { TableOfContents, type TocEntry } from './TableOfContents'
 
-const Frame = styled.div<{ $sidebarCollapsed: boolean }>`
+const Frame = styled.div<{ $sidebarCollapsed: boolean; $topInset: number }>`
   position: fixed;
-  top: 4px;
+  top: ${({ $topInset }) => `${$topInset}px`};
   left: ${({ $sidebarCollapsed }) => ($sidebarCollapsed ? '44px' : '268px')};
   right: 4px;
   bottom: 4px;
@@ -20,7 +20,9 @@ const Frame = styled.div<{ $sidebarCollapsed: boolean }>`
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
   overflow: hidden;
   will-change: left;
-  transition: left 260ms cubic-bezier(0.32, 0.72, 0, 1);
+  transition:
+    left 260ms cubic-bezier(0.32, 0.72, 0, 1),
+    top 260ms cubic-bezier(0.32, 0.72, 0, 1);
 `
 
 const Body = styled.div`
@@ -64,9 +66,12 @@ const tocEntries: TocEntry[] = [
 ]
 
 export const ChatFrame = observer(function ChatFrame() {
-  const { sidebarCollapsed } = useRootStore()
+  const store = useRootStore()
   return (
-    <Frame $sidebarCollapsed={sidebarCollapsed}>
+    <Frame
+      $sidebarCollapsed={store.sidebarCollapsed}
+      $topInset={store.topInset}
+    >
       <TabBar />
       <Body>
         <TableOfContents entries={tocEntries} />

@@ -1,5 +1,7 @@
 import { createContext, useContext } from 'react'
-import { action, makeObservable, observable } from 'mobx'
+import { action, computed, makeObservable, observable } from 'mobx'
+import { getElectronApi } from '../electronApi'
+import { PLATFORM_LAYOUT } from '../theme/platformLayout'
 
 export interface Tab {
   id: string
@@ -17,9 +19,33 @@ export class RootStore {
     { id: 't2', label: 'Embeddings primer' },
   ]
   @observable activeTabId: string = 't1'
+  @observable isDesktop = false
+  @observable isDesktopFullScreen = false
 
   constructor() {
     makeObservable(this)
+
+    const electronApi = getElectronApi()
+    this.isDesktop = Boolean(electronApi)
+    if (!electronApi) return
+
+    void electronApi.getWindowState?.().then((state) => {
+      this.setDesktopFullScreen(Boolean(state?.isFullScreen))
+    })
+    electronApi.onWindowStateChange?.((state) => {
+      this.setDesktopFullScreen(Boolean(state?.isFullScreen))
+    })
+  }
+
+  @computed get topInset(): number {
+    if (!this.isDesktop) return 4
+    return this.isDesktopFullScreen
+      ? PLATFORM_LAYOUT.appDesktop.topInsetWhenFullScreen
+      : PLATFORM_LAYOUT.appDesktop.topInset
+  }
+
+  @action setDesktopFullScreen(value: boolean) {
+    this.isDesktopFullScreen = value
   }
 
   @action setQuery(value: string) {

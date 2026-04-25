@@ -5,7 +5,7 @@ import { ArrowUpIcon } from '../icons/ArrowUpIcon'
 const Bar = styled.div`
   display: flex;
   justify-content: center;
-  padding: 12px 24px 20px;
+  padding: 8px 24px 14px;
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff 40%);
 `
 
@@ -19,7 +19,7 @@ const Field = styled.textarea`
   line-height: 1.5;
   background: transparent;
   color: #2a2a2a;
-  padding: 6px 0;
+  padding: 4px 0;
   min-height: 22px;
   max-height: 240px;
   overflow-y: auto;
@@ -35,7 +35,7 @@ const Box = styled.form`
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  padding: 10px 10px 10px 14px;
+  padding: 8px 8px 8px 12px;
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 8px;

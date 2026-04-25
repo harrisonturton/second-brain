@@ -6,9 +6,9 @@ import { useRootStore, type SidebarView } from '../stores/RootStore'
 
 const PANEL_WIDTH = 220
 
-const Container = styled.aside<{ $collapsed: boolean }>`
+const Container = styled.aside<{ $collapsed: boolean; $topInset: number }>`
   position: fixed;
-  top: 4px;
+  top: ${({ $topInset }) => `${$topInset}px`};
   left: 44px;
   bottom: 4px;
   width: ${PANEL_WIDTH}px;
@@ -23,7 +23,8 @@ const Container = styled.aside<{ $collapsed: boolean }>`
   pointer-events: ${({ $collapsed }) => ($collapsed ? 'none' : 'auto')};
   transition:
     opacity 200ms ease,
-    transform 260ms cubic-bezier(0.32, 0.72, 0, 1);
+    transform 260ms cubic-bezier(0.32, 0.72, 0, 1),
+    top 260ms cubic-bezier(0.32, 0.72, 0, 1);
 `
 
 const PanelTitle = styled.button`
@@ -46,6 +47,7 @@ const PanelTitle = styled.button`
   white-space: nowrap;
   overflow: hidden;
   cursor: pointer;
+  transition: background 120ms ease;
 
   &:hover {
     background: #f3f3f3;
@@ -165,14 +167,17 @@ const viewLabels: Record<SidebarView, string> = {
   library: 'Library',
 }
 
+const itemsByView: Record<SidebarView, string[]> = {
+  sessions: sessionItems,
+  library: libraryItems,
+}
+
 export const Sidebar = observer(function Sidebar() {
   const store = useRootStore()
-  const collapsed = store.sidebarCollapsed
   const view = store.activeSidebarView
-  const items = view === 'sessions' ? sessionItems : libraryItems
 
   return (
-    <Container $collapsed={collapsed}>
+    <Container $collapsed={store.sidebarCollapsed} $topInset={store.topInset}>
       <PanelTitle type="button">{viewLabels[view]}</PanelTitle>
       <ToggleButton
         onClick={() => store.toggleSidebar()}
@@ -181,7 +186,7 @@ export const Sidebar = observer(function Sidebar() {
         <ChevronLeftIcon />
       </ToggleButton>
       <Items>
-        {items.map((label) => (
+        {itemsByView[view].map((label) => (
           <Item key={label}>
             <Label>{label}</Label>
             <MoreButton aria-label={`More options for ${label}`}>
