@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import styled from 'styled-components'
 import type { LoginProvider } from '@/base/session/SessionPresenter'
-import { LoginShader } from './LoginShader'
 
 const Backdrop = styled.div<{ $topInset: number }>`
   position: fixed;
@@ -144,6 +143,27 @@ const ProviderButton = styled.button`
   }
 `
 
+const DevButton = styled.button`
+  padding: 9px 14px;
+  font: inherit;
+  font-size: 13px;
+  color: ${({ theme }) => theme.textSecondary};
+  background: transparent;
+  border: 1px dashed ${({ theme }) => theme.panelBorder};
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 120ms ease;
+
+  &:hover:not(:disabled) {
+    background: ${({ theme }) => theme.subtleHoverBg};
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+`
+
 const ErrorMessage = styled.p`
   margin: 12px 0 0;
   font-size: 12px;
@@ -179,9 +199,12 @@ export function LoginPanel({
     onSubmit(email, password)
   }
 
+  const handleDevLogin = () => {
+    onSubmit('dev@example.com', 'password')
+  }
+
   return (
     <Backdrop $topInset={topInset}>
-      <LoginShader />
       <Card>
         <Title>Welcome back</Title>
         <Subtitle>Sign in to continue.</Subtitle>
@@ -212,6 +235,9 @@ export function LoginPanel({
         </Form>
         <Divider>or</Divider>
         <ProviderRow>
+          <DevButton type="button" disabled={submitting} onClick={handleDevLogin}>
+            Dev login
+          </DevButton>
           {PROVIDERS.map(({ id, label }) => (
             <ProviderButton
               key={id}
