@@ -32,24 +32,38 @@ const List = styled.ul`
   gap: 1px;
 `
 
-const Item = styled.li<{ $level: 1 | 2 }>`
-  padding-left: ${({ $level }) => ($level === 2 ? '12px' : '0')};
+const Item = styled.li``
+
+const Bar = styled.span<{ $level: 1 | 2 }>`
+  flex-shrink: 0;
+  width: ${({ $level }) => ($level === 2 ? '26px' : '14px')};
+  height: 1px;
+  background: #d8d8d8;
+  transition: background 120ms ease;
+`
+
+const LinkLabel = styled.span`
+  flex-shrink: 0;
 `
 
 const TocLink = styled.a<{ $active: boolean; $level: 1 | 2 }>`
-  display: block;
-  padding: 3px 6px;
-  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
   font-size: ${({ $level }) => ($level === 2 ? '12px' : '13px')};
   font-weight: ${({ $active }) => ($active ? 500 : 400)};
   color: ${({ $active }) => ($active ? '#2a2a2a' : '#888')};
   text-decoration: none;
   line-height: 1.4;
-  transition: color 120ms ease, background 120ms ease;
+  transition: color 120ms ease;
 
   &:hover {
     color: #2a2a2a;
-    background: #f3f3f3;
+  }
+
+  &:hover ${Bar} {
+    background: #888;
   }
 `
 
@@ -80,7 +94,7 @@ export function TableOfContents({ entries }: Props) {
     <Aside>
       <List>
         {entries.map(({ id, label, level = 1 }) => (
-          <Item key={id} $level={level}>
+          <Item key={id}>
             <TocLink
               href={`#${id}`}
               $active={activeId === id}
@@ -92,7 +106,8 @@ export function TableOfContents({ entries }: Props) {
                   ?.scrollIntoView({ behavior: 'smooth' })
               }}
             >
-              {label}
+              <Bar $level={level} />
+              <LinkLabel>{label}</LinkLabel>
             </TocLink>
           </Item>
         ))}

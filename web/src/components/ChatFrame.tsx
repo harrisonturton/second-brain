@@ -2,6 +2,7 @@ import { observer } from 'mobx-react-lite'
 import styled from 'styled-components'
 import { useRootStore } from '../stores/RootStore'
 import { Composer } from './Composer'
+import { ExampleContent } from './ExampleContent'
 import { TableOfContents, type TocEntry } from './TableOfContents'
 
 const Frame = styled.div<{ $sidebarCollapsed: boolean }>`
@@ -54,7 +55,9 @@ export const ChatFrame = observer(function ChatFrame() {
       <TableOfContents entries={tocEntries} />
       <Main>
         <Messages>
-          <Column />
+          <Column>
+            <ExampleContent />
+          </Column>
         </Messages>
         <Composer />
       </Main>
