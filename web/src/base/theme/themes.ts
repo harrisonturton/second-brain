@@ -35,10 +35,10 @@ const SERIF_FONT_STACK =
 export const lightTheme: Theme = {
   fontFamily: SANS_FONT_STACK,
 
-  pageBg: '#f6f6f6',
-  panelBg: '#ffffff',
-  panelBgFade: 'rgba(255, 255, 255, 0)',
-  panelBorder: '#e8e8e8',
+  pageBg: '#eef0e8',
+  panelBg: '#fafbf7',
+  panelBgFade: 'rgba(250, 251, 247, 0)',
+  panelBorder: '#e3e6dc',
   panelShadow: '0 3px 10px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)',
 
   textPrimary: '#2a2a2a',
@@ -50,7 +50,7 @@ export const lightTheme: Theme = {
   hoverBg: 'rgba(0, 0, 0, 0.06)',
   activeBg: 'rgba(93, 124, 71, 0.16)',
   activeFg: '#3a5328',
-  subtleHoverBg: '#f3f3f3',
+  subtleHoverBg: '#eef1e8',
   divider: 'rgba(0, 0, 0, 0.08)',
 
   accentBg: '#5d7c47',
