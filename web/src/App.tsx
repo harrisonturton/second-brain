@@ -1,4 +1,6 @@
+import { observer } from 'mobx-react-lite'
 import styled from 'styled-components'
+import { useRootStore } from './stores/RootStore'
 
 const Page = styled.main`
   min-height: 100svh;
@@ -16,12 +18,14 @@ const Title = styled.h1`
   font-weight: 500;
 `
 
-function App() {
+const App = observer(function App() {
+  useRootStore()
+
   return (
     <Page>
       <Title>second brain</Title>
     </Page>
   )
-}
+})
 
 export default App
