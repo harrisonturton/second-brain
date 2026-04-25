@@ -58,6 +58,7 @@ export default makePage((_props, { services }) => {
     services.profileService,
     services.httpService,
   )
+  sessionPresenter.restore()
 
   const TitleBarView = observer(() => (
     <DesktopTitleBar
