@@ -1,6 +1,6 @@
 import type { FunctionComponent } from 'react'
 
-export type HomePageProps = {
+export type AppPageProps = {
   ActivityBar: FunctionComponent
   Sidebar: FunctionComponent
   /** The main content panel. Swapped depending on which section is
@@ -10,11 +10,11 @@ export type HomePageProps = {
 }
 
 /**
- * HomePage — stateless layout for the home route. The setup in
- * `index.tsx` hands in pre-bound, observer-wrapped subcomponents;
+ * AppPage — stateless layout for the main app route (`/`). The setup
+ * in `index.tsx` hands in pre-bound, observer-wrapped subcomponents;
  * this layout just composes them.
  */
-export function HomePage({ ActivityBar, Sidebar, Main }: HomePageProps) {
+export function AppPage({ ActivityBar, Sidebar, Main }: AppPageProps) {
   return (
     <>
       <ActivityBar />

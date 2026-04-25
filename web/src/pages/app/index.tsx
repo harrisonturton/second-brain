@@ -1,8 +1,10 @@
 import { observer } from 'mobx-react-lite'
 import { makePage } from '@/base/page/Page'
+import type { SessionPresenter } from '@/base/session/SessionPresenter'
+import type { SessionStore } from '@/base/session/SessionStore'
 import type { ThemeStore } from '@/base/theme/ThemeStore'
 import type { WindowStore } from '@/base/window/WindowStore'
-import { HomePage } from './HomePage'
+import { AppPage } from './AppPage'
 import { ChatFrame } from './chat/ChatFrame'
 import { ActivityBar } from './navigation/ActivityBar'
 import { NavigationPresenter } from './navigation/NavigationPresenter'
@@ -11,8 +13,6 @@ import {
   type WorkspaceSection,
 } from './navigation/NavigationStore'
 import { Sidebar } from './navigation/Sidebar'
-import { ProfilePresenter } from './profile/ProfilePresenter'
-import { ProfileStore } from './profile/ProfileStore'
 import { DeveloperSettings } from './settings/DeveloperSettings'
 import { SettingsPanel } from './settings/SettingsPanel'
 import { SettingsPresenter } from './settings/SettingsPresenter'
@@ -29,19 +29,28 @@ const sectionTitles: Record<WorkspaceSection, string> = {
 }
 
 /**
- * HomePage install. Setup runs once on mount: it builds the page-local
- * stores + presenters, kicks off initial loads, and binds each
- * stateless component to its store/presenter via inline
- * `observer(() => <Component ... />)` wrappers.
+ * AppPage install (rendered when sessionStore.status === 'logged-in').
  *
- * The global theme + window stores arrive as page props (the root page
- * owns and passes them).
+ * Receives the global stores (theme, window, session) + session
+ * presenter via props. Builds page-local stores + presenters,
+ * kicks off initial loads, and binds each stateless component to its
+ * store/presenter via inline `observer(...)` wrappers.
+ *
+ * Profile no longer has its own store on this page — the session
+ * holds the hydrated profile, and the avatar reads it directly.
  */
-export default makePage<{ themeStore: ThemeStore; windowStore: WindowStore }>(
-  ({ themeStore, windowStore }, { services }) => {
+export default makePage<{
+  themeStore: ThemeStore
+  windowStore: WindowStore
+  sessionStore: SessionStore
+  sessionPresenter: SessionPresenter
+}>(
+  (
+    { themeStore, windowStore, sessionStore, sessionPresenter },
+    { services },
+  ) => {
     const navigationStore = new NavigationStore()
     const tabsStore = new TabsStore()
-    const profileStore = new ProfileStore()
     const settingsStore = new SettingsStore()
 
     const navigationPresenter = new NavigationPresenter(
@@ -50,34 +59,23 @@ export default makePage<{ themeStore: ThemeStore; windowStore: WindowStore }>(
       services.libraryService,
     )
     const tabsPresenter = new TabsPresenter(tabsStore, services.sessionService)
-    const profilePresenter = new ProfilePresenter(
-      profileStore,
-      services.profileService,
-    )
     const settingsPresenter = new SettingsPresenter(
       settingsStore,
       services.httpService,
     )
 
-    // If developer mode is on at load (from persisted settings, when we
-    // wire that up), make sure the runtime services match.
     settingsPresenter.applyToServices()
 
     void navigationPresenter.loadSidebarItems()
     void tabsPresenter.load()
-    void profilePresenter.load()
-
-    const handleLogout = () => {
-      // TODO: wire when session state lands.
-    }
 
     const ActivityBarView = observer(() => (
       <ActivityBar
         activeSection={navigationStore.activeSection}
         themeMode={themeStore.mode}
         topInset={windowStore.topInset}
-        avatarInitials={profileStore.profile?.initials ?? ''}
-        avatarTitle={profileStore.profile?.name ?? 'Profile'}
+        avatarInitials={sessionStore.profile?.initials ?? ''}
+        avatarTitle={sessionStore.profile?.name ?? 'Profile'}
         onSelectSection={navigationPresenter.selectSection}
         onToggleTheme={() => themeStore.toggle()}
         onProfileClick={() => navigationPresenter.openSettingsItem('user')}
@@ -129,7 +127,7 @@ export default makePage<{ themeStore: ThemeStore; windowStore: WindowStore }>(
         selectedItemId={navigationStore.selectedSidebarItemId}
         sidebarCollapsed={navigationStore.sidebarCollapsed}
         topInset={windowStore.topInset}
-        userSettings={<UserSettings onLogout={handleLogout} />}
+        userSettings={<UserSettings onLogout={sessionPresenter.logout} />}
         developerSettings={<DeveloperSettingsView />}
       />
     ))
@@ -143,7 +141,7 @@ export default makePage<{ themeStore: ThemeStore; windowStore: WindowStore }>(
     )
 
     return () => (
-      <HomePage
+      <AppPage
         ActivityBar={ActivityBarView}
         Sidebar={SidebarView}
         Main={MainView}

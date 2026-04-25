@@ -1,10 +1,13 @@
 import { observer } from 'mobx-react-lite'
 import styled, { ThemeProvider, createGlobalStyle } from 'styled-components'
 import { makePage } from '@/base/page/Page'
+import { SessionPresenter } from '@/base/session/SessionPresenter'
+import { SessionStore } from '@/base/session/SessionStore'
 import { ThemeStore } from '@/base/theme/ThemeStore'
 import { WindowStore } from '@/base/window/WindowStore'
 import { PLATFORM_LAYOUT } from '@/base/theme/platformLayout'
-import HomePage from '@/pages/home'
+import AppPage from '@/pages/app'
+import LoginPage from '@/pages/login'
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -36,18 +39,25 @@ const DesktopTitleBar = styled.header<{ $visible: boolean }>`
 
 /**
  * RootPage — the root of the HTML page. Owns the truly-global UI
- * stores (theme, window) and the global styling concerns
- * (`ThemeProvider`, body bg via `GlobalStyle`, the macOS title-bar
- * overlay).
+ * stores (theme, window, session) and the global styling concerns
+ * (`<ThemeProvider>`, body bg, the macOS title-bar overlay).
  *
- * It picks the subpage based on the URL (today: only HomePage) and
- * passes the global stores down as page props. This is the mechanism
- * by which `themeStore` / `windowStore` reach every page — there is
- * no app-level RootStore construct.
+ * Routes between subpages based on session status:
+ *   - logged-out / logging-in  →  LoginPage at `/login`
+ *   - logged-in                →  AppPage at `/`
+ *
+ * The global stores reach each subpage as page props — there is no
+ * app-level store container.
  */
-export default makePage(() => {
+export default makePage((_props, { services }) => {
   const themeStore = new ThemeStore()
   const windowStore = new WindowStore()
+  const sessionStore = new SessionStore()
+  const sessionPresenter = new SessionPresenter(
+    sessionStore,
+    services.profileService,
+    services.httpService,
+  )
 
   const TitleBarView = observer(() => (
     <DesktopTitleBar
@@ -57,11 +67,31 @@ export default makePage(() => {
     </DesktopTitleBar>
   ))
 
+  const RoutedSubpage = observer(() => {
+    if (sessionStore.status === 'logged-in') {
+      return (
+        <AppPage
+          themeStore={themeStore}
+          windowStore={windowStore}
+          sessionStore={sessionStore}
+          sessionPresenter={sessionPresenter}
+        />
+      )
+    }
+    return (
+      <LoginPage
+        themeStore={themeStore}
+        windowStore={windowStore}
+        sessionStore={sessionStore}
+        sessionPresenter={sessionPresenter}
+      />
+    )
+  })
+
   const RootView = observer(() => (
     <ThemeProvider theme={themeStore.theme}>
       <GlobalStyle />
-      {/* TODO: route to the right subpage based on the URL. */}
-      <HomePage themeStore={themeStore} windowStore={windowStore} />
+      <RoutedSubpage />
       <TitleBarView />
     </ThemeProvider>
   ))

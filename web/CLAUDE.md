@@ -6,7 +6,12 @@ The repo's parent `CLAUDE.md` describes the Go backend + Postgres + LLM engine. 
 
 ## What this app is
 
-The renderer for a "second brain" knowledge tool. The home page is the chat surface: an activity bar (left edge), a sidebar that swaps content based on the active section (sessions / library / settings), tabs at the top of the chat frame, and a chat area with table of contents + composer. There's also a settings subpage (rendered in place of the chat frame when the cog is selected) for things like dev-mode toggles.
+The renderer for a "second brain" knowledge tool. There are two top-level pages today:
+
+- **`/login`** — the sign-in screen (email + password + Google / Apple / SSO buttons). Auth is currently fake: any non-empty credentials accepted; the user profile is hydrated from `ProfileService` after a successful login.
+- **`/`** — the main app. An activity bar (left edge), a sidebar that swaps content based on the active section (sessions / library / settings), tabs at the top of the chat frame, and a chat area with table of contents + composer. There's also a settings subpage (rendered in place of the chat frame when the cog is selected) for things like dev-mode toggles, plus a user settings panel with a logout button.
+
+The visible page is driven by `SessionStore.status`, not directly by the URL — the URL is pushed on login/logout for bookmark-ability but the renderer keys off the session.
 
 Today the backend isn't wired in: services are fake implementations that sleep for `FakeHttpService.delayMs` and return hardcoded data. Loading states in the UI are real and exercise the same code paths the eventual real services will.
 
@@ -66,7 +71,7 @@ The app uses a strict separation between **rendering**, **state**, **behaviour**
 A "stateful component" is a function that **instantiates the stores + presenters + services it needs and wires them to stateless views**. These are the install files:
 
 - **`main.tsx`** — composition root. Builds the service graph (`FakeHttpService` + every `Fake*Service`) once and provides them through `<ServicesProvider>`. Renders `<RootPage />`. Swap fakes for real impls here.
-- **`pages/root/index.tsx`** — the root page (`makePage`). Owns the truly-global UI stores (`ThemeStore`, `WindowStore`) and the global styling concerns (`<ThemeProvider>`, `createGlobalStyle` for body bg, the macOS title-bar overlay). Picks the subpage from the URL and passes the global stores down as props. There is **no `RootStore`** — `pages/root` is the mechanism that makes the global stores reachable from each page.
+- **`pages/root/index.tsx`** — the root page (`makePage`). Owns the truly-global UI stores (`ThemeStore`, `WindowStore`, `SessionStore`) + the global session presenter, and the global styling concerns (`<ThemeProvider>`, `createGlobalStyle` for body bg, the macOS title-bar overlay). Routes between subpages by reading `sessionStore.status` (logged-out → `LoginPage`, logged-in → `AppPage`) and passes the global stores + session presenter down as props. There is **no `RootStore`** — `pages/root` is the mechanism that makes the global stores reachable from each page.
 - **`pages/<page>/index.tsx`** — a subpage install (`makePage`), default-exported so callers `import HomePage from '@/pages/home'`. The setup function runs once on mount with `(initialProps, { services })`, instantiates page-local stores + presenters, kicks off initial loads, wraps each stateless component in `observer(() => <Component ... />)` to bind it (state from the store, actions from the presenter), and returns a root component (typically rendering a stateless layout that takes the bound subcomponents as props). Subpages receive the global stores (theme, window) through `initialProps`, **not** through context.
 
 The setup function runs once and stores live for the lifetime of the page mount — no `useMemo` / `useEffect` ceremony. Each `observer(() => ...)` wrapper is its own MobX subscription, so re-renders stay scoped to the data each binding reads.
@@ -88,7 +93,7 @@ Inside `setup` you cannot call React hooks (it runs inside a `useState` lazy ini
 - A store has only `@observable` fields and one-line `@action` setters. If you find yourself adding a method that calls a service or composes multiple setters, that logic belongs in a presenter.
 - The store fields should mirror what the view actually consumes. If the sidebar shows one list of items, there's one `sidebarItems` field — not one per source-of-truth (e.g. `sessionCategories` + `libraryCategories`). The presenter decides which source fills the field based on the active mode. See [NavigationStore](src/pages/home/navigation/NavigationStore.ts) + [NavigationPresenter](src/pages/home/navigation/NavigationPresenter.ts).
 - Do not put services on stores. Services flow through the presenter constructor.
-- The truly-global UI stores (`ThemeStore`, `WindowStore`) are owned by `pages/root` and flow into subpages as props on the page install. There is no app-level store container.
+- The truly-global UI stores (`ThemeStore`, `WindowStore`, `SessionStore`) are owned by `pages/root` and flow into subpages as props on the page install. There is no app-level store container.
 - Page-local stores (`NavigationStore`, `TabsStore`, `ProfileStore`, `SettingsStore`) live inside their page's folder and are instantiated in the page's setup.
 - If a store has no presenter (`ThemeStore`, `WindowStore`), it can still expose a one-line action method like `toggle()`. The bar for "needs a presenter" is real orchestration logic, not symmetry.
 
@@ -211,14 +216,20 @@ web/
         themes.ts                    Theme type + lightTheme / darkTheme tokens
         styled.d.ts                  styled-components DefaultTheme augmentation
         platformLayout.ts            pixel constants (title bar height, top inset)
+      session/
+        SessionStore.ts              status (logged-out / logging-in / logged-in), profile, loginError
+        SessionPresenter.ts          login / loginWithProvider / logout; hydrates profile via ProfileService
       window/
         WindowStore.ts               isDesktop / isFullScreen / topInset; subscribes to electronAPI
     pages/
       root/
-        index.tsx                    root page (makePage); owns ThemeStore + WindowStore + ThemeProvider + GlobalStyle + title bar; routes to subpages
-      home/
-        index.tsx                    page install (makePage); default-exported so callers `import HomePage from '@/pages/home'`
-        HomePage.tsx                 stateless layout that takes ActivityBar / Sidebar / Main as props
+        index.tsx                    root page (makePage); owns ThemeStore + WindowStore + SessionStore; routes between LoginPage and AppPage by sessionStore.status
+      login/
+        index.tsx                    login page (makePage); calls SessionPresenter
+        LoginPanel.tsx               stateless email/password form + provider buttons
+      app/
+        index.tsx                    app page install (makePage); default-exported so callers `import AppPage from '@/pages/app'`
+        AppPage.tsx                  stateless layout that takes ActivityBar / Sidebar / Main as props
         navigation/                  activity bar + sidebar feature
           NavigationStore.ts
           NavigationPresenter.ts
@@ -234,13 +245,11 @@ web/
           Composer.tsx               local form state only
           TableOfContents.tsx        local IntersectionObserver state only
           ExampleContent.tsx         static
-        profile/
-          ProfileStore.ts
-          ProfilePresenter.ts
         settings/                    settings subpage (rendered when activeSection === 'settings')
           SettingsStore.ts           developer-mode flag + fake network delay
           SettingsPresenter.ts       writes settings into runtime services (e.g. FakeHttpService.delayMs)
           SettingsPanel.tsx          stateless settings panel (sidebar-item-driven content)
+          UserSettings.tsx           stateless user-settings panel (logout button)
           DeveloperSettings.tsx      stateless developer-settings form
     services/                        backend boundary
       ServicesContext.ts             Services type + Provider + useServices
@@ -270,14 +279,16 @@ web/
 
 | To learn… | Read |
 |---|---|
-| The full install pattern | [src/pages/home/index.tsx](src/pages/home/index.tsx) |
-| Stupid store with single source of truth | [NavigationStore.ts](src/pages/home/navigation/NavigationStore.ts) |
-| Presenter with services + race-safe loader | [NavigationPresenter.ts](src/pages/home/navigation/NavigationPresenter.ts) |
-| Presenter that mutates a service at runtime | [SettingsPresenter.ts](src/pages/home/settings/SettingsPresenter.ts) |
-| Stateless view with loading state | [Sidebar.tsx](src/pages/home/navigation/Sidebar.tsx) |
-| Stateless view + slot pattern | [ChatFrame.tsx](src/pages/home/chat/ChatFrame.tsx) |
+| The full install pattern | [src/pages/app/index.tsx](src/pages/app/index.tsx) |
+| Stupid store with single source of truth | [NavigationStore.ts](src/pages/app/navigation/NavigationStore.ts) |
+| Presenter with services + race-safe loader | [NavigationPresenter.ts](src/pages/app/navigation/NavigationPresenter.ts) |
+| Presenter that mutates a service at runtime | [SettingsPresenter.ts](src/pages/app/settings/SettingsPresenter.ts) |
+| Global presenter (auth) with URL side effects | [SessionPresenter.ts](src/base/session/SessionPresenter.ts) |
+| Stateless view with loading state | [Sidebar.tsx](src/pages/app/navigation/Sidebar.tsx) |
+| Stateless view + slot pattern | [ChatFrame.tsx](src/pages/app/chat/ChatFrame.tsx) |
 | The makePage factory | [base/page/Page.ts](src/base/page/Page.ts) |
-| How global stores are owned/passed | [pages/root/index.tsx](src/pages/root/index.tsx) |
+| How global stores are owned/passed + routing | [pages/root/index.tsx](src/pages/root/index.tsx) |
+| A simple subpage install | [pages/login/index.tsx](src/pages/login/index.tsx) |
 | Service interface + fake | [SessionService.ts](src/services/session/SessionService.ts) + [FakeSessionService.ts](src/services/session/FakeSessionService.ts) |
 | Composition root | [main.tsx](src/main.tsx) |
 
