@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite'
 import styled, { ThemeProvider, createGlobalStyle } from 'styled-components'
-import HomePage from '@/pages/home/HomePage'
+import HomePage from '@/pages/home'
 import { useRootStore } from '@/stores/RootStore'
 import { PLATFORM_LAYOUT } from '@/base/theme/platformLayout'
 

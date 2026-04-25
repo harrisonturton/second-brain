@@ -23,18 +23,19 @@ const sectionTitles: Record<WorkspaceSection, string> = {
 /**
  * HomePage — page install. Setup runs once on mount: it builds the
  * page-local stores + presenters, kicks off initial loads, and binds
- * each `*View` to its presenter via `observer(...)`. The composed
- * subcomponents are passed to `HomePageView` for layout.
+ * each `*View` to its store/presenter via `observer(...)`.
+ *
+ * Bindings read **state from stores** and **actions from presenters**.
+ * Presenters intentionally don't expose state getters — they write into
+ * the store, and views read the store directly.
  */
 export default makePage((_props, { rootStore, services }) => {
   const { themeStore, windowStore } = rootStore
 
-  // Page-local stores (state only).
   const navigationStore = new NavigationStore()
   const tabsStore = new TabsStore()
   const profileStore = new ProfileStore()
 
-  // Presenters wire stores + services into behaviour the views consume.
   const navigationPresenter = new NavigationPresenter(
     navigationStore,
     services.sessionService,
@@ -46,20 +47,17 @@ export default makePage((_props, { rootStore, services }) => {
     services.profileService,
   )
 
-  // Kick off initial loads. Loading flags on the presenters drive the
-  // views' loading states.
-  void navigationPresenter.loadSessionCategories()
-  void navigationPresenter.loadLibraryCategories()
+  void navigationPresenter.loadSidebarItems()
   void tabsPresenter.load()
   void profilePresenter.load()
 
   const ActivityBar = observer(() => (
     <ActivityBarView
-      activeSection={navigationPresenter.activeSection}
+      activeSection={navigationStore.activeSection}
       themeMode={themeStore.mode}
       topInset={windowStore.topInset}
-      avatarInitials={profilePresenter.profile?.initials ?? ''}
-      avatarTitle={profilePresenter.profile?.name ?? 'Profile'}
+      avatarInitials={profileStore.profile?.initials ?? ''}
+      avatarTitle={profileStore.profile?.name ?? 'Profile'}
       onSelectSection={navigationPresenter.selectSection}
       onToggleTheme={() => themeStore.toggle()}
     />
@@ -67,10 +65,10 @@ export default makePage((_props, { rootStore, services }) => {
 
   const Sidebar = observer(() => (
     <SidebarView
-      title={sectionTitles[navigationPresenter.activeSection]}
-      items={navigationPresenter.sidebarItems}
-      loading={navigationPresenter.sidebarLoading}
-      collapsed={navigationPresenter.sidebarCollapsed}
+      title={sectionTitles[navigationStore.activeSection]}
+      items={navigationStore.sidebarItems}
+      loading={navigationStore.sidebarLoading}
+      collapsed={navigationStore.sidebarCollapsed}
       topInset={windowStore.topInset}
       onToggleSidebar={navigationPresenter.toggleSidebar}
     />
@@ -78,8 +76,8 @@ export default makePage((_props, { rootStore, services }) => {
 
   const TabBar = observer(() => (
     <TabBarView
-      tabs={tabsPresenter.tabs}
-      activeTabId={tabsPresenter.activeTabId}
+      tabs={tabsStore.tabs}
+      activeTabId={tabsStore.activeTabId}
       onSelectTab={tabsPresenter.selectTab}
       onCloseTab={tabsPresenter.closeTab}
       onMoveTab={tabsPresenter.moveTab}
@@ -88,7 +86,7 @@ export default makePage((_props, { rootStore, services }) => {
 
   const ChatFrame = observer(() => (
     <ChatFrameView
-      sidebarCollapsed={navigationPresenter.sidebarCollapsed}
+      sidebarCollapsed={navigationStore.sidebarCollapsed}
       topInset={windowStore.topInset}
       tabBar={<TabBar />}
     />

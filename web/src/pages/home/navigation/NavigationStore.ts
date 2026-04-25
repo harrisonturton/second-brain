@@ -9,17 +9,20 @@ export type SidebarItem = {
 
 /**
  * NavigationStore — state for the activity bar + sidebar.
- * Only data: which section is active, whether the sidebar is collapsed,
- * the per-section sidebar items, and per-section loading flags.
- * All fetching and orchestration lives in NavigationPresenter.
+ *
+ * Holds the *final* values the views consume: the active section,
+ * whether the sidebar is collapsed, the items currently shown in the
+ * sidebar, and whether the sidebar is loading. Selecting a section
+ * doesn't change the shape of the state — the items field is the same
+ * array of `SidebarItem` regardless of which section is active. The
+ * presenter is responsible for populating it (from sessions or library)
+ * when the section changes.
  */
 export class NavigationStore {
   @observable activeSection: WorkspaceSection = 'sessions'
   @observable sidebarCollapsed = false
-  @observable sessionCategories: SidebarItem[] = []
-  @observable libraryCategories: SidebarItem[] = []
-  @observable loadingSessionCategories = false
-  @observable loadingLibraryCategories = false
+  @observable sidebarItems: SidebarItem[] = []
+  @observable sidebarLoading = false
 
   constructor() {
     makeObservable(this)
@@ -33,19 +36,11 @@ export class NavigationStore {
     this.sidebarCollapsed = value
   }
 
-  @action setSessionCategories(items: SidebarItem[]) {
-    this.sessionCategories = items
+  @action setSidebarItems(items: SidebarItem[]) {
+    this.sidebarItems = items
   }
 
-  @action setLibraryCategories(items: SidebarItem[]) {
-    this.libraryCategories = items
-  }
-
-  @action setLoadingSessionCategories(value: boolean) {
-    this.loadingSessionCategories = value
-  }
-
-  @action setLoadingLibraryCategories(value: boolean) {
-    this.loadingLibraryCategories = value
+  @action setSidebarLoading(value: boolean) {
+    this.sidebarLoading = value
   }
 }

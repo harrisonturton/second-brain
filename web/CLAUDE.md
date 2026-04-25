@@ -24,8 +24,8 @@ The app uses a strict separation between **rendering**, **state**, **behaviour**
 | Role | Lives in | Responsibility | Allowed to import |
 |---|---|---|---|
 | **View** (stateless component) | `*View.tsx` next to its presenter, or `base/components/` if generic | Render UI. Props in, JSX out. No `useRootStore`, no `observer`, no service calls. **Always named with the `View` suffix** (e.g. `ActivityBarView`, `SidebarView`). | styled-components, icons, types from sibling store |
-| **Store** | `*Store.ts` next to its presenter | Hold observable state. **Data only** — no services, no orchestration, no React. Just `@observable` fields and one-line `@action` setters. | mobx, types from services (for typed fields) |
-| **Presenter** | `*Presenter.ts` next to its store | Behaviour + business logic. Takes its store(s) and any services in the constructor. Exposes derived getters and action methods. No React. | mobx (`action`), the store, service interfaces |
+| **Store** | `*Store.ts` next to its presenter | Hold observable state — **everything the views read**. No services, no orchestration, no React. Just `@observable` fields and one-line `@action` setters. The shape of the store is the shape of what the view consumes; the presenter is responsible for keeping the right values in those fields. | mobx, types from services (for typed fields) |
+| **Presenter** | `*Presenter.ts` next to its store | Behaviour + business logic. Takes its store(s) and any services in the constructor. Exposes **only action methods** — no state getters, no derived `@computed`. Views never read from a presenter. The presenter writes results into the store, and the view reads the store. No React. | mobx (`action`), the store, service interfaces |
 | **Service** | `services/<feature>/` | Backend data fetching. **Interface** + **fake impl** today (real impls land later). All services accept an `HttpService` so the fake can simulate latency to exercise loading states. | http types only |
 
 ### The install layer
@@ -34,23 +34,25 @@ A "stateful component" is just a function that **instantiates the stores + prese
 
 - **`App.tsx`** — installs the global theme + window providers around `<HomePage />`.
 - **`main.tsx`** — composition root. Instantiates `FakeHttpService` + every `Fake*Service` and provides them through `<ServicesProvider>`. Instantiates `RootStore` and provides it through `<RootStoreProvider>`. Swap fakes for real impls here.
-- **`pages/<page>/<Page>.tsx`** — the page install. Built using the `makePage` factory from `@/base/page/Page`. The setup function passed to `makePage` runs once on mount with `(initialProps, { rootStore, services })`, instantiates page-local stores + presenters, kicks off initial loads, wraps each `*View` in `observer(() => <View ... />)` to bind it to its presenter, and returns a root component (typically rendering a `<PageView>` that takes the bound subcomponents as props).
+- **`pages/<page>/index.tsx`** — the page install. Built using the `makePage` factory from `@/base/page/Page`, default-exported so callers `import HomePage from '@/pages/home'`. The setup function passed to `makePage` runs once on mount with `(initialProps, { rootStore, services })`, instantiates page-local stores + presenters, kicks off initial loads, wraps each `*View` in `observer(() => <View ... />)` to bind it (state from the store, actions from the presenter), and returns a root component (typically rendering a `<PageView>` that takes the bound subcomponents as props).
 
 The setup function runs once and stores live for the lifetime of the page mount — no `useMemo` / `useEffect` ceremony. Each `observer(() => ...)` wrapper is its own MobX subscription, so re-renders stay scoped to the data each binding reads. **Do not** wrap views themselves with `observer` — keep them stateless and bind them in the setup function.
 
 Example shape:
 
 ```tsx
-// HomePage.tsx
+// pages/home/index.tsx
 export default makePage((_, { rootStore, services }) => {
   const navStore = new NavigationStore()
   const navPresenter = new NavigationPresenter(navStore, services.sessionService, services.libraryService)
-  void navPresenter.loadSessionCategories()
+  void navPresenter.loadSidebarItems()
 
+  // State comes from the store; actions come from the presenter.
   const Sidebar = observer(() => (
     <SidebarView
-      collapsed={navPresenter.sidebarCollapsed}
-      items={navPresenter.sidebarItems}
+      collapsed={navStore.sidebarCollapsed}
+      items={navStore.sidebarItems}
+      loading={navStore.sidebarLoading}
       onToggleSidebar={navPresenter.toggleSidebar}
     />
   ))
@@ -62,6 +64,7 @@ export default makePage((_, { rootStore, services }) => {
 ### Stores hold state, not behaviour
 
 - A store has only observables + setters. If you find yourself adding a method that calls a service or composes multiple setters, that logic belongs in a presenter.
+- The store fields should mirror what the view actually consumes. If the sidebar shows one list of items, there's one `sidebarItems` field — not one per source-of-truth (e.g. `sessionCategories` + `libraryCategories`). The presenter decides which source fills the field based on the active mode.
 - Do not put services on stores. Services flow through the presenter constructor.
 - `RootStore` is a tiny container of **truly global** stores (`themeStore`, `windowStore`). It does NOT hold page-local stores (e.g. `NavigationStore`, `TabsStore`) — those live inside their page and are owned by the page install.
 - If a store has no presenter (`ThemeStore`, `WindowStore`), it can still expose a one-line action method like `toggle()`. The bar for "needs a presenter" is real orchestration logic, not symmetry.
@@ -70,7 +73,8 @@ export default makePage((_, { rootStore, services }) => {
 
 - Constructor takes `(store, ...services)`. Tests hand it a fake store and a fake service.
 - Methods that mutate multiple store fields are wrapped with `action(...)` from MobX so the change is one transaction.
-- Async loaders set a loading flag, fetch, set the data, and unset the flag in `finally`. The view reads both off the presenter.
+- Async loaders set a loading flag on the store, fetch, set the data on the store, and unset the loading flag in `finally`. **The view reads both off the store, never off the presenter.**
+- For loaders that can race (e.g. rapid section switches refetching the same field), use a monotonic load token to discard stale results — see `NavigationPresenter.loadSidebarItems`.
 - A presenter that contains essentially zero logic (just passthrough getters and one-line wrappers) is a smell — drop the presenter and let the install file call the store/service directly.
 
 ### Services have interfaces and fakes
@@ -115,7 +119,7 @@ web/
         WindowStore.ts               isDesktop / isFullScreen / topInset; subscribes to electronAPI
     pages/
       home/
-        HomePage.tsx                 page install (makePage); instantiates stores + presenters and binds views
+        index.tsx                    page install (makePage); default-exported so callers `import HomePage from '@/pages/home'`
         HomePageView.tsx             stateless layout that takes ActivityBar / Sidebar / ChatFrame as props
         navigation/                  activity bar + sidebar feature
           NavigationStore.ts

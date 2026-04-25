@@ -4,26 +4,15 @@ import type { TabsStore } from './TabsStore'
 
 /**
  * TabsPresenter — orchestrates the open-sessions tab strip.
- * Loads sessions through SessionService on `load()`, then exposes
- * read access + close/move/select behaviour for the TabBar view.
+ *
+ * Action-only: exposes load + select/close/move methods. Views read
+ * tabs/activeTabId/loading directly from TabsStore.
  */
 export class TabsPresenter {
   constructor(
     private store: TabsStore,
     private sessionService: SessionService,
   ) {}
-
-  get tabs() {
-    return this.store.tabs
-  }
-
-  get activeTabId() {
-    return this.store.activeTabId
-  }
-
-  get loading() {
-    return this.store.loading
-  }
 
   load = async (): Promise<void> => {
     this.store.setLoading(true)

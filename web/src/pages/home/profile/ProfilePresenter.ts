@@ -3,22 +3,14 @@ import type { ProfileStore } from './ProfileStore'
 
 /**
  * ProfilePresenter — fetches the current user's profile through
- * ProfileService and exposes the result + loading flag for views
- * (today: just the avatar in ActivityBar).
+ * ProfileService and writes it into ProfileStore. Action-only;
+ * views read profile/loading from the store.
  */
 export class ProfilePresenter {
   constructor(
     private store: ProfileStore,
     private profileService: ProfileService,
   ) {}
-
-  get profile() {
-    return this.store.profile
-  }
-
-  get loading() {
-    return this.store.loading
-  }
 
   load = async (): Promise<void> => {
     this.store.setLoading(true)
