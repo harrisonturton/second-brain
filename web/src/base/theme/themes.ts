@@ -93,10 +93,10 @@ export const darkTheme: Theme = {
 export const sepiaTheme: Theme = {
   fontFamily: SERIF_FONT_STACK,
 
-  pageBg: '#f1ece1',
-  panelBg: '#faf6ec',
-  panelBgFade: 'rgba(250, 246, 236, 0)',
-  panelBorder: '#e5dfd0',
+  pageBg: '#f4f1ea',
+  panelBg: '#fbf9f4',
+  panelBgFade: 'rgba(251, 249, 244, 0)',
+  panelBorder: '#ebe7dd',
   panelShadow: '0 3px 10px rgba(80, 60, 20, 0.04), 0 1px 2px rgba(80, 60, 20, 0.03)',
 
   textPrimary: '#322a1f',
@@ -107,13 +107,13 @@ export const sepiaTheme: Theme = {
 
   hoverBg: 'rgba(60, 40, 10, 0.05)',
   activeBg: 'rgba(60, 40, 10, 0.07)',
-  subtleHoverBg: '#f0ebde',
+  subtleHoverBg: '#f2eee5',
   divider: 'rgba(60, 40, 10, 0.08)',
 
   accentBg: '#322a1f',
   accentBgHover: '#42392c',
   accentBgDisabled: '#e0d8c5',
-  accentFg: '#faf6ec',
+  accentFg: '#fbf9f4',
 
   tocBar: '#dcd4be',
   tocBarActive: '#8c8270',
