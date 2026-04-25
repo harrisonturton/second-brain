@@ -1,27 +1,30 @@
 import { useState, type FormEvent } from 'react'
 import styled from 'styled-components'
 import type { LoginProvider } from '@/base/session/SessionPresenter'
+import { LoginShader } from './LoginShader'
 
 const Backdrop = styled.div<{ $topInset: number }>`
   position: fixed;
   top: ${({ $topInset }) => `${$topInset}px`};
-  left: 4px;
-  right: 4px;
-  bottom: 4px;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${({ theme }) => theme.panelBg};
-  border: 1px solid ${({ theme }) => theme.panelBorder};
-  border-radius: 7px;
-  box-shadow: ${({ theme }) => theme.panelShadow};
+  overflow: hidden;
   transition: top 260ms cubic-bezier(0.32, 0.72, 0, 1);
 `
 
 const Card = styled.div`
-  width: 100%;
-  max-width: 360px;
+  position: relative;
+  z-index: 1;
+  width: 360px;
   padding: 32px;
+  background: ${({ theme }) => theme.panelBg};
+  border: 1px solid ${({ theme }) => theme.panelBorder};
+  border-radius: 10px;
+  box-shadow: ${({ theme }) => theme.panelShadow};
 `
 
 const Title = styled.h1`
@@ -178,6 +181,7 @@ export function LoginPanel({
 
   return (
     <Backdrop $topInset={topInset}>
+      <LoginShader />
       <Card>
         <Title>Welcome back</Title>
         <Subtitle>Sign in to continue.</Subtitle>
