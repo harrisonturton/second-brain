@@ -2,6 +2,7 @@ import styled from 'styled-components'
 import { BookOpenIcon } from '@/base/icons/BookOpenIcon'
 import { ChatBubblesIcon } from '@/base/icons/ChatBubblesIcon'
 import { CogIcon } from '@/base/icons/CogIcon'
+import { EyeIcon } from '@/base/icons/EyeIcon'
 import { MoonIcon } from '@/base/icons/MoonIcon'
 import { SearchIcon } from '@/base/icons/SearchIcon'
 import { SparklesIcon } from '@/base/icons/SparklesIcon'
@@ -77,6 +78,15 @@ const Avatar = styled.button`
   }
 `
 
+function nextThemeToggle(mode: ThemeMode): {
+  Icon: typeof ChatBubblesIcon
+  label: string
+} {
+  if (mode === 'light') return { Icon: EyeIcon, label: 'Switch to sepia theme' }
+  if (mode === 'sepia') return { Icon: MoonIcon, label: 'Switch to dark theme' }
+  return { Icon: SunIcon, label: 'Switch to light theme' }
+}
+
 const sectionIcons: { id: WorkspaceSection; label: string; Icon: typeof ChatBubblesIcon }[] = [
   { id: 'sessions', label: 'Sessions', Icon: ChatBubblesIcon },
   { id: 'library', label: 'Library', Icon: BookOpenIcon },
@@ -109,7 +119,7 @@ export function ActivityBar(props: ActivityBarProps) {
     onProfileClick,
     onOpenNewSearch,
   } = props
-  const isDark = themeMode === 'dark'
+  const themeToggle = nextThemeToggle(themeMode)
 
   return (
     <Strip $topInset={topInset}>
@@ -137,11 +147,11 @@ export function ActivityBar(props: ActivityBarProps) {
       <IconButton
         $active={false}
         onClick={onToggleTheme}
-        aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-        title={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+        aria-label={themeToggle.label}
+        title={themeToggle.label}
         type="button"
       >
-        {isDark ? <SunIcon /> : <MoonIcon />}
+        <themeToggle.Icon />
       </IconButton>
       <IconButton
         $active={activeSection === 'settings'}

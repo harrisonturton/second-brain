@@ -22,6 +22,8 @@ export class ThemeStore {
   }
 
   @action toggle() {
-    this.mode = this.mode === 'light' ? 'dark' : 'light'
+    const cycle: ThemeMode[] = ['light', 'sepia', 'dark']
+    const next = (cycle.indexOf(this.mode) + 1) % cycle.length
+    this.mode = cycle[next]
   }
 }

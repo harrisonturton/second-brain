@@ -79,8 +79,36 @@ export const darkTheme: Theme = {
   tocBarActive: '#888888',
 }
 
+export const sepiaTheme: Theme = {
+  pageBg: '#e8dcc4',
+  panelBg: '#f4ead3',
+  panelBgFade: 'rgba(244, 234, 211, 0)',
+  panelBorder: '#d6c9aa',
+  panelShadow: '0 3px 10px rgba(80, 60, 20, 0.06), 0 1px 2px rgba(80, 60, 20, 0.04)',
+
+  textPrimary: '#3a2e1c',
+  textBody: '#5a4a32',
+  textSecondary: '#8a7656',
+  textTertiary: '#b3a482',
+  textMuted: '#6b5a40',
+
+  hoverBg: 'rgba(60, 40, 10, 0.06)',
+  activeBg: 'rgba(60, 40, 10, 0.08)',
+  subtleHoverBg: '#ebe0c5',
+  divider: 'rgba(60, 40, 10, 0.1)',
+
+  accentBg: '#3a2e1c',
+  accentBgHover: '#4a3d28',
+  accentBgDisabled: '#d6c9aa',
+  accentFg: '#f4ead3',
+
+  tocBar: '#cfc1a2',
+  tocBarActive: '#8a7656',
+}
+
 export const themesByMode = {
   light: lightTheme,
+  sepia: sepiaTheme,
   dark: darkTheme,
 } as const
 
