@@ -32,9 +32,9 @@ The app uses a strict separation between **rendering**, **state**, **behaviour**
 
 A "stateful component" is just a function that **instantiates the stores + presenters + services it needs and wires them to stateless views**. These are the install files:
 
-- **`App.tsx`** — installs the global theme + window providers around `<HomePage />`.
-- **`main.tsx`** — composition root. Instantiates `FakeHttpService` + every `Fake*Service` and provides them through `<ServicesProvider>`. Instantiates `RootStore` and provides it through `<RootStoreProvider>`. Swap fakes for real impls here.
-- **`pages/<page>/index.tsx`** — the page install. Built using the `makePage` factory from `@/base/page/Page`, default-exported so callers `import HomePage from '@/pages/home'`. The setup function passed to `makePage` runs once on mount with `(initialProps, { rootStore, services })`, instantiates page-local stores + presenters, kicks off initial loads, wraps each `*View` in `observer(() => <View ... />)` to bind it (state from the store, actions from the presenter), and returns a root component (typically rendering a `<PageView>` that takes the bound subcomponents as props).
+- **`main.tsx`** — composition root. Instantiates `FakeHttpService` + every `Fake*Service` and provides them through `<ServicesProvider>`. Renders `<RootPage />`. Swap fakes for real impls here.
+- **`pages/root/index.tsx`** — the root page. Built with `makePage`. Owns the truly-global UI stores (`ThemeStore`, `WindowStore`) and the global styling concerns (`<ThemeProvider>`, `createGlobalStyle` for body bg, the macOS title-bar overlay). It picks the subpage from the URL and passes the global stores down as props. There is **no `RootStore`** — `pages/root` is the mechanism that makes the global stores reachable from each page.
+- **`pages/<page>/index.tsx`** — a subpage install. Built with `makePage`, default-exported so callers `import HomePage from '@/pages/home'`. The setup function runs once on mount with `(initialProps, { services })`, instantiates page-local stores + presenters, kicks off initial loads, wraps each stateless component in `observer(() => <Component ... />)` to bind it (state from the store, actions from the presenter), and returns a root component (typically rendering a stateless layout that takes the bound subcomponents as props). Subpages receive the global stores (theme, window) through `initialProps`, **not** through context.
 
 The setup function runs once and stores live for the lifetime of the page mount — no `useMemo` / `useEffect` ceremony. Each `observer(() => ...)` wrapper is its own MobX subscription, so re-renders stay scoped to the data each binding reads. **Do not** wrap views themselves with `observer` — keep them stateless and bind them in the setup function.
 
@@ -67,7 +67,8 @@ export default makePage((_, { rootStore, services }) => {
 - A store has only observables + setters. If you find yourself adding a method that calls a service or composes multiple setters, that logic belongs in a presenter.
 - The store fields should mirror what the view actually consumes. If the sidebar shows one list of items, there's one `sidebarItems` field — not one per source-of-truth (e.g. `sessionCategories` + `libraryCategories`). The presenter decides which source fills the field based on the active mode.
 - Do not put services on stores. Services flow through the presenter constructor.
-- `RootStore` is a tiny container of **truly global** stores (`themeStore`, `windowStore`). It does NOT hold page-local stores (e.g. `NavigationStore`, `TabsStore`) — those live inside their page and are owned by the page install.
+- The truly-global UI stores (`ThemeStore`, `WindowStore`) are owned by `pages/root` and flow into subpages as props on the page install. There is no app-level store container.
+- Page-local stores (`NavigationStore`, `TabsStore`, `ProfileStore`, …) live inside their page's folder and are instantiated in the page's setup.
 - If a store has no presenter (`ThemeStore`, `WindowStore`), it can still expose a one-line action method like `toggle()`. The bar for "needs a presenter" is real orchestration logic, not symmetry.
 
 ### Presenters are testable behaviour
@@ -104,8 +105,7 @@ web/
     main.ts
     preload.ts
   src/
-    App.tsx                          install: global providers
-    main.tsx                         composition root: services + RootStore
+    main.tsx                         composition root: services + <RootPage/>
     electronApi.ts                   window.electronAPI typing & accessor
     base/                            cross-cutting / non-feature code
       icons/                         SVG-as-React-component icons
@@ -119,6 +119,8 @@ web/
       window/
         WindowStore.ts               isDesktop / isFullScreen / topInset; subscribes to electronAPI
     pages/
+      root/
+        index.tsx                    root page (makePage); owns ThemeStore + WindowStore + ThemeProvider + GlobalStyle + title bar; routes to subpages
       home/
         index.tsx                    page install (makePage); default-exported so callers `import HomePage from '@/pages/home'`
         HomePage.tsx                 stateless layout that takes ActivityBar / Sidebar / ChatFrame as props
@@ -154,8 +156,6 @@ web/
       library/
         LibraryService.ts
         FakeLibraryService.ts
-    stores/
-      RootStore.ts                   global stores (themeStore, windowStore) + useRootStore
   vite.config.ts                     `@/*` alias → ./src/*; base="./" in app-desktop mode
   tsconfig.app.json                  paths: { "@/*": ["./src/*"] }
   tsconfig.electron.json             main-process compile (outDir: dist-desktop)

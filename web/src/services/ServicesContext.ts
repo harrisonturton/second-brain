@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react'
+import type { HttpService } from './http/HttpService'
 import type { LibraryService } from './library/LibraryService'
 import type { ProfileService } from './profile/ProfileService'
 import type { SessionService } from './session/SessionService'
@@ -10,6 +11,7 @@ import type { SessionService } from './session/SessionService'
  * any consumer code.
  */
 export type Services = {
+  httpService: HttpService
   sessionService: SessionService
   profileService: ProfileService
   libraryService: LibraryService
