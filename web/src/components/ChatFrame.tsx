@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { Composer } from './Composer'
 
 const Frame = styled.div`
   position: fixed;
@@ -29,6 +30,7 @@ export function ChatFrame() {
       <Messages>
         <Column />
       </Messages>
+      <Composer />
     </Frame>
   )
 }
