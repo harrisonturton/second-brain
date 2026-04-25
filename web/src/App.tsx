@@ -4,7 +4,7 @@ import { Sidebar } from './components/Sidebar'
 import { useRootStore } from './stores/RootStore'
 
 const Main = styled.main`
-  margin-left: 264px;
+  margin-left: 252px;
   padding: 24px;
   min-height: 100svh;
 `
