@@ -64,6 +64,21 @@ function withAlpha(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 
+function relativeLuminance(hex: string): number {
+  const [r, g, b] = hexToRgb(hex)
+  return 0.299 * r + 0.587 * g + 0.114 * b
+}
+
+// Pick an alpha for activeBg such that overlaying accent on pageTint
+// darkens it by the same ~7% regardless of accent luminance — keeps the
+// active highlight visually consistent with the original neutral theme.
+function activeWashAlpha(accent: string, pageTint: string): number {
+  const ay = relativeLuminance(accent)
+  const py = relativeLuminance(pageTint)
+  if (py <= ay) return 0.16
+  return Math.min(0.22, Math.max(0.06, (0.07 * py) / (py - ay)))
+}
+
 export type Swatch = { value: string; label: string }
 
 export const LIGHT_ACCENT_SWATCHES: Swatch[] = [
@@ -106,7 +121,7 @@ export function buildLightTheme(accent: string, pageTint: string): Theme {
     textMuted: '#6b6b6b',
 
     hoverBg: 'rgba(0, 0, 0, 0.06)',
-    activeBg: withAlpha(accent, 0.16),
+    activeBg: withAlpha(accent, activeWashAlpha(accent, pageTint)),
     activeFg: darken(accent, 0.35),
     subtleHoverBg: darken(pageTint, 0.015),
     divider: 'rgba(0, 0, 0, 0.08)',

@@ -47,9 +47,10 @@ const SwatchButton = styled.button<{ $color: string; $selected: boolean }>`
   border-radius: 6px;
   cursor: pointer;
   transition: transform 100ms ease, box-shadow 120ms ease;
-  outline: ${({ $selected, theme }) =>
-    $selected ? `2px solid ${theme.activeFg}` : '2px solid transparent'};
-  outline-offset: 1px;
+  box-shadow: ${({ $selected, theme }) =>
+    $selected
+      ? `0 0 0 1px ${theme.accentBg}, 0 0 0 3px ${theme.activeBg}`
+      : 'none'};
 
   &:hover {
     transform: scale(1.06);
