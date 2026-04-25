@@ -5,6 +5,10 @@ import type { SessionStore } from '@/base/session/SessionStore'
 import type { ThemeStore } from '@/base/theme/ThemeStore'
 import type { WindowStore } from '@/base/window/WindowStore'
 import { AppPage } from './AppPage'
+import {
+  BreadcrumbBar,
+  type BreadcrumbCrumb,
+} from './breadcrumbs/BreadcrumbBar'
 import { ChatFrame } from './chat/ChatFrame'
 import { BrowsePanel } from './library/BrowsePanel'
 import { LibraryPresenter } from './library/LibraryPresenter'
@@ -116,11 +120,35 @@ export default makePage<{
       />
     ))
 
+    const BreadcrumbBarView = observer(() => {
+      const section = navigationStore.activeSection
+      const selectedId = navigationStore.selectedSidebarItemId
+      const selectedItem = navigationStore.sidebarItems.find(
+        (i) => i.id === selectedId,
+      )
+      const crumbs: BreadcrumbCrumb[] = [
+        {
+          id: `section:${section}`,
+          label: sectionTitles[section],
+          onClick: () => navigationPresenter.selectSection(section),
+        },
+      ]
+      if (selectedItem) {
+        crumbs.push({
+          id: `item:${selectedItem.id}`,
+          label: selectedItem.label,
+          onClick: () => navigationPresenter.selectSidebarItem(selectedItem.id),
+        })
+      }
+      return <BreadcrumbBar crumbs={crumbs} />
+    })
+
     const ChatFrameView = observer(() => (
       <ChatFrame
         sidebarCollapsed={navigationStore.sidebarCollapsed}
         topInset={windowStore.topInset}
         tabBar={<TabBarView />}
+        breadcrumbBar={<BreadcrumbBarView />}
       />
     ))
 
@@ -140,6 +168,7 @@ export default makePage<{
         topInset={windowStore.topInset}
         userSettings={<UserSettings onLogout={sessionPresenter.logout} />}
         developerSettings={<DeveloperSettingsView />}
+        breadcrumbBar={<BreadcrumbBarView />}
       />
     ))
 
@@ -149,6 +178,7 @@ export default makePage<{
         loading={libraryStore.documentsLoading}
         sidebarCollapsed={navigationStore.sidebarCollapsed}
         topInset={windowStore.topInset}
+        breadcrumbBar={<BreadcrumbBarView />}
       />
     ))
 

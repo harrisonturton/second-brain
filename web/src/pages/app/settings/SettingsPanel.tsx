@@ -49,6 +49,7 @@ export type SettingsPanelProps = {
    *  sidebar item is rendered. */
   userSettings: ReactNode
   developerSettings: ReactNode
+  breadcrumbBar: ReactNode
 }
 
 export function SettingsPanel({
@@ -57,6 +58,7 @@ export function SettingsPanel({
   topInset,
   userSettings,
   developerSettings,
+  breadcrumbBar,
 }: SettingsPanelProps) {
   return (
     <Panel $sidebarCollapsed={sidebarCollapsed} $topInset={topInset}>
@@ -69,6 +71,7 @@ export function SettingsPanel({
           )}
         </Column>
       </Body>
+      {breadcrumbBar}
     </Panel>
   )
 }

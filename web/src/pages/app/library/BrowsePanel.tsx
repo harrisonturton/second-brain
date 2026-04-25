@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import styled, { keyframes } from 'styled-components'
 import type { LibraryDocument } from '@/services/library/LibraryService'
 
@@ -132,6 +133,7 @@ export type BrowsePanelProps = {
   loading: boolean
   sidebarCollapsed: boolean
   topInset: number
+  breadcrumbBar: ReactNode
 }
 
 export function BrowsePanel({
@@ -139,6 +141,7 @@ export function BrowsePanel({
   loading,
   sidebarCollapsed,
   topInset,
+  breadcrumbBar,
 }: BrowsePanelProps) {
   const showSkeleton = loading && documents.length === 0
   const showEmpty = !loading && documents.length === 0
@@ -207,6 +210,7 @@ export function BrowsePanel({
           </Table>
         )}
       </Scroll>
+      {breadcrumbBar}
     </Frame>
   )
 }

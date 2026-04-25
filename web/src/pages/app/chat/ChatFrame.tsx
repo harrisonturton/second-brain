@@ -68,12 +68,15 @@ export type ChatFrameProps = {
   topInset: number
   /** Stateful tab strip; injected as a slot so the layout stays stateless. */
   tabBar: ReactNode
+  /** Stateful breadcrumb strip rendered at the bottom of the panel. */
+  breadcrumbBar: ReactNode
 }
 
 export function ChatFrame({
   sidebarCollapsed,
   topInset,
   tabBar,
+  breadcrumbBar,
 }: ChatFrameProps) {
   return (
     <Frame $sidebarCollapsed={sidebarCollapsed} $topInset={topInset}>
@@ -91,6 +94,7 @@ export function ChatFrame({
           </ComposerSlot>
         </Main>
       </Body>
+      {breadcrumbBar}
     </Frame>
   )
 }
