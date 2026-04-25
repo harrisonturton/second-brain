@@ -48,9 +48,7 @@ const SwatchButton = styled.button<{ $color: string; $selected: boolean }>`
   cursor: pointer;
   transition: transform 100ms ease, box-shadow 120ms ease;
   box-shadow: ${({ $selected, theme }) =>
-    $selected
-      ? `0 0 0 1px ${theme.accentBg}, 0 0 0 3px ${theme.activeBg}`
-      : 'none'};
+    $selected ? `0 0 0 2px ${theme.activeBg}` : 'none'};
 
   &:hover {
     transform: scale(1.06);
