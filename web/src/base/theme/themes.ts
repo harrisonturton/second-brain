@@ -59,7 +59,7 @@ function mixHex(hex: string, target: number, amount: number): string {
 const lighten = (hex: string, amount: number) => mixHex(hex, 255, amount)
 const darken = (hex: string, amount: number) => mixHex(hex, 0, amount)
 
-function withAlpha(hex: string, alpha: number): string {
+export function withAlpha(hex: string, alpha: number): string {
   const [r, g, b] = hexToRgb(hex)
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }

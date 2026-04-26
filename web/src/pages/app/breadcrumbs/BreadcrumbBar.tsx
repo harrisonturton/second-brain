@@ -1,6 +1,7 @@
 import { Fragment } from 'react'
 import styled from 'styled-components'
 import { ChevronRightIcon } from '@/base/icons/ChevronRightIcon'
+import { withAlpha } from '@/base/theme/themes'
 
 const Wrap = styled.div`
   position: absolute;
@@ -23,11 +24,13 @@ const Bar = styled.div`
 `
 
 const Fade = styled.div`
-  height: 24px;
+  height: 48px;
   background: linear-gradient(
     to bottom,
-    ${({ theme }) => theme.panelBg},
-    transparent
+    ${({ theme }) => theme.panelBg} 0%,
+    ${({ theme }) => withAlpha(theme.panelBg, 0.85)} 30%,
+    ${({ theme }) => withAlpha(theme.panelBg, 0.5)} 60%,
+    ${({ theme }) => withAlpha(theme.panelBg, 0)} 100%
   );
 `
 
