@@ -1,18 +1,20 @@
-import type { ReactNode } from 'react'
+import type { PointerEvent as ReactPointerEvent, ReactNode } from 'react'
 import styled, { keyframes } from 'styled-components'
 import { DotIcon } from '@/base/icons/DotIcon'
 import { MoreVerticalIcon } from '@/base/icons/MoreVerticalIcon'
 import { XIcon } from '@/base/icons/XIcon'
 import type { SidebarItem } from './NavigationStore'
 
-const PANEL_WIDTH = 220
-
-const Container = styled.aside<{ $collapsed: boolean; $topInset: number }>`
+const Container = styled.aside<{
+  $collapsed: boolean
+  $topInset: number
+  $width: number
+}>`
   position: fixed;
   top: ${({ $topInset }) => `${$topInset}px`};
   left: 44px;
   bottom: 4px;
-  width: ${PANEL_WIDTH}px;
+  width: ${({ $width }) => `${$width}px`};
   background: ${({ theme }) => theme.panelBg};
   border: 1px solid ${({ theme }) => theme.panelBorder};
   border-radius: 7px;
@@ -26,6 +28,41 @@ const Container = styled.aside<{ $collapsed: boolean; $topInset: number }>`
     opacity 200ms ease,
     transform 260ms cubic-bezier(0.32, 0.72, 0, 1),
     top 260ms cubic-bezier(0.32, 0.72, 0, 1);
+`
+
+const ResizeHandle = styled.div<{
+  $left: number
+  $topInset: number
+  $hidden: boolean
+  $resizing: boolean
+}>`
+  position: fixed;
+  top: ${({ $topInset }) => `${$topInset}px`};
+  left: ${({ $left }) => `${$left - 3}px`};
+  bottom: 4px;
+  width: 7px;
+  cursor: col-resize;
+  z-index: 60;
+  pointer-events: ${({ $hidden }) => ($hidden ? 'none' : 'auto')};
+  opacity: ${({ $hidden }) => ($hidden ? 0 : 1)};
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    border-radius: 1px;
+    background: ${({ theme }) => theme.activeBg};
+    opacity: ${({ $resizing }) => ($resizing ? 1 : 0)};
+    transition: opacity 120ms ease;
+  }
+
+  &:hover::before {
+    opacity: 1;
+  }
 `
 
 const PanelTitle = styled.div`
@@ -190,8 +227,11 @@ export type SidebarProps = {
   loading: boolean
   collapsed: boolean
   topInset: number
+  width: number
+  resizing: boolean
   onSelectItem: (id: string) => void
   onToggleSidebar: () => void
+  onResizeStart: (e: ReactPointerEvent<HTMLDivElement>) => void
   /** Optional row rendered above the items list, styled like an entry
    *  but with a leading icon. Used by the sessions section for "New
    *  session". */
@@ -208,63 +248,78 @@ export function Sidebar(props: SidebarProps) {
     loading,
     collapsed,
     topInset,
+    width,
+    resizing,
     onSelectItem,
     onToggleSidebar,
+    onResizeStart,
     leadingAction,
     itemsHeader,
   } = props
 
   return (
-    <Container $collapsed={collapsed} $topInset={topInset}>
-      <PanelTitle>{title}</PanelTitle>
-      <ToggleButton
-        onClick={onToggleSidebar}
-        aria-label="Close sidebar"
-      >
-        <XIcon />
-      </ToggleButton>
-      <Items>
-        {leadingAction && (
-          <Item $selected={false}>
-            <Label
-              $selected={false}
-              onClick={leadingAction.onClick}
-            >
-              <LeadingIcon>{leadingAction.icon}</LeadingIcon>
-              {leadingAction.label}
-            </Label>
-          </Item>
-        )}
-        {itemsHeader && <GroupHeader>{itemsHeader}</GroupHeader>}
-        {loading && items.length === 0 ? (
-          <>
-            <SkeletonRow />
-            <SkeletonRow />
-            <SkeletonRow />
-            <SkeletonRow />
-          </>
-        ) : (
-          items.map((item) => {
-            const selected = item.id === selectedItemId
-            return (
-              <Item key={item.id} $selected={selected}>
-                <Label
-                  $selected={selected}
-                  onClick={() => onSelectItem(item.id)}
-                >
-                  <LeadingIcon>
-                    <DotIcon />
-                  </LeadingIcon>
-                  {item.label}
-                </Label>
-                <MoreButton aria-label={`More options for ${item.label}`}>
-                  <MoreVerticalIcon />
-                </MoreButton>
-              </Item>
-            )
-          })
-        )}
-      </Items>
-    </Container>
+    <>
+      <Container $collapsed={collapsed} $topInset={topInset} $width={width}>
+        <PanelTitle>{title}</PanelTitle>
+        <ToggleButton
+          onClick={onToggleSidebar}
+          aria-label="Close sidebar"
+        >
+          <XIcon />
+        </ToggleButton>
+        <Items>
+          {leadingAction && (
+            <Item $selected={false}>
+              <Label
+                $selected={false}
+                onClick={leadingAction.onClick}
+              >
+                <LeadingIcon>{leadingAction.icon}</LeadingIcon>
+                {leadingAction.label}
+              </Label>
+            </Item>
+          )}
+          {itemsHeader && <GroupHeader>{itemsHeader}</GroupHeader>}
+          {loading && items.length === 0 ? (
+            <>
+              <SkeletonRow />
+              <SkeletonRow />
+              <SkeletonRow />
+              <SkeletonRow />
+            </>
+          ) : (
+            items.map((item) => {
+              const selected = item.id === selectedItemId
+              return (
+                <Item key={item.id} $selected={selected}>
+                  <Label
+                    $selected={selected}
+                    onClick={() => onSelectItem(item.id)}
+                  >
+                    <LeadingIcon>
+                      <DotIcon />
+                    </LeadingIcon>
+                    {item.label}
+                  </Label>
+                  <MoreButton aria-label={`More options for ${item.label}`}>
+                    <MoreVerticalIcon />
+                  </MoreButton>
+                </Item>
+              )
+            })
+          )}
+        </Items>
+      </Container>
+      <ResizeHandle
+        $left={44 + width}
+        $topInset={topInset}
+        $hidden={collapsed}
+        $resizing={resizing}
+        onPointerDown={onResizeStart}
+        role="separator"
+        aria-label="Resize sidebar"
+        aria-orientation="vertical"
+      />
+    </>
   )
 }

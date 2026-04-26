@@ -2,10 +2,16 @@ import type { ReactNode } from 'react'
 import styled, { keyframes } from 'styled-components'
 import type { LibraryDocument } from '@/services/library/LibraryService'
 
-const Frame = styled.div<{ $sidebarCollapsed: boolean; $topInset: number }>`
+const Frame = styled.div<{
+  $sidebarCollapsed: boolean
+  $topInset: number
+  $sidebarWidth: number
+  $resizing: boolean
+}>`
   position: fixed;
   top: ${({ $topInset }) => `${$topInset}px`};
-  left: ${({ $sidebarCollapsed }) => ($sidebarCollapsed ? '44px' : '268px')};
+  left: ${({ $sidebarCollapsed, $sidebarWidth }) =>
+    $sidebarCollapsed ? '44px' : `${44 + $sidebarWidth + 4}px`};
   right: 4px;
   bottom: 4px;
   display: flex;
@@ -16,9 +22,10 @@ const Frame = styled.div<{ $sidebarCollapsed: boolean; $topInset: number }>`
   box-shadow: ${({ theme }) => theme.panelShadow};
   overflow: hidden;
   will-change: left;
-  transition:
-    left 260ms cubic-bezier(0.32, 0.72, 0, 1),
-    top 260ms cubic-bezier(0.32, 0.72, 0, 1);
+  transition: ${({ $resizing }) =>
+    $resizing
+      ? 'top 260ms cubic-bezier(0.32, 0.72, 0, 1)'
+      : 'left 260ms cubic-bezier(0.32, 0.72, 0, 1), top 260ms cubic-bezier(0.32, 0.72, 0, 1)'};
 `
 
 const Header = styled.div`
@@ -133,6 +140,8 @@ export type BrowsePanelProps = {
   loading: boolean
   sidebarCollapsed: boolean
   topInset: number
+  sidebarWidth: number
+  resizing: boolean
   breadcrumbBar: ReactNode
 }
 
@@ -141,13 +150,20 @@ export function BrowsePanel({
   loading,
   sidebarCollapsed,
   topInset,
+  sidebarWidth,
+  resizing,
   breadcrumbBar,
 }: BrowsePanelProps) {
   const showSkeleton = loading && documents.length === 0
   const showEmpty = !loading && documents.length === 0
 
   return (
-    <Frame $sidebarCollapsed={sidebarCollapsed} $topInset={topInset}>
+    <Frame
+      $sidebarCollapsed={sidebarCollapsed}
+      $topInset={topInset}
+      $sidebarWidth={sidebarWidth}
+      $resizing={resizing}
+    >
       <Header>
         <Title>Browse</Title>
         {!showSkeleton && !showEmpty && (

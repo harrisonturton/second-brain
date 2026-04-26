@@ -1,10 +1,16 @@
 import type { ReactNode } from 'react'
 import styled from 'styled-components'
 
-const Panel = styled.div<{ $sidebarCollapsed: boolean; $topInset: number }>`
+const Panel = styled.div<{
+  $sidebarCollapsed: boolean
+  $topInset: number
+  $sidebarWidth: number
+  $resizing: boolean
+}>`
   position: fixed;
   top: ${({ $topInset }) => `${$topInset}px`};
-  left: ${({ $sidebarCollapsed }) => ($sidebarCollapsed ? '44px' : '268px')};
+  left: ${({ $sidebarCollapsed, $sidebarWidth }) =>
+    $sidebarCollapsed ? '44px' : `${44 + $sidebarWidth + 4}px`};
   right: 4px;
   bottom: 4px;
   display: flex;
@@ -15,9 +21,10 @@ const Panel = styled.div<{ $sidebarCollapsed: boolean; $topInset: number }>`
   box-shadow: ${({ theme }) => theme.panelShadow};
   overflow: hidden;
   will-change: left;
-  transition:
-    left 260ms cubic-bezier(0.32, 0.72, 0, 1),
-    top 260ms cubic-bezier(0.32, 0.72, 0, 1);
+  transition: ${({ $resizing }) =>
+    $resizing
+      ? 'top 260ms cubic-bezier(0.32, 0.72, 0, 1)'
+      : 'left 260ms cubic-bezier(0.32, 0.72, 0, 1), top 260ms cubic-bezier(0.32, 0.72, 0, 1)'};
 `
 
 const Body = styled.div`
@@ -44,6 +51,8 @@ export type SettingsPanelProps = {
   selectedItemId: string | null
   sidebarCollapsed: boolean
   topInset: number
+  sidebarWidth: number
+  resizing: boolean
   /** Slots for the per-item settings views. The install file binds
    *  them to their stores/presenters; only the slot for the selected
    *  sidebar item is rendered. */
@@ -57,13 +66,20 @@ export function SettingsPanel({
   selectedItemId,
   sidebarCollapsed,
   topInset,
+  sidebarWidth,
+  resizing,
   userSettings,
   appearanceSettings,
   developerSettings,
   breadcrumbBar,
 }: SettingsPanelProps) {
   return (
-    <Panel $sidebarCollapsed={sidebarCollapsed} $topInset={topInset}>
+    <Panel
+      $sidebarCollapsed={sidebarCollapsed}
+      $topInset={topInset}
+      $sidebarWidth={sidebarWidth}
+      $resizing={resizing}
+    >
       <Body>
         <Column>
           {selectedItemId === 'user' && userSettings}

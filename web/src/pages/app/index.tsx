@@ -162,8 +162,11 @@ export default makePage<{
           loading={navigationStore.sidebarLoading}
           collapsed={navigationStore.sidebarCollapsed}
           topInset={windowStore.topInset}
+          width={navigationStore.sidebarWidth}
+          resizing={navigationStore.sidebarResizing}
           onSelectItem={navigationPresenter.selectSidebarItem}
           onToggleSidebar={navigationPresenter.toggleSidebar}
+          onResizeStart={navigationPresenter.startSidebarResize}
           leadingAction={leadingAction}
           itemsHeader={itemsHeader}
         />
@@ -211,6 +214,8 @@ export default makePage<{
       <ChatFrame
         sidebarCollapsed={navigationStore.sidebarCollapsed}
         topInset={windowStore.topInset}
+        sidebarWidth={navigationStore.sidebarWidth}
+        resizing={navigationStore.sidebarResizing}
         breadcrumbBar={<BreadcrumbBarView />}
       />
     ))
@@ -238,6 +243,8 @@ export default makePage<{
         selectedItemId={navigationStore.selectedSidebarItemId}
         sidebarCollapsed={navigationStore.sidebarCollapsed}
         topInset={windowStore.topInset}
+        sidebarWidth={navigationStore.sidebarWidth}
+        resizing={navigationStore.sidebarResizing}
         userSettings={<UserSettings onLogout={sessionPresenter.logout} />}
         appearanceSettings={<AppearanceSettingsView />}
         developerSettings={<DeveloperSettingsView />}
@@ -251,6 +258,8 @@ export default makePage<{
         loading={libraryStore.documentsLoading}
         sidebarCollapsed={navigationStore.sidebarCollapsed}
         topInset={windowStore.topInset}
+        sidebarWidth={navigationStore.sidebarWidth}
+        resizing={navigationStore.sidebarResizing}
         breadcrumbBar={<BreadcrumbBarView />}
       />
     ))
@@ -262,6 +271,8 @@ export default makePage<{
         searching={searchStore.searching}
         sidebarCollapsed={navigationStore.sidebarCollapsed}
         topInset={windowStore.topInset}
+        sidebarWidth={navigationStore.sidebarWidth}
+        resizing={navigationStore.sidebarResizing}
         onQueryChange={searchPresenter.setQuery}
         onSubmit={searchPresenter.runSearch}
         breadcrumbBar={<BreadcrumbBarView />}

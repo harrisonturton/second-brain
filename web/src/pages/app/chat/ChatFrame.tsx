@@ -4,10 +4,16 @@ import { Composer } from './Composer'
 import { ExampleContent } from './ExampleContent'
 import { TableOfContents, type TocEntry } from './TableOfContents'
 
-const Frame = styled.div<{ $sidebarCollapsed: boolean; $topInset: number }>`
+const Frame = styled.div<{
+  $sidebarCollapsed: boolean
+  $topInset: number
+  $sidebarWidth: number
+  $resizing: boolean
+}>`
   position: fixed;
   top: ${({ $topInset }) => `${$topInset}px`};
-  left: ${({ $sidebarCollapsed }) => ($sidebarCollapsed ? '44px' : '268px')};
+  left: ${({ $sidebarCollapsed, $sidebarWidth }) =>
+    $sidebarCollapsed ? '44px' : `${44 + $sidebarWidth + 4}px`};
   right: 4px;
   bottom: 4px;
   display: flex;
@@ -18,9 +24,10 @@ const Frame = styled.div<{ $sidebarCollapsed: boolean; $topInset: number }>`
   box-shadow: ${({ theme }) => theme.panelShadow};
   overflow: hidden;
   will-change: left;
-  transition:
-    left 260ms cubic-bezier(0.32, 0.72, 0, 1),
-    top 260ms cubic-bezier(0.32, 0.72, 0, 1);
+  transition: ${({ $resizing }) =>
+    $resizing
+      ? 'top 260ms cubic-bezier(0.32, 0.72, 0, 1)'
+      : 'left 260ms cubic-bezier(0.32, 0.72, 0, 1), top 260ms cubic-bezier(0.32, 0.72, 0, 1)'};
 `
 
 const Body = styled.div`
@@ -68,6 +75,8 @@ const tocEntries: TocEntry[] = [
 export type ChatFrameProps = {
   sidebarCollapsed: boolean
   topInset: number
+  sidebarWidth: number
+  resizing: boolean
   /** Stateful breadcrumb strip rendered at the top of the panel. */
   breadcrumbBar: ReactNode
 }
@@ -75,10 +84,17 @@ export type ChatFrameProps = {
 export function ChatFrame({
   sidebarCollapsed,
   topInset,
+  sidebarWidth,
+  resizing,
   breadcrumbBar,
 }: ChatFrameProps) {
   return (
-    <Frame $sidebarCollapsed={sidebarCollapsed} $topInset={topInset}>
+    <Frame
+      $sidebarCollapsed={sidebarCollapsed}
+      $topInset={topInset}
+      $sidebarWidth={sidebarWidth}
+      $resizing={resizing}
+    >
       <Body>
         <TableOfContents entries={tocEntries} />
         <Main>

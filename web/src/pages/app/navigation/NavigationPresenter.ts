@@ -1,3 +1,4 @@
+import type React from 'react'
 import { action } from 'mobx'
 import type { AgentsService } from '@/services/agents/AgentsService'
 import type { LibraryService } from '@/services/library/LibraryService'
@@ -52,6 +53,27 @@ export class NavigationPresenter {
 
   toggleSidebar = (): void => {
     this.store.setSidebarCollapsed(!this.store.sidebarCollapsed)
+  }
+
+  /** Start a sidebar drag-resize. Captures the pointer on window so the
+   *  drag continues even if the cursor leaves the handle, and clears the
+   *  resizing flag on release so panel transitions re-enable. */
+  startSidebarResize = (e: React.PointerEvent<HTMLElement>): void => {
+    e.preventDefault()
+    this.store.setSidebarResizing(true)
+    const onMove = (ev: PointerEvent) => {
+      // Sidebar starts at x=44 (activity bar 4 + 36 + 4 gap).
+      this.store.setSidebarWidth(ev.clientX - 44)
+    }
+    const onUp = () => {
+      this.store.setSidebarResizing(false)
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onUp)
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+    window.addEventListener('pointercancel', onUp)
   }
 
   selectSidebarItem = (id: string): void => {

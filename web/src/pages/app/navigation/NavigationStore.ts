@@ -23,12 +23,18 @@ export type SidebarItem = {
  * section is active. The presenter populates it (from sessions /
  * library / settings) when the section changes.
  */
+export const SIDEBAR_MIN_WIDTH = 180
+export const SIDEBAR_MAX_WIDTH = 420
+export const SIDEBAR_DEFAULT_WIDTH = 220
+
 export class NavigationStore {
   @observable activeSection: WorkspaceSection = 'sessions'
   @observable sidebarCollapsed = false
   @observable sidebarItems: SidebarItem[] = []
   @observable selectedSidebarItemId: string | null = null
   @observable sidebarLoading = false
+  @observable sidebarWidth = SIDEBAR_DEFAULT_WIDTH
+  @observable sidebarResizing = false
 
   constructor() {
     makeObservable(this)
@@ -52,5 +58,16 @@ export class NavigationStore {
 
   @action setSidebarLoading(value: boolean) {
     this.sidebarLoading = value
+  }
+
+  @action setSidebarWidth(value: number) {
+    this.sidebarWidth = Math.max(
+      SIDEBAR_MIN_WIDTH,
+      Math.min(SIDEBAR_MAX_WIDTH, Math.round(value)),
+    )
+  }
+
+  @action setSidebarResizing(value: boolean) {
+    this.sidebarResizing = value
   }
 }
