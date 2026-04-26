@@ -40,7 +40,7 @@ const PanelTitle = styled.div`
   font-size: 12px;
   font-weight: 500;
   line-height: 1;
-  color: ${({ theme }) => theme.textBody};
+  color: ${({ theme }) => theme.textSecondary};
   white-space: nowrap;
   overflow: hidden;
 `
@@ -131,7 +131,7 @@ const GroupHeader = styled.div`
   margin: 14px 6px 4px;
   font-size: 12px;
   font-weight: 500;
-  color: ${({ theme }) => theme.textBody};
+  color: ${({ theme }) => theme.textSecondary};
 `
 
 const MoreButton = styled.button`
