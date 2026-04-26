@@ -24,12 +24,11 @@ const Bar = styled.div`
 `
 
 const Fade = styled.div`
-  height: 48px;
+  height: 32px;
   background: linear-gradient(
     to bottom,
     ${({ theme }) => theme.panelBg} 0%,
-    ${({ theme }) => withAlpha(theme.panelBg, 0.85)} 30%,
-    ${({ theme }) => withAlpha(theme.panelBg, 0.5)} 60%,
+    ${({ theme }) => withAlpha(theme.panelBg, 0.6)} 50%,
     ${({ theme }) => withAlpha(theme.panelBg, 0)} 100%
   );
 `
