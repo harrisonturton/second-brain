@@ -26,7 +26,7 @@ const Container = styled.aside<{ $collapsed: boolean; $topInset: number }>`
     top 260ms cubic-bezier(0.32, 0.72, 0, 1);
 `
 
-const PanelTitle = styled.button`
+const PanelTitle = styled.div`
   position: absolute;
   top: 5px;
   left: 5px;
@@ -35,22 +35,11 @@ const PanelTitle = styled.button`
   align-items: center;
   height: 22px;
   padding: 0 6px;
-  background: transparent;
-  border: none;
-  border-radius: 4px;
-  font: inherit;
   font-size: 13px;
   line-height: 1;
   color: ${({ theme }) => theme.textPrimary};
-  text-align: left;
   white-space: nowrap;
   overflow: hidden;
-  cursor: pointer;
-  transition: background 120ms ease;
-
-  &:hover {
-    background: ${({ theme }) => theme.subtleHoverBg};
-  }
 `
 
 const ToggleButton = styled.button`
@@ -189,7 +178,7 @@ export function Sidebar(props: SidebarProps) {
 
   return (
     <Container $collapsed={collapsed} $topInset={topInset}>
-      <PanelTitle type="button">{title}</PanelTitle>
+      <PanelTitle>{title}</PanelTitle>
       <ToggleButton
         onClick={onToggleSidebar}
         aria-label="Close sidebar"
