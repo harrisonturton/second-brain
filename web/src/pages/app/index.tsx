@@ -20,7 +20,7 @@ import {
   NavigationStore,
   type WorkspaceSection,
 } from './navigation/NavigationStore'
-import { Sidebar } from './navigation/Sidebar'
+import { Sidebar, type SidebarLeadingAction } from './navigation/Sidebar'
 import { SearchPanel } from './search/SearchPanel'
 import { SearchPresenter } from './search/SearchPresenter'
 import { SearchStore } from './search/SearchStore'
@@ -118,10 +118,27 @@ export default makePage<{
     ))
 
     const SidebarView = observer(() => {
-      const isSessions = navigationStore.activeSection === 'sessions'
+      const section = navigationStore.activeSection
+      let leadingAction: SidebarLeadingAction | undefined
+      let itemsHeader: string | undefined
+      if (section === 'sessions') {
+        leadingAction = {
+          label: 'New session',
+          icon: <PlusIcon />,
+          onClick: navigationPresenter.openNewSession,
+        }
+        itemsHeader = 'Recents'
+      } else if (section === 'minions') {
+        leadingAction = {
+          label: 'Spawn minion',
+          icon: <PlusIcon />,
+          onClick: navigationPresenter.spawnMinion,
+        }
+        itemsHeader = 'Current team'
+      }
       return (
         <Sidebar
-          title={sectionTitles[navigationStore.activeSection]}
+          title={sectionTitles[section]}
           items={navigationStore.sidebarItems}
           selectedItemId={navigationStore.selectedSidebarItemId}
           loading={navigationStore.sidebarLoading}
@@ -129,16 +146,8 @@ export default makePage<{
           topInset={windowStore.topInset}
           onSelectItem={navigationPresenter.selectSidebarItem}
           onToggleSidebar={navigationPresenter.toggleSidebar}
-          leadingAction={
-            isSessions
-              ? {
-                  label: 'New session',
-                  icon: <PlusIcon />,
-                  onClick: navigationPresenter.openNewSession,
-                }
-              : undefined
-          }
-          itemsHeader={isSessions ? 'Recents' : undefined}
+          leadingAction={leadingAction}
+          itemsHeader={itemsHeader}
         />
       )
     })

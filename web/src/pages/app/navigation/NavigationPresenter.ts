@@ -71,6 +71,18 @@ export class NavigationPresenter {
     }
   })
 
+  /** Start spawning a new minion — clears the selected minion so the
+   *  panel shows a fresh state. (Real spawn flow lands later.) */
+  spawnMinion = action((): void => {
+    const sectionChanged = this.store.activeSection !== 'minions'
+    this.store.setActiveSection('minions')
+    this.store.setSidebarCollapsed(false)
+    this.store.setSelectedSidebarItemId(null)
+    if (sectionChanged) {
+      void this.loadSidebarItems()
+    }
+  })
+
   /** Open a fresh, empty search. Always switches to the search
    *  section, expands the sidebar, and clears any previously selected
    *  history item — clicking the activity bar Search entry should
