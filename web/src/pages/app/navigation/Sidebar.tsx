@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import styled, { keyframes } from 'styled-components'
+import { DotIcon } from '@/base/icons/DotIcon'
 import { MoreVerticalIcon } from '@/base/icons/MoreVerticalIcon'
 import { XIcon } from '@/base/icons/XIcon'
 import type { SidebarItem } from './NavigationStore'
@@ -252,6 +253,9 @@ export function Sidebar(props: SidebarProps) {
                   $selected={selected}
                   onClick={() => onSelectItem(item.id)}
                 >
+                  <LeadingIcon>
+                    <DotIcon />
+                  </LeadingIcon>
                   {item.label}
                 </Label>
                 <MoreButton aria-label={`More options for ${item.label}`}>
