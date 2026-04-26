@@ -31,12 +31,15 @@ const Tooltip = styled.span`
   top: 50%;
   transform: translate(-4px, -50%);
   padding: 5px 9px;
-  background: #1f1f1f;
-  color: #f0f0f0;
+  background: #ffffff;
+  color: #1f1f1f;
   font-size: 13px;
   line-height: 1;
   border-radius: 4px;
   white-space: nowrap;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.1);
   opacity: 0;
   pointer-events: none;
   z-index: 100;
