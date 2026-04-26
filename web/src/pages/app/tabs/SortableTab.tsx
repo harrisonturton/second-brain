@@ -10,8 +10,8 @@ const Tab = styled.div<{ $active: boolean }>`
   display: flex;
   align-items: center;
   height: 26px;
-  padding: 0 12px;
-  min-width: 80px;
+  padding: 0 8px;
+  min-width: 70px;
   max-width: 220px;
   border-radius: 6px;
   font-size: 12px;

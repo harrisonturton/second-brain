@@ -35,8 +35,6 @@ export class WindowStore {
 
   @computed get topInset(): number {
     if (!this.isDesktop) return 4
-    return this.isDesktopFullScreen
-      ? PLATFORM_LAYOUT.appDesktop.topInsetWhenFullScreen
-      : PLATFORM_LAYOUT.appDesktop.topInset
+    return PLATFORM_LAYOUT.appDesktop.topInset
   }
 }
