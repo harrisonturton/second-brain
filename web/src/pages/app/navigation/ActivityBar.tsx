@@ -90,7 +90,7 @@ function nextThemeToggle(mode: ThemeMode): {
 const sectionIcons: { id: WorkspaceSection; label: string; Icon: typeof ChatBubblesIcon }[] = [
   { id: 'sessions', label: 'Sessions', Icon: ChatBubblesIcon },
   { id: 'library', label: 'Library', Icon: BookOpenIcon },
-  { id: 'minions', label: 'Minions', Icon: SparklesIcon },
+  { id: 'minions', label: 'Agents', Icon: SparklesIcon },
 ]
 
 export type ActivityBarProps = {

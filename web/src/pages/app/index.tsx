@@ -38,7 +38,7 @@ const sectionTitles: Record<WorkspaceSection, string> = {
   search: 'Search',
   sessions: 'Sessions',
   library: 'Library',
-  minions: 'Minions',
+  minions: 'Agents',
   settings: 'Settings',
 }
 
@@ -130,7 +130,7 @@ export default makePage<{
         itemsHeader = 'Recents'
       } else if (section === 'minions') {
         leadingAction = {
-          label: 'Spawn minion',
+          label: 'Spawn agent',
           icon: <PlusIcon />,
           onClick: navigationPresenter.spawnMinion,
         }
