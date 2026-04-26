@@ -15,6 +15,7 @@ import { SortableTab } from './SortableTab'
 import type { Tab } from './TabsStore'
 
 const TRAFFIC_LIGHTS_GUTTER = 80
+const SIDEBAR_LEFT = 44
 
 const Bar = styled.div<{ $fullScreen: boolean }>`
   position: fixed;
@@ -26,7 +27,8 @@ const Bar = styled.div<{ $fullScreen: boolean }>`
   align-items: center;
   gap: 4px;
   padding: 0 8px 0
-    ${({ $fullScreen }) => ($fullScreen ? '8px' : `${TRAFFIC_LIGHTS_GUTTER}px`)};
+    ${({ $fullScreen }) =>
+      $fullScreen ? `${SIDEBAR_LEFT}px` : `${TRAFFIC_LIGHTS_GUTTER}px`};
   z-index: 60;
   -webkit-app-region: drag;
   user-select: none;
