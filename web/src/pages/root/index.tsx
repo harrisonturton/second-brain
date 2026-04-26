@@ -58,12 +58,16 @@ export default makePage((_props, { services }) => {
 
   // Empty drag strip — gives the macOS window a draggable area on
   // pages without their own tab bar (e.g. login). The app page's tab
-  // bar overlays this with a higher z-index and provides drag itself.
-  const TitleBarView = observer(() => (
-    <DesktopTitleBar
-      $visible={windowStore.isDesktop && !windowStore.isDesktopFullScreen}
-    />
-  ))
+  // bar provides drag itself, so we skip this overlay there to avoid
+  // hijacking clicks on the tabs.
+  const TitleBarView = observer(() => {
+    if (sessionStore.status === 'logged-in') return null
+    return (
+      <DesktopTitleBar
+        $visible={windowStore.isDesktop && !windowStore.isDesktopFullScreen}
+      />
+    )
+  })
 
   const RoutedSubpage = observer(() => {
     if (sessionStore.status === 'logged-in') {
