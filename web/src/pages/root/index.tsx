@@ -1,3 +1,4 @@
+import { autorun } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import styled, { ThemeProvider, createGlobalStyle } from 'styled-components'
 import { makePage } from '@/base/page/Page'
@@ -55,6 +56,14 @@ export default makePage((_props, { services }) => {
     services.httpService,
   )
   sessionPresenter.restore()
+
+  // Keep the <meta name="theme-color"> tag in sync with the current
+  // theme's page background — Safari/mobile browsers tint their window
+  // chrome to match.
+  autorun(() => {
+    const meta = document.querySelector('meta[name="theme-color"]')
+    if (meta) meta.setAttribute('content', themeStore.theme.pageBg)
+  })
 
   // Empty drag strip — gives the macOS window a draggable area on
   // pages without their own tab bar (e.g. login). The app page's tab
