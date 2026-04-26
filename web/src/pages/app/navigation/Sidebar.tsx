@@ -55,7 +55,7 @@ const ResizeHandle = styled.div<{
     transform: translateX(-50%);
     width: 2px;
     border-radius: 1px;
-    background: ${({ theme }) => theme.textBody};
+    background: ${({ theme }) => theme.activeBg};
     opacity: ${({ $resizing }) => ($resizing ? 1 : 0)};
     transition: opacity 120ms ease;
   }
