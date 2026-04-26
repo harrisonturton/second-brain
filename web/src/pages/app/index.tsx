@@ -38,7 +38,7 @@ const sectionTitles: Record<WorkspaceSection, string> = {
   search: 'Search',
   sessions: 'Sessions',
   library: 'Library',
-  minions: 'Agents',
+  agents: 'Agents',
   settings: 'Settings',
 }
 
@@ -73,7 +73,7 @@ export default makePage<{
       navigationStore,
       services.sessionService,
       services.libraryService,
-      services.minionsService,
+      services.agentsService,
       services.searchService,
     )
     const tabsPresenter = new TabsPresenter(tabsStore, services.sessionService)
@@ -128,11 +128,11 @@ export default makePage<{
           onClick: navigationPresenter.openNewSession,
         }
         itemsHeader = 'Recents'
-      } else if (section === 'minions') {
+      } else if (section === 'agents') {
         leadingAction = {
           label: 'Spawn agent',
           icon: <PlusIcon />,
-          onClick: navigationPresenter.spawnMinion,
+          onClick: navigationPresenter.spawnAgent,
         }
         itemsHeader = 'Current team'
       }

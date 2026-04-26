@@ -2,9 +2,9 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import RootPage from '@/pages/root'
+import { FakeAgentsService } from '@/services/agents/FakeAgentsService'
 import { FakeHttpService } from '@/services/http/FakeHttpService'
 import { FakeLibraryService } from '@/services/library/FakeLibraryService'
-import { FakeMinionsService } from '@/services/minions/FakeMinionsService'
 import { FakeProfileService } from '@/services/profile/FakeProfileService'
 import { FakeSearchService } from '@/services/search/FakeSearchService'
 import { FakeSessionService } from '@/services/session/FakeSessionService'
@@ -19,7 +19,7 @@ const services: Services = {
   sessionService: new FakeSessionService(httpService),
   profileService: new FakeProfileService(httpService),
   libraryService: new FakeLibraryService(httpService),
-  minionsService: new FakeMinionsService(httpService),
+  agentsService: new FakeAgentsService(httpService),
   searchService: new FakeSearchService(httpService),
 }
 

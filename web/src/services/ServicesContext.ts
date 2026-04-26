@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react'
 import type { HttpService } from './http/HttpService'
+import type { AgentsService } from './agents/AgentsService'
 import type { LibraryService } from './library/LibraryService'
-import type { MinionsService } from './minions/MinionsService'
 import type { ProfileService } from './profile/ProfileService'
 import type { SearchService } from './search/SearchService'
 import type { SessionService } from './session/SessionService'
@@ -17,7 +17,7 @@ export type Services = {
   sessionService: SessionService
   profileService: ProfileService
   libraryService: LibraryService
-  minionsService: MinionsService
+  agentsService: AgentsService
   searchService: SearchService
 }
 

@@ -1,6 +1,6 @@
 import { action } from 'mobx'
+import type { AgentsService } from '@/services/agents/AgentsService'
 import type { LibraryService } from '@/services/library/LibraryService'
-import type { MinionsService } from '@/services/minions/MinionsService'
 import type { SearchService } from '@/services/search/SearchService'
 import type { SessionService } from '@/services/session/SessionService'
 import type {
@@ -32,7 +32,7 @@ export class NavigationPresenter {
     private store: NavigationStore,
     private sessionService: SessionService,
     private libraryService: LibraryService,
-    private minionsService: MinionsService,
+    private agentsService: AgentsService,
     private searchService: SearchService,
   ) {}
 
@@ -71,11 +71,11 @@ export class NavigationPresenter {
     }
   })
 
-  /** Start spawning a new minion — clears the selected minion so the
+  /** Start spawning a new agent — clears the selected agent so the
    *  panel shows a fresh state. (Real spawn flow lands later.) */
-  spawnMinion = action((): void => {
-    const sectionChanged = this.store.activeSection !== 'minions'
-    this.store.setActiveSection('minions')
+  spawnAgent = action((): void => {
+    const sectionChanged = this.store.activeSection !== 'agents'
+    this.store.setActiveSection('agents')
     this.store.setSidebarCollapsed(false)
     this.store.setSelectedSidebarItemId(null)
     if (sectionChanged) {
@@ -148,8 +148,8 @@ export class NavigationPresenter {
         return this.sessionService.listCategories()
       case 'library':
         return this.libraryService.listCategories()
-      case 'minions':
-        return this.minionsService.listMinions()
+      case 'agents':
+        return this.agentsService.listAgents()
       case 'settings':
         return SETTINGS_SIDEBAR_ITEMS
     }

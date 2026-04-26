@@ -4,7 +4,7 @@ export type WorkspaceSection =
   | 'search'
   | 'sessions'
   | 'library'
-  | 'minions'
+  | 'agents'
   | 'settings'
 
 export type SidebarItem = {

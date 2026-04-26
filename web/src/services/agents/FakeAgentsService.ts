@@ -1,7 +1,7 @@
 import type { HttpService } from '@/services/http/HttpService'
-import type { Minion, MinionsService } from './MinionsService'
+import type { Agent, AgentsService } from './AgentsService'
 
-const MINIONS: Minion[] = [
+const AGENTS: Agent[] = [
   { id: 'indexer', label: 'Indexer' },
   { id: 'crawler', label: 'Crawler' },
   { id: 'summarizer', label: 'Summarizer' },
@@ -9,11 +9,11 @@ const MINIONS: Minion[] = [
   { id: 'curator', label: 'Curator' },
 ]
 
-export class FakeMinionsService implements MinionsService {
+export class FakeAgentsService implements AgentsService {
   constructor(private http: HttpService) {}
 
-  async listMinions(): Promise<Minion[]> {
-    await this.http.request({ method: 'GET', path: '/minions' })
-    return MINIONS
+  async listAgents(): Promise<Agent[]> {
+    await this.http.request({ method: 'GET', path: '/agents' })
+    return AGENTS
   }
 }
