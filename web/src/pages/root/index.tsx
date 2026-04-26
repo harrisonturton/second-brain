@@ -16,9 +16,15 @@ const GlobalStyle = createGlobalStyle`
     color: ${({ theme }) => theme.textPrimary};
     font-family: ${({ theme }) => theme.fontFamily};
     transition: background-color 200ms ease, color 200ms ease;
+    user-select: none;
+    -webkit-user-select: none;
   }
   button, input, textarea, select {
     font-family: ${({ theme }) => theme.fontFamily};
+  }
+  input, textarea, [contenteditable="true"] {
+    user-select: text;
+    -webkit-user-select: text;
   }
 `
 

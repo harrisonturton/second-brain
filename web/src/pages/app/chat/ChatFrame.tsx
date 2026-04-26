@@ -47,6 +47,8 @@ const Column = styled.div`
   width: 100%;
   max-width: 720px;
   padding: 48px 24px 180px;
+  user-select: text;
+  -webkit-user-select: text;
 `
 
 const ComposerSlot = styled.div`
@@ -66,7 +68,7 @@ const tocEntries: TocEntry[] = [
 export type ChatFrameProps = {
   sidebarCollapsed: boolean
   topInset: number
-  /** Stateful breadcrumb strip rendered at the bottom of the panel. */
+  /** Stateful breadcrumb strip rendered at the top of the panel. */
   breadcrumbBar: ReactNode
 }
 
