@@ -21,6 +21,7 @@ const Strip = styled.nav<{ $topInset: number }>`
   align-items: center;
   padding: 6px 0;
   gap: 4px;
+  z-index: 50;
   transition: top 260ms cubic-bezier(0.32, 0.72, 0, 1);
 `
 
