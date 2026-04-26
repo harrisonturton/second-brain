@@ -83,12 +83,17 @@ export class NavigationPresenter {
     }
   })
 
-  /** Open a fresh, empty search. Always switches to the search
-   *  section, expands the sidebar, and clears any previously selected
-   *  history item — clicking the activity bar Search entry should
-   *  feel like "new search" every time. */
+  /** Open a fresh, empty search. Clicking the activity-bar Search
+   *  entry should feel like "new search" every time, but if we're
+   *  already in the search section with the sidebar open it should
+   *  also toggle the sidebar collapsed (matching `selectSection`'s
+   *  collapse-on-second-click behaviour). */
   openNewSearch = action((): void => {
     const sectionChanged = this.store.activeSection !== 'search'
+    if (!sectionChanged && !this.store.sidebarCollapsed) {
+      this.store.setSidebarCollapsed(true)
+      return
+    }
     this.store.setActiveSection('search')
     this.store.setSidebarCollapsed(false)
     this.store.setSelectedSidebarItemId(null)
