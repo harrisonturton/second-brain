@@ -30,10 +30,10 @@ const Tooltip = styled.span`
   left: calc(100% + 6px);
   top: 50%;
   transform: translate(-4px, -50%);
-  padding: 4px 8px;
+  padding: 5px 9px;
   background: #1f1f1f;
   color: #f0f0f0;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1;
   border-radius: 4px;
   white-space: nowrap;
@@ -41,8 +41,8 @@ const Tooltip = styled.span`
   pointer-events: none;
   z-index: 100;
   transition:
-    opacity 100ms ease 200ms,
-    transform 120ms ease 200ms;
+    opacity 80ms ease,
+    transform 100ms ease;
 `
 
 const TooltipHost = styled.span`
