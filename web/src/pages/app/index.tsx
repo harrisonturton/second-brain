@@ -21,6 +21,12 @@ import {
   type WorkspaceSection,
 } from './navigation/NavigationStore'
 import { Sidebar, type SidebarLeadingAction } from './navigation/Sidebar'
+import {
+  CommandPalette,
+  type CommandAction,
+} from './palette/CommandPalette'
+import { CommandPalettePresenter } from './palette/CommandPalettePresenter'
+import { CommandPaletteStore } from './palette/CommandPaletteStore'
 import { SearchPanel } from './search/SearchPanel'
 import { SearchPresenter } from './search/SearchPresenter'
 import { SearchStore } from './search/SearchStore'
@@ -68,6 +74,7 @@ export default makePage<{
     const settingsStore = new SettingsStore()
     const libraryStore = new LibraryStore()
     const searchStore = new SearchStore()
+    const paletteStore = new CommandPaletteStore()
 
     const navigationPresenter = new NavigationPresenter(
       navigationStore,
@@ -89,8 +96,19 @@ export default makePage<{
       searchStore,
       services.searchService,
     )
+    const palettePresenter = new CommandPalettePresenter(paletteStore)
 
     settingsPresenter.applyToServices()
+
+    // Cmd/Ctrl+K toggles the palette. Esc-to-close lives in the
+    // palette component itself (it owns the focused input).
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        palettePresenter.toggle()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
 
     void navigationPresenter.loadSidebarItems()
     void tabsPresenter.load()
@@ -250,6 +268,70 @@ export default makePage<{
       />
     ))
 
+    const paletteActions: CommandAction[] = [
+      {
+        id: 'new-session',
+        label: 'New session',
+        hint: 'Sessions',
+        run: navigationPresenter.openNewSession,
+      },
+      {
+        id: 'new-search',
+        label: 'New search',
+        hint: 'Search',
+        run: handleOpenNewSearch,
+      },
+      {
+        id: 'spawn-agent',
+        label: 'Spawn agent',
+        hint: 'Agents',
+        run: navigationPresenter.spawnAgent,
+      },
+      {
+        id: 'browse-library',
+        label: 'Browse library',
+        hint: 'Library',
+        run: () => navigationPresenter.selectSection('library'),
+      },
+      {
+        id: 'toggle-theme',
+        label: 'Cycle theme (light / sepia / dark)',
+        hint: 'Theme',
+        run: () => themeStore.toggle(),
+      },
+      {
+        id: 'open-settings',
+        label: 'Open settings',
+        hint: 'Settings',
+        run: () => navigationPresenter.selectSection('settings'),
+      },
+      {
+        id: 'open-appearance',
+        label: 'Appearance settings',
+        hint: 'Settings',
+        run: () => navigationPresenter.openSettingsItem('appearance'),
+      },
+      {
+        id: 'logout',
+        label: 'Log out',
+        hint: 'Account',
+        run: sessionPresenter.logout,
+      },
+    ]
+
+    const CommandPaletteView = observer(() => {
+      if (!paletteStore.open) return null
+      return (
+        <CommandPalette
+          query={paletteStore.query}
+          actions={paletteActions}
+          onQueryChange={palettePresenter.setQuery}
+          onRun={palettePresenter.runAction}
+          onClose={palettePresenter.close}
+        />
+      )
+    })
+
     const MainView = observer(() => {
       if (navigationStore.activeSection === 'settings') {
         return <SettingsPanelView />
@@ -272,6 +354,7 @@ export default makePage<{
         Sidebar={SidebarView}
         Main={MainView}
         TabBar={TabBarView}
+        CommandPalette={CommandPaletteView}
       />
     )
   },

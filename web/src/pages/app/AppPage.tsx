@@ -10,6 +10,8 @@ export type AppPageProps = {
   /** Top-of-window tab bar. Renders only on desktop; on web the install
    *  passes a no-op component. */
   TabBar: FunctionComponent
+  /** Cmd+K command palette overlay. Renders nothing when closed. */
+  CommandPalette: FunctionComponent
 }
 
 /**
@@ -17,13 +19,20 @@ export type AppPageProps = {
  * in `index.tsx` hands in pre-bound, observer-wrapped subcomponents;
  * this layout just composes them.
  */
-export function AppPage({ ActivityBar, Sidebar, Main, TabBar }: AppPageProps) {
+export function AppPage({
+  ActivityBar,
+  Sidebar,
+  Main,
+  TabBar,
+  CommandPalette,
+}: AppPageProps) {
   return (
     <>
       <TabBar />
       <ActivityBar />
       <Sidebar />
       <Main />
+      <CommandPalette />
     </>
   )
 }
