@@ -38,9 +38,9 @@ const ResizeHandle = styled.div<{
 }>`
   position: fixed;
   top: ${({ $topInset }) => `${$topInset}px`};
-  left: ${({ $left }) => `${$left - 3}px`};
+  left: ${({ $left }) => `${$left - 2}px`};
   bottom: 4px;
-  width: 7px;
+  width: 8px;
   cursor: col-resize;
   z-index: 60;
   pointer-events: ${({ $hidden }) => ($hidden ? 'none' : 'auto')};
@@ -55,7 +55,7 @@ const ResizeHandle = styled.div<{
     transform: translateX(-50%);
     width: 2px;
     border-radius: 1px;
-    background: ${({ theme }) => theme.activeBg};
+    background: ${({ theme }) => theme.textBody};
     opacity: ${({ $resizing }) => ($resizing ? 1 : 0)};
     transition: opacity 120ms ease;
   }
