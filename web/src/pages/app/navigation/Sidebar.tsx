@@ -37,9 +37,10 @@ const PanelTitle = styled.div`
   align-items: center;
   height: 22px;
   padding: 0 6px;
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 500;
   line-height: 1;
-  color: ${({ theme }) => theme.textPrimary};
+  color: ${({ theme }) => theme.textSecondary};
   white-space: nowrap;
   overflow: hidden;
 `
@@ -128,9 +129,9 @@ const LeadingIcon = styled.span`
 
 const GroupHeader = styled.div`
   margin: 14px 6px 4px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
-  color: ${({ theme }) => theme.textTertiary};
+  color: ${({ theme }) => theme.textSecondary};
 `
 
 const MoreButton = styled.button`
