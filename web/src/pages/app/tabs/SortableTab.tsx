@@ -19,19 +19,17 @@ const Tab = styled.div<{ $active: boolean }>`
   color: ${({ $active, theme }) =>
     $active ? theme.textPrimary : theme.textSecondary};
   background: ${({ $active, theme }) =>
-    $active ? theme.panelBg : 'transparent'};
-  border: 1px solid
-    ${({ $active, theme }) =>
-      $active ? theme.panelBorder : 'transparent'};
+    $active ? theme.panelBorder : 'transparent'};
+  border: none;
   cursor: pointer;
   white-space: nowrap;
   user-select: none;
   -webkit-app-region: no-drag;
-  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+  transition: background 120ms ease, color 120ms ease;
 
   &:hover {
     background: ${({ $active, theme }) =>
-      $active ? theme.panelBg : theme.subtleHoverBg};
+      $active ? theme.panelBorder : theme.subtleHoverBg};
     color: ${({ theme }) => theme.textPrimary};
   }
 `
