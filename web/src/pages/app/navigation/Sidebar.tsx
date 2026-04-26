@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import styled, { keyframes } from 'styled-components'
 import { MoreVerticalIcon } from '@/base/icons/MoreVerticalIcon'
 import { XIcon } from '@/base/icons/XIcon'
@@ -94,6 +95,9 @@ const Item = styled.div<{ $selected: boolean }>`
 
 const Label = styled.button<{ $selected: boolean }>`
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 4px 6px;
   background: transparent;
   border: none;
@@ -108,6 +112,26 @@ const Label = styled.button<{ $selected: boolean }>`
   ${Item}:hover & {
     opacity: 1;
   }
+`
+
+const LeadingIcon = styled.span`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+`
+
+const GroupHeader = styled.div`
+  margin: 14px 6px 4px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: ${({ theme }) => theme.textTertiary};
 `
 
 const MoreButton = styled.button`
@@ -153,6 +177,12 @@ const SkeletonRow = styled.div`
   animation: ${shimmer} 1.2s ease-in-out infinite;
 `
 
+export type SidebarLeadingAction = {
+  label: string
+  icon: ReactNode
+  onClick: () => void
+}
+
 export type SidebarProps = {
   title: string
   items: SidebarItem[]
@@ -162,6 +192,12 @@ export type SidebarProps = {
   topInset: number
   onSelectItem: (id: string) => void
   onToggleSidebar: () => void
+  /** Optional row rendered above the items list, styled like an entry
+   *  but with a leading icon. Used by the sessions section for "New
+   *  session". */
+  leadingAction?: SidebarLeadingAction
+  /** Optional uppercase group header rendered above the items list. */
+  itemsHeader?: string
 }
 
 export function Sidebar(props: SidebarProps) {
@@ -174,6 +210,8 @@ export function Sidebar(props: SidebarProps) {
     topInset,
     onSelectItem,
     onToggleSidebar,
+    leadingAction,
+    itemsHeader,
   } = props
 
   return (
@@ -186,6 +224,18 @@ export function Sidebar(props: SidebarProps) {
         <XIcon />
       </ToggleButton>
       <Items>
+        {leadingAction && (
+          <Item $selected={false}>
+            <Label
+              $selected={false}
+              onClick={leadingAction.onClick}
+            >
+              <LeadingIcon>{leadingAction.icon}</LeadingIcon>
+              {leadingAction.label}
+            </Label>
+          </Item>
+        )}
+        {itemsHeader && <GroupHeader>{itemsHeader}</GroupHeader>}
         {loading && items.length === 0 ? (
           <>
             <SkeletonRow />

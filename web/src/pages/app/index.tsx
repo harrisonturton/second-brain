@@ -13,6 +13,7 @@ import { ChatFrame } from './chat/ChatFrame'
 import { BrowsePanel } from './library/BrowsePanel'
 import { LibraryPresenter } from './library/LibraryPresenter'
 import { LibraryStore } from './library/LibraryStore'
+import { PlusIcon } from '@/base/icons/PlusIcon'
 import { ActivityBar } from './navigation/ActivityBar'
 import { NavigationPresenter } from './navigation/NavigationPresenter'
 import {
@@ -116,18 +117,31 @@ export default makePage<{
       />
     ))
 
-    const SidebarView = observer(() => (
-      <Sidebar
-        title={sectionTitles[navigationStore.activeSection]}
-        items={navigationStore.sidebarItems}
-        selectedItemId={navigationStore.selectedSidebarItemId}
-        loading={navigationStore.sidebarLoading}
-        collapsed={navigationStore.sidebarCollapsed}
-        topInset={windowStore.topInset}
-        onSelectItem={navigationPresenter.selectSidebarItem}
-        onToggleSidebar={navigationPresenter.toggleSidebar}
-      />
-    ))
+    const SidebarView = observer(() => {
+      const isSessions = navigationStore.activeSection === 'sessions'
+      return (
+        <Sidebar
+          title={sectionTitles[navigationStore.activeSection]}
+          items={navigationStore.sidebarItems}
+          selectedItemId={navigationStore.selectedSidebarItemId}
+          loading={navigationStore.sidebarLoading}
+          collapsed={navigationStore.sidebarCollapsed}
+          topInset={windowStore.topInset}
+          onSelectItem={navigationPresenter.selectSidebarItem}
+          onToggleSidebar={navigationPresenter.toggleSidebar}
+          leadingAction={
+            isSessions
+              ? {
+                  label: 'New session',
+                  icon: <PlusIcon />,
+                  onClick: navigationPresenter.openNewSession,
+                }
+              : undefined
+          }
+          itemsHeader={isSessions ? 'Recents' : undefined}
+        />
+      )
+    })
 
     const TabBarView = observer(() => {
       if (!windowStore.isDesktop) return null

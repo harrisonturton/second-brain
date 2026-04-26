@@ -58,6 +58,19 @@ export class NavigationPresenter {
     this.store.setSelectedSidebarItemId(id)
   }
 
+  /** Start a fresh session — clears the selected history item so the
+   *  chat surface shows an empty state. (Real session creation will
+   *  call SessionService once that lands.) */
+  openNewSession = action((): void => {
+    const sectionChanged = this.store.activeSection !== 'sessions'
+    this.store.setActiveSection('sessions')
+    this.store.setSidebarCollapsed(false)
+    this.store.setSelectedSidebarItemId(null)
+    if (sectionChanged) {
+      void this.loadSidebarItems()
+    }
+  })
+
   /** Open a fresh, empty search. Always switches to the search
    *  section, expands the sidebar, and clears any previously selected
    *  history item — clicking the activity bar Search entry should
