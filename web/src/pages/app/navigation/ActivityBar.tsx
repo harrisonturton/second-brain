@@ -24,6 +24,38 @@ const Strip = styled.nav<{ $topInset: number }>`
   transition: top 260ms cubic-bezier(0.32, 0.72, 0, 1);
 `
 
+const Tooltip = styled.span`
+  position: absolute;
+  left: calc(100% + 6px);
+  top: 50%;
+  transform: translate(-4px, -50%);
+  padding: 4px 8px;
+  background: #1f1f1f;
+  color: #f0f0f0;
+  font-size: 12px;
+  line-height: 1;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 100;
+  transition:
+    opacity 100ms ease 200ms,
+    transform 120ms ease 200ms;
+`
+
+const TooltipHost = styled.span`
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover ${Tooltip} {
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+`
+
 const Spacer = styled.div`
   flex: 1;
 `
@@ -123,53 +155,62 @@ export function ActivityBar(props: ActivityBarProps) {
 
   return (
     <Strip $topInset={topInset}>
-      <IconButton
-        $active={activeSection === 'search'}
-        onClick={onOpenNewSearch}
-        aria-label="New search"
-        title="New search"
-        type="button"
-      >
-        <SearchIcon />
-      </IconButton>
-      {sectionIcons.map(({ id, label, Icon }) => (
+      <TooltipHost>
         <IconButton
-          key={id}
-          $active={activeSection === id}
-          onClick={() => onSelectSection(id)}
-          aria-label={label}
-          title={label}
+          $active={activeSection === 'search'}
+          onClick={onOpenNewSearch}
+          aria-label="New search"
+          type="button"
         >
-          <Icon />
+          <SearchIcon />
         </IconButton>
+        <Tooltip>New search</Tooltip>
+      </TooltipHost>
+      {sectionIcons.map(({ id, label, Icon }) => (
+        <TooltipHost key={id}>
+          <IconButton
+            $active={activeSection === id}
+            onClick={() => onSelectSection(id)}
+            aria-label={label}
+          >
+            <Icon />
+          </IconButton>
+          <Tooltip>{label}</Tooltip>
+        </TooltipHost>
       ))}
       <Spacer />
-      <IconButton
-        $active={false}
-        onClick={onToggleTheme}
-        aria-label={themeToggle.label}
-        title={themeToggle.label}
-        type="button"
-      >
-        <themeToggle.Icon />
-      </IconButton>
-      <IconButton
-        $active={activeSection === 'settings'}
-        onClick={() => onSelectSection('settings')}
-        aria-label="Settings"
-        title="Settings"
-        type="button"
-      >
-        <CogIcon />
-      </IconButton>
-      <Avatar
-        aria-label={avatarTitle}
-        title={avatarTitle}
-        type="button"
-        onClick={onProfileClick}
-      >
-        {avatarInitials}
-      </Avatar>
+      <TooltipHost>
+        <IconButton
+          $active={false}
+          onClick={onToggleTheme}
+          aria-label={themeToggle.label}
+          type="button"
+        >
+          <themeToggle.Icon />
+        </IconButton>
+        <Tooltip>{themeToggle.label}</Tooltip>
+      </TooltipHost>
+      <TooltipHost>
+        <IconButton
+          $active={activeSection === 'settings'}
+          onClick={() => onSelectSection('settings')}
+          aria-label="Settings"
+          type="button"
+        >
+          <CogIcon />
+        </IconButton>
+        <Tooltip>Settings</Tooltip>
+      </TooltipHost>
+      <TooltipHost>
+        <Avatar
+          aria-label={avatarTitle}
+          type="button"
+          onClick={onProfileClick}
+        >
+          {avatarInitials}
+        </Avatar>
+        <Tooltip>{avatarTitle}</Tooltip>
+      </TooltipHost>
     </Strip>
   )
 }
