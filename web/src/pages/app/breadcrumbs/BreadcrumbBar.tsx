@@ -2,36 +2,55 @@ import { Fragment } from 'react'
 import styled from 'styled-components'
 import { ChevronRightIcon } from '@/base/icons/ChevronRightIcon'
 
+const Wrap = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+`
+
 const Bar = styled.div`
   display: flex;
   align-items: center;
   gap: 2px;
   padding: 5px;
-  border-top: 1px solid ${({ theme }) => theme.panelBorder};
+  background: ${({ theme }) => theme.panelBg};
+  pointer-events: auto;
 `
 
-const Pill = styled.button<{ $active: boolean }>`
+const Fade = styled.div`
+  height: 24px;
+  background: linear-gradient(
+    to bottom,
+    ${({ theme }) => theme.panelBg},
+    transparent
+  );
+`
+
+const Pill = styled.button<{ $current: boolean }>`
   display: flex;
   align-items: center;
   height: 22px;
   padding: 0 8px;
-  background: ${({ $active, theme }) =>
-    $active ? theme.activeBg : 'transparent'};
+  background: transparent;
   border: none;
   border-radius: 4px;
   font: inherit;
   font-size: 13px;
   line-height: 1.5;
-  color: ${({ $active, theme }) =>
-    $active ? theme.activeFg : theme.textPrimary};
-  cursor: pointer;
+  color: ${({ theme }) => theme.textPrimary};
+  cursor: ${({ $current }) => ($current ? 'default' : 'pointer')};
   white-space: nowrap;
-  opacity: ${({ $active }) => ($active ? 1 : 0.65)};
-  transition: background 120ms ease, opacity 120ms ease, color 120ms ease;
+  opacity: ${({ $current }) => ($current ? 1 : 0.65)};
+  transition: background 120ms ease, opacity 120ms ease;
 
   &:hover {
-    background: ${({ $active, theme }) =>
-      $active ? theme.activeBg : theme.subtleHoverBg};
+    background: ${({ $current, theme }) =>
+      $current ? 'transparent' : theme.subtleHoverBg};
     opacity: 1;
   }
 `
@@ -59,27 +78,29 @@ export type BreadcrumbBarProps = {
 }
 
 export function BreadcrumbBar({ crumbs }: BreadcrumbBarProps) {
-  if (crumbs.length === 0) return <Bar />
   const lastIndex = crumbs.length - 1
   return (
-    <Bar>
-      {crumbs.map((crumb, i) => (
-        <Fragment key={crumb.id}>
-          <Pill
-            type="button"
-            $active={i === lastIndex}
-            onClick={crumb.onClick}
-            disabled={!crumb.onClick}
-          >
-            {crumb.label}
-          </Pill>
-          {i < lastIndex && (
-            <Separator aria-hidden="true">
-              <ChevronRightIcon />
-            </Separator>
-          )}
-        </Fragment>
-      ))}
-    </Bar>
+    <Wrap>
+      <Bar>
+        {crumbs.map((crumb, i) => (
+          <Fragment key={crumb.id}>
+            <Pill
+              type="button"
+              $current={i === lastIndex}
+              onClick={crumb.onClick}
+              disabled={!crumb.onClick}
+            >
+              {crumb.label}
+            </Pill>
+            {i < lastIndex && (
+              <Separator aria-hidden="true">
+                <ChevronRightIcon />
+              </Separator>
+            )}
+          </Fragment>
+        ))}
+      </Bar>
+      <Fade />
+    </Wrap>
   )
 }
