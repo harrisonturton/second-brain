@@ -130,8 +130,6 @@ const GroupHeader = styled.div`
   margin: 14px 6px 4px;
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
   color: ${({ theme }) => theme.textTertiary};
 `
 
