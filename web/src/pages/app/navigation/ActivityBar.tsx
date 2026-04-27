@@ -160,12 +160,12 @@ export function ActivityBar(props: ActivityBarProps) {
         <IconButton
           $active={activeSection === 'search'}
           onClick={onOpenNewSearch}
-          aria-label="New search"
+          aria-label="Search"
           type="button"
         >
           <SearchIcon />
         </IconButton>
-        <Tooltip>New search</Tooltip>
+        <Tooltip>Search</Tooltip>
       </TooltipHost>
       {sectionIcons.map(({ id, label, Icon }) => (
         <TooltipHost key={id}>

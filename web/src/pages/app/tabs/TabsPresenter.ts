@@ -31,6 +31,15 @@ export class TabsPresenter {
     this.store.setActiveTabId(id)
   }
 
+  /** Append a fresh tab and activate it. Real session creation will
+   *  flow through SessionService once that lands; for now we just
+   *  push a placeholder labelled "New session". */
+  newTab = action((): void => {
+    const id = `new-${Date.now()}`
+    this.store.setTabs([...this.store.tabs, { id, label: 'New session' }])
+    this.store.setActiveTabId(id)
+  })
+
   closeTab = action((id: string): void => {
     const idx = this.store.tabs.findIndex((t) => t.id === id)
     if (idx === -1) return

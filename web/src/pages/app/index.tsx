@@ -153,6 +153,23 @@ export default makePage<{
           onClick: navigationPresenter.spawnAgent,
         }
         itemsHeader = 'Current team'
+      } else if (section === 'library') {
+        leadingAction = {
+          label: 'Add document',
+          icon: <PlusIcon />,
+          onClick: navigationPresenter.addDocument,
+        }
+        itemsHeader = 'Recently viewed'
+      } else if (section === 'search') {
+        leadingAction = {
+          label: 'New search',
+          icon: <PlusIcon />,
+          onClick: () => {
+            searchPresenter.reset()
+            navigationPresenter.clearSidebarSelection()
+          },
+        }
+        itemsHeader = 'Recents'
       }
       return (
         <Sidebar
@@ -183,6 +200,7 @@ export default makePage<{
           onSelectTab={tabsPresenter.selectTab}
           onCloseTab={tabsPresenter.closeTab}
           onMoveTab={tabsPresenter.moveTab}
+          onNewTab={tabsPresenter.newTab}
         />
       )
     })

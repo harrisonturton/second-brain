@@ -93,6 +93,25 @@ export class NavigationPresenter {
     }
   })
 
+  /** Add a document to the library — clears selection so the panel
+   *  shows a fresh state. (Real add-document flow lands later.) */
+  addDocument = action((): void => {
+    const sectionChanged = this.store.activeSection !== 'library'
+    this.store.setActiveSection('library')
+    this.store.setSidebarCollapsed(false)
+    this.store.setSelectedSidebarItemId(null)
+    if (sectionChanged) {
+      void this.loadSidebarItems()
+    }
+  })
+
+  /** Clear the currently-selected sidebar item without touching the
+   *  active section. Used by sidebar leading actions ("New search")
+   *  that should reset the surface in place. */
+  clearSidebarSelection = (): void => {
+    this.store.setSelectedSidebarItemId(null)
+  }
+
   /** Start spawning a new agent — clears the selected agent so the
    *  panel shows a fresh state. (Real spawn flow lands later.) */
   spawnAgent = action((): void => {
@@ -173,8 +192,10 @@ export class NavigationPresenter {
       }
       case 'sessions':
         return this.sessionService.listCategories()
-      case 'library':
-        return this.libraryService.listCategories()
+      case 'library': {
+        const docs = await this.libraryService.listRecentlyViewed()
+        return docs.map((d) => ({ id: d.id, label: d.title }))
+      }
       case 'agents':
         return this.agentsService.listAgents()
       case 'settings':

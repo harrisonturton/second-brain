@@ -19,4 +19,6 @@ export interface LibraryService {
   listCategories(): Promise<LibraryCategory[]>
   /** All documents currently saved in the library (Browse view). */
   listDocuments(): Promise<LibraryDocument[]>
+  /** Recently viewed documents shown in the library sidebar. */
+  listRecentlyViewed(): Promise<LibraryDocument[]>
 }

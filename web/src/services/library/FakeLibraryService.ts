@@ -104,4 +104,19 @@ export class FakeLibraryService implements LibraryService {
     await this.http.request({ method: 'GET', path: '/library/documents' })
     return DOCUMENTS
   }
+
+  async listRecentlyViewed(): Promise<LibraryDocument[]> {
+    await this.http.request({
+      method: 'GET',
+      path: '/library/recently-viewed',
+    })
+    // Hardcoded slice for now; eventually backed by view-history.
+    return [
+      DOCUMENTS[7], // Building a Second Brain
+      DOCUMENTS[8], // Notes on Notes
+      DOCUMENTS[3], // How to Do Great Work
+      DOCUMENTS[0], // Attention is all you need
+      DOCUMENTS[1], // The Bitter Lesson
+    ]
+  }
 }

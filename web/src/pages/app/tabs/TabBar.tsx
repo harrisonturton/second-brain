@@ -11,6 +11,7 @@ import {
   horizontalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import styled from 'styled-components'
+import { PlusIcon } from '@/base/icons/PlusIcon'
 import { SortableTab } from './SortableTab'
 import type { Tab } from './TabsStore'
 
@@ -35,6 +36,33 @@ const Bar = styled.div<{ $fullScreen: boolean }>`
   transition: padding-left 200ms ease;
 `
 
+const NewTabButton = styled.button`
+  -webkit-app-region: no-drag;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  margin-left: 2px;
+  background: transparent;
+  border: none;
+  border-radius: 5px;
+  color: ${({ theme }) => theme.textSecondary};
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+
+  &:hover {
+    background: ${({ theme }) => theme.subtleHoverBg};
+    color: ${({ theme }) => theme.textPrimary};
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+`
+
 export type TabBarProps = {
   tabs: Tab[]
   activeTabId: string | null
@@ -42,6 +70,7 @@ export type TabBarProps = {
   onSelectTab: (id: string) => void
   onCloseTab: (id: string) => void
   onMoveTab: (draggedId: string, targetId: string) => void
+  onNewTab: () => void
 }
 
 export function TabBar({
@@ -51,6 +80,7 @@ export function TabBar({
   onSelectTab,
   onCloseTab,
   onMoveTab,
+  onNewTab,
 }: TabBarProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -85,6 +115,15 @@ export function TabBar({
               }}
             />
           ))}
+          <NewTabButton
+            type="button"
+            onClick={onNewTab}
+            onPointerDown={(e) => e.stopPropagation()}
+            aria-label="New tab"
+            title="New tab"
+          >
+            <PlusIcon />
+          </NewTabButton>
         </Bar>
       </SortableContext>
     </DndContext>
