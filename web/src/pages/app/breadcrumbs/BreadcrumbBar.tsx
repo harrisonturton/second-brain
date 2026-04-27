@@ -24,6 +24,7 @@ const Bar = styled.div<{ $leftIndent: number }>`
   padding-left: ${({ $leftIndent }) => `${5 + $leftIndent}px`};
   background: ${({ theme }) => theme.panelBg};
   pointer-events: auto;
+  -webkit-app-region: drag;
   transition: padding-left 200ms ease;
 `
 
@@ -32,6 +33,7 @@ const Spacer = styled.span`
 `
 
 const ExpandButton = styled.button`
+  -webkit-app-region: no-drag;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -67,6 +69,7 @@ const Fade = styled.div`
 `
 
 const Pill = styled.button<{ $current: boolean }>`
+  -webkit-app-region: no-drag;
   display: flex;
   align-items: center;
   height: 22px;
