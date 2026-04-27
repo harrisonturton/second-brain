@@ -126,6 +126,7 @@ export default makePage<{
         activeSection={navigationStore.activeSection}
         themeMode={themeStore.mode}
         topInset={windowStore.topInset}
+        hidden={navigationStore.mainExpanded}
         avatarInitials={sessionStore.profile?.initials ?? ''}
         avatarTitle={sessionStore.profile?.name ?? 'Profile'}
         onSelectSection={navigationPresenter.selectSection}
@@ -181,6 +182,7 @@ export default makePage<{
           topInset={windowStore.topInset}
           width={navigationStore.sidebarWidth}
           resizing={navigationStore.sidebarResizing}
+          hidden={navigationStore.mainExpanded}
           onSelectItem={navigationPresenter.selectSidebarItem}
           onToggleSidebar={navigationPresenter.toggleSidebar}
           onResizeStart={navigationPresenter.startSidebarResize}
@@ -197,6 +199,7 @@ export default makePage<{
           tabs={tabsStore.tabs}
           activeTabId={tabsStore.activeTabId}
           fullScreen={windowStore.isDesktopFullScreen}
+          hidden={navigationStore.mainExpanded}
           onSelectTab={tabsPresenter.selectTab}
           onCloseTab={tabsPresenter.closeTab}
           onMoveTab={tabsPresenter.moveTab}
@@ -225,7 +228,22 @@ export default makePage<{
           onClick: () => navigationPresenter.selectSidebarItem(selectedItem.id),
         })
       }
-      return <BreadcrumbBar crumbs={crumbs} />
+      // In focus mode on a windowed desktop app, push the breadcrumb
+      // pills past the macOS traffic lights. Web (no lights) and
+      // fullscreen desktop (lights hidden) keep the default padding.
+      const needsTrafficLightGutter =
+        navigationStore.mainExpanded &&
+        windowStore.isDesktop &&
+        !windowStore.isDesktopFullScreen
+      const leftIndent = needsTrafficLightGutter ? 70 : 0
+      return (
+        <BreadcrumbBar
+          crumbs={crumbs}
+          expanded={navigationStore.mainExpanded}
+          leftIndent={leftIndent}
+          onToggleExpanded={navigationPresenter.toggleMainExpanded}
+        />
+      )
     })
 
     const ChatFrameView = observer(() => (
@@ -234,6 +252,7 @@ export default makePage<{
         topInset={windowStore.topInset}
         sidebarWidth={navigationStore.sidebarWidth}
         resizing={navigationStore.sidebarResizing}
+        expanded={navigationStore.mainExpanded}
         breadcrumbBar={<BreadcrumbBarView />}
       />
     ))
@@ -263,6 +282,7 @@ export default makePage<{
         topInset={windowStore.topInset}
         sidebarWidth={navigationStore.sidebarWidth}
         resizing={navigationStore.sidebarResizing}
+        expanded={navigationStore.mainExpanded}
         userSettings={<UserSettings onLogout={sessionPresenter.logout} />}
         appearanceSettings={<AppearanceSettingsView />}
         developerSettings={<DeveloperSettingsView />}
@@ -278,6 +298,7 @@ export default makePage<{
         topInset={windowStore.topInset}
         sidebarWidth={navigationStore.sidebarWidth}
         resizing={navigationStore.sidebarResizing}
+        expanded={navigationStore.mainExpanded}
         breadcrumbBar={<BreadcrumbBarView />}
       />
     ))
@@ -291,6 +312,7 @@ export default makePage<{
         topInset={windowStore.topInset}
         sidebarWidth={navigationStore.sidebarWidth}
         resizing={navigationStore.sidebarResizing}
+        expanded={navigationStore.mainExpanded}
         onQueryChange={searchPresenter.setQuery}
         onSubmit={searchPresenter.runSearch}
         breadcrumbBar={<BreadcrumbBarView />}

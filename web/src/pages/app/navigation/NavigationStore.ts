@@ -35,6 +35,7 @@ export class NavigationStore {
   @observable sidebarLoading = false
   @observable sidebarWidth = SIDEBAR_DEFAULT_WIDTH
   @observable sidebarResizing = false
+  @observable mainExpanded = false
 
   constructor() {
     makeObservable(this)
@@ -69,5 +70,9 @@ export class NavigationStore {
 
   @action setSidebarResizing(value: boolean) {
     this.sidebarResizing = value
+  }
+
+  @action setMainExpanded(value: boolean) {
+    this.mainExpanded = value
   }
 }

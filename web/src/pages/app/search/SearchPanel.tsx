@@ -8,13 +8,19 @@ const Frame = styled.div<{
   $topInset: number
   $sidebarWidth: number
   $resizing: boolean
+  $expanded: boolean
 }>`
   position: fixed;
-  top: ${({ $topInset }) => `${$topInset}px`};
-  left: ${({ $sidebarCollapsed, $sidebarWidth }) =>
-    $sidebarCollapsed ? '44px' : `${44 + $sidebarWidth + 4}px`};
+  top: ${({ $topInset, $expanded }) => ($expanded ? '4px' : `${$topInset}px`)};
+  left: ${({ $sidebarCollapsed, $sidebarWidth, $expanded }) =>
+    $expanded
+      ? '4px'
+      : $sidebarCollapsed
+        ? '44px'
+        : `${44 + $sidebarWidth + 4}px`};
   right: 4px;
   bottom: 4px;
+  z-index: ${({ $expanded }) => ($expanded ? 70 : 'auto')};
   display: flex;
   flex-direction: column;
   background: ${({ theme }) => theme.panelBg};
@@ -169,6 +175,7 @@ export type SearchPanelProps = {
   topInset: number
   sidebarWidth: number
   resizing: boolean
+  expanded: boolean
   onQueryChange: (value: string) => void
   onSubmit: (query: string) => void
   breadcrumbBar: ReactNode
@@ -182,6 +189,7 @@ export function SearchPanel({
   topInset,
   sidebarWidth,
   resizing,
+  expanded,
   onQueryChange,
   onSubmit,
   breadcrumbBar,
@@ -206,6 +214,7 @@ export function SearchPanel({
       $topInset={topInset}
       $sidebarWidth={sidebarWidth}
       $resizing={resizing}
+      $expanded={expanded}
     >
       <Body>
         <Hero $compact={compact}>

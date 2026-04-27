@@ -1,5 +1,7 @@
 import { Fragment } from 'react'
 import styled from 'styled-components'
+import { ArrowsInIcon } from '@/base/icons/ArrowsInIcon'
+import { ArrowsOutIcon } from '@/base/icons/ArrowsOutIcon'
 import { ChevronRightIcon } from '@/base/icons/ChevronRightIcon'
 import { withAlpha } from '@/base/theme/themes'
 
@@ -14,13 +16,44 @@ const Wrap = styled.div`
   flex-direction: column;
 `
 
-const Bar = styled.div`
+const Bar = styled.div<{ $leftIndent: number }>`
   display: flex;
   align-items: center;
   gap: 2px;
   padding: 5px;
+  padding-left: ${({ $leftIndent }) => `${5 + $leftIndent}px`};
   background: ${({ theme }) => theme.panelBg};
   pointer-events: auto;
+  transition: padding-left 200ms ease;
+`
+
+const Spacer = styled.span`
+  flex: 1;
+`
+
+const ExpandButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: ${({ theme }) => theme.textSecondary};
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+
+  &:hover {
+    background: ${({ theme }) => theme.subtleHoverBg};
+    color: ${({ theme }) => theme.textPrimary};
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
 `
 
 const Fade = styled.div`
@@ -77,13 +110,24 @@ export type BreadcrumbCrumb = {
 
 export type BreadcrumbBarProps = {
   crumbs: BreadcrumbCrumb[]
+  expanded: boolean
+  /** Extra left padding to clear the macOS traffic-light buttons when
+   *  the panel is flush against the window edge. Caller passes 0 when
+   *  no indent is needed (web, fullscreen, or non-expanded). */
+  leftIndent: number
+  onToggleExpanded: () => void
 }
 
-export function BreadcrumbBar({ crumbs }: BreadcrumbBarProps) {
+export function BreadcrumbBar({
+  crumbs,
+  expanded,
+  leftIndent,
+  onToggleExpanded,
+}: BreadcrumbBarProps) {
   const lastIndex = crumbs.length - 1
   return (
     <Wrap>
-      <Bar>
+      <Bar $leftIndent={leftIndent}>
         {crumbs.map((crumb, i) => (
           <Fragment key={crumb.id}>
             <Pill
@@ -101,6 +145,15 @@ export function BreadcrumbBar({ crumbs }: BreadcrumbBarProps) {
             )}
           </Fragment>
         ))}
+        <Spacer />
+        <ExpandButton
+          type="button"
+          onClick={onToggleExpanded}
+          aria-label={expanded ? 'Exit focus mode' : 'Enter focus mode'}
+          title={expanded ? 'Exit focus mode' : 'Enter focus mode'}
+        >
+          {expanded ? <ArrowsInIcon /> : <ArrowsOutIcon />}
+        </ExpandButton>
       </Bar>
       <Fade />
     </Wrap>

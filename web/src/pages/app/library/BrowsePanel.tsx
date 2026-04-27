@@ -7,13 +7,19 @@ const Frame = styled.div<{
   $topInset: number
   $sidebarWidth: number
   $resizing: boolean
+  $expanded: boolean
 }>`
   position: fixed;
-  top: ${({ $topInset }) => `${$topInset}px`};
-  left: ${({ $sidebarCollapsed, $sidebarWidth }) =>
-    $sidebarCollapsed ? '44px' : `${44 + $sidebarWidth + 4}px`};
+  top: ${({ $topInset, $expanded }) => ($expanded ? '4px' : `${$topInset}px`)};
+  left: ${({ $sidebarCollapsed, $sidebarWidth, $expanded }) =>
+    $expanded
+      ? '4px'
+      : $sidebarCollapsed
+        ? '44px'
+        : `${44 + $sidebarWidth + 4}px`};
   right: 4px;
   bottom: 4px;
+  z-index: ${({ $expanded }) => ($expanded ? 70 : 'auto')};
   display: flex;
   flex-direction: column;
   background: ${({ theme }) => theme.panelBg};
@@ -142,6 +148,7 @@ export type BrowsePanelProps = {
   topInset: number
   sidebarWidth: number
   resizing: boolean
+  expanded: boolean
   breadcrumbBar: ReactNode
 }
 
@@ -152,6 +159,7 @@ export function BrowsePanel({
   topInset,
   sidebarWidth,
   resizing,
+  expanded,
   breadcrumbBar,
 }: BrowsePanelProps) {
   const showSkeleton = loading && documents.length === 0
@@ -163,6 +171,7 @@ export function BrowsePanel({
       $topInset={topInset}
       $sidebarWidth={sidebarWidth}
       $resizing={resizing}
+      $expanded={expanded}
     >
       <Header>
         <Title>Browse</Title>

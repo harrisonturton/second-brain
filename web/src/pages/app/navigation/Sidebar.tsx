@@ -229,6 +229,9 @@ export type SidebarProps = {
   topInset: number
   width: number
   resizing: boolean
+  /** When true, the sidebar fades out alongside the activity bar so
+   *  the main panel can take over the full window in focus mode. */
+  hidden: boolean
   onSelectItem: (id: string) => void
   onToggleSidebar: () => void
   onResizeStart: (e: ReactPointerEvent<HTMLDivElement>) => void
@@ -250,6 +253,7 @@ export function Sidebar(props: SidebarProps) {
     topInset,
     width,
     resizing,
+    hidden,
     onSelectItem,
     onToggleSidebar,
     onResizeStart,
@@ -257,9 +261,15 @@ export function Sidebar(props: SidebarProps) {
     itemsHeader,
   } = props
 
+  const effectiveCollapsed = collapsed || hidden
+
   return (
     <>
-      <Container $collapsed={collapsed} $topInset={topInset} $width={width}>
+      <Container
+        $collapsed={effectiveCollapsed}
+        $topInset={topInset}
+        $width={width}
+      >
         <PanelTitle>{title}</PanelTitle>
         <ToggleButton
           onClick={onToggleSidebar}
@@ -313,7 +323,7 @@ export function Sidebar(props: SidebarProps) {
       <ResizeHandle
         $left={44 + width}
         $topInset={topInset}
-        $hidden={collapsed}
+        $hidden={effectiveCollapsed}
         $resizing={resizing}
         onPointerDown={onResizeStart}
         role="separator"

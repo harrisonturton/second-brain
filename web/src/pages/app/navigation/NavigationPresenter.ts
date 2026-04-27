@@ -55,6 +55,12 @@ export class NavigationPresenter {
     this.store.setSidebarCollapsed(!this.store.sidebarCollapsed)
   }
 
+  /** Toggle the main panel into/out of "focus mode" — panel grows to
+   *  fill the window, activity bar / sidebar / tab bar fade away. */
+  toggleMainExpanded = (): void => {
+    this.store.setMainExpanded(!this.store.mainExpanded)
+  }
+
   /** Start a sidebar drag-resize. Captures the pointer on window so the
    *  drag continues even if the cursor leaves the handle, and clears the
    *  resizing flag on release so panel transitions re-enable. */

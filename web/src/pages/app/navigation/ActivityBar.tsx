@@ -10,7 +10,7 @@ import { SunIcon } from '@/base/icons/SunIcon'
 import type { WorkspaceSection } from './NavigationStore'
 import type { ThemeMode } from '@/base/theme/themes'
 
-const Strip = styled.nav<{ $topInset: number }>`
+const Strip = styled.nav<{ $topInset: number; $hidden: boolean }>`
   position: fixed;
   top: ${({ $topInset }) => `${$topInset}px`};
   left: 4px;
@@ -22,7 +22,11 @@ const Strip = styled.nav<{ $topInset: number }>`
   padding: 6px 0;
   gap: 4px;
   z-index: 50;
-  transition: top 260ms cubic-bezier(0.32, 0.72, 0, 1);
+  opacity: ${({ $hidden }) => ($hidden ? 0 : 1)};
+  pointer-events: ${({ $hidden }) => ($hidden ? 'none' : 'auto')};
+  transition:
+    top 260ms cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 200ms ease;
 `
 
 const Tooltip = styled.span`
@@ -130,6 +134,7 @@ export type ActivityBarProps = {
   activeSection: WorkspaceSection
   themeMode: ThemeMode
   topInset: number
+  hidden: boolean
   avatarInitials: string
   avatarTitle: string
   onSelectSection: (section: WorkspaceSection) => void
@@ -145,6 +150,7 @@ export function ActivityBar(props: ActivityBarProps) {
     activeSection,
     themeMode,
     topInset,
+    hidden,
     avatarInitials,
     avatarTitle,
     onSelectSection,
@@ -155,7 +161,7 @@ export function ActivityBar(props: ActivityBarProps) {
   const themeToggle = nextThemeToggle(themeMode)
 
   return (
-    <Strip $topInset={topInset}>
+    <Strip $topInset={topInset} $hidden={hidden}>
       <TooltipHost>
         <IconButton
           $active={activeSection === 'search'}

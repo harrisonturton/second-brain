@@ -18,7 +18,7 @@ import type { Tab } from './TabsStore'
 const TRAFFIC_LIGHTS_GUTTER = 80
 const SIDEBAR_LEFT = 44
 
-const Bar = styled.div<{ $fullScreen: boolean }>`
+const Bar = styled.div<{ $fullScreen: boolean; $hidden: boolean }>`
   position: fixed;
   top: 0;
   left: 0;
@@ -33,7 +33,11 @@ const Bar = styled.div<{ $fullScreen: boolean }>`
   z-index: 60;
   -webkit-app-region: drag;
   user-select: none;
-  transition: padding-left 200ms ease;
+  opacity: ${({ $hidden }) => ($hidden ? 0 : 1)};
+  pointer-events: ${({ $hidden }) => ($hidden ? 'none' : 'auto')};
+  transition:
+    padding-left 200ms ease,
+    opacity 200ms ease;
 `
 
 const NewTabButton = styled.button`
@@ -67,6 +71,7 @@ export type TabBarProps = {
   tabs: Tab[]
   activeTabId: string | null
   fullScreen: boolean
+  hidden: boolean
   onSelectTab: (id: string) => void
   onCloseTab: (id: string) => void
   onMoveTab: (draggedId: string, targetId: string) => void
@@ -77,6 +82,7 @@ export function TabBar({
   tabs,
   activeTabId,
   fullScreen,
+  hidden,
   onSelectTab,
   onCloseTab,
   onMoveTab,
@@ -102,7 +108,7 @@ export function TabBar({
         items={tabs.map((t) => t.id)}
         strategy={horizontalListSortingStrategy}
       >
-        <Bar $fullScreen={fullScreen}>
+        <Bar $fullScreen={fullScreen} $hidden={hidden}>
           {tabs.map((tab) => (
             <SortableTab
               key={tab.id}
